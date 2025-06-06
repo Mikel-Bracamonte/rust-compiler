@@ -23,4 +23,44 @@ Factor ::= id | Num | Bool | ( Exp ) | ifexp ( CExp , CExp , CExp ) | id ( [ArgL
 ArgList ::= CExp (, CExp)*
 Bool ::= true | false
 
-rust grammar:
+propuesta 1:
+Program ::= VarDecList FunDecList
+
+VarDecList ::= (VarDec)*
+
+FunDecList ::= (FunDec)+
+
+FunDec ::= fn id ([ParamDecList]) -> Type { Body }
+
+Body ::= VarDecList StmtList
+
+ParamDecList ::= id: Type (, id: Type)*
+
+VarDec ::= let [mut] id: Type;
+
+Type ::= id
+
+StmtList ::= Stmt ( ; Stmt )*
+
+Stmt ::= id = AExp |
+println!("{}", AExp ) |
+if AExp { Body } [else { Body } ] |
+while AExp { Body } |
+for [ mut ] id in Num..Num { Body } |
+return [ AExp ]
+
+AExp ::= BExp ((&& | ||) BExp)*
+
+BExp ::= CExp | !CExp
+
+CExp ::= Exp [(<|<=|>|>=|==|!=) Exp]
+
+Exp ::= Term ((+ | -) Term)*
+
+Term ::= Factor ((*|/) Factor)*
+
+Factor ::= id | Num | Bool | ( AExp ) | if AExp {AExp} else {AExp} | id ( [ArgList] )
+
+ArgList ::= AExp (, AExp)*
+
+Bool ::= true | false

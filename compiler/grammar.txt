@@ -23,6 +23,8 @@ Factor ::= id | Num | Bool | ( Exp ) | ifexp ( CExp , CExp , CExp ) | id ( [ArgL
 ArgList ::= CExp (, CExp)*
 Bool ::= true | false
 
+
+/////////////////////////////////////////////////////////////////////////////
 propuesta 1:
 Program ::= VarDecList FunDecList
 
@@ -48,6 +50,64 @@ if AExp { Body } [else { Body } ] |
 while AExp { Body } |
 for [ mut ] id in Num..Num { Body } |
 return [ AExp ]
+
+AExp ::= BExp ((&& | ||) BExp)*
+
+BExp ::= CExp | !CExp
+
+CExp ::= Exp [(<|<=|>|>=|==|!=) Exp]
+
+Exp ::= Term ((+ | -) Term)*
+
+Term ::= Factor ((*|/) Factor)*
+
+Factor ::= id | Num | Bool | ( AExp ) | if AExp {AExp} else {AExp} | id ( [ArgList] )
+
+ArgList ::= AExp (, AExp)*
+
+Bool ::= true | false
+
+/////////////////////////////////////////////////////////////////////////////
+propuesta 2:
+Program ::= VarDecList FunDecList
+VarDecList ::= (VarDec)*
+FunDecList ::= (FunDec)+
+
+FunDec ::= fn id ([ParamDecList]) [-> Type] { Body }
+// por si no retorna nada
+// deberiamos asegurar que haya un return? (en el typechecker)?
+
+Body ::= VarDecList StmtList
+
+ParamDecList ::= id : [mut] Type (, id : [mut] Type )*
+
+VarDec ::= let [mut] id : Type [ = AExp]
+// asignar mientras se definen las variables
+
+Type ::= id
+
+StmtList ::= ( Stmt )*
+
+// los ';' como serían? notemos que los stmt terminan en ; siempre
+Stmt ::= id = AExp ; |
+    println!("{}", AExp ) ; |
+    if AExp { Body } [else { Body } ] |
+    while AExp { Body } |
+    for [ mut ] id in AExp..AExp { Body } |
+    return [ AExp ] ;
+
+// en rust el for le da el valor a id pero no lo 'guarda'
+/*
+fn main(){
+	let x:i32 = 5;
+	let y:i32 = 10;
+	for mut i in x..(y+x) {
+		i-=1;
+		println!("{}", i);
+	}	
+}
+// typechecker para asegurar que AExp no son booleanos
+*/
 
 AExp ::= BExp ((&& | ||) BExp)*
 

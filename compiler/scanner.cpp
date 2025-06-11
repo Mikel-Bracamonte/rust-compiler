@@ -65,12 +65,51 @@ Token* Scanner::nextToken() {
         }
     }
 
-    else if (strchr("+-*/()=;,<>!.:|&{}\"", c)) {
+    else if (strchr("+-*/()=;,<>!.:|&{}\"%", c)) {
         switch(c) {
-            case '+': token = new Token(Token::PLUS, c); break;
-            case '-': token = new Token(Token::MINUS, c); break;
-            case '*': token = new Token(Token::MUL, c); break;
-            case '/': token = new Token(Token::DIV, c); break;
+            case '+':
+                if (current + 1 < input.length() && input[current + 1] == '=') {
+                    token = new Token(Token::PLUSASSIGN, "+=", 0, 2);
+                    current++;
+                } else {
+                    token = new Token(Token::PLUS, c);
+                }
+                break;
+            case '-':
+                if (current + 1 < input.length() && input[current + 1] == '=') {
+                    token = new Token(Token::MINUSASSIGN, "-=", 0, 2);
+                    current++;
+                } else if (current + 1 < input.length() && input[current + 1] == '>') {
+                    token = new Token(Token::ARROW, "->", 0, 2);
+                    current++;
+                } else {
+                    token = new Token(Token::MINUS, c);
+                }
+                break;
+            case '*':
+                if (current + 1 < input.length() && input[current + 1] == '=') {
+                    token = new Token(Token::MULASSIGN, "*=", 0, 2);
+                    current++;
+                } else {
+                    token = new Token(Token::MUL, c);
+                }
+                break;
+            case '/':
+                if (current + 1 < input.length() && input[current + 1] == '=') {
+                    token = new Token(Token::DIVASSIGN, "/=", 0, 2);
+                    current++;
+                } else {
+                    token = new Token(Token::DIV, c);
+                }
+                break;
+            case '%':
+                if (current + 1 < input.length() && input[current + 1] == '=') {
+                    token = new Token(Token::MODASSIGN, "%=", 0, 2);
+                    current++;
+                } else {
+                    token = new Token(Token::MOD, c);
+                }
+                break;
             case ',': token = new Token(Token::COMMA, c); break;
             case '.': token = new Token(Token::DOT, c); break;
             case '(': token = new Token(Token::PI, c); break;

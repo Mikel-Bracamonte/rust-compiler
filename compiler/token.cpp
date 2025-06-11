@@ -18,6 +18,7 @@ std::ostream& operator << ( std::ostream& outs, const Token & tok )
         case Token::MINUS: outs << "TOKEN(MINUS)"; break;
         case Token::MUL: outs << "TOKEN(MUL)"; break;
         case Token::DIV: outs << "TOKEN(DIV)"; break;
+        case Token::MOD: outs << "TOKEN(MOD)"; break;
         case Token::NUM: outs << "TOKEN(NUM)"; break;
         case Token::ERR: outs << "TOKEN(ERR)"; break;
         case Token::PD: outs << "TOKEN(PD)"; break;
@@ -56,6 +57,12 @@ std::ostream& operator << ( std::ostream& outs, const Token & tok )
         case Token::OR : outs << "TOKEN(OR)"; break;
         case Token::NOT : outs << "TOKEN(NOT)"; break;
         case Token::QUOTE : outs << "TOKEN(QUOTE)"; break;
+        case Token::ARROW : outs << "TOKEN(ARROW)"; break;
+        case Token::PLUSASSIGN : outs << "TOKEN(PLUSASSIGN)"; break;
+        case Token::MINUSASSIGN : outs << "TOKEN(MINUSASSIGN)"; break;
+        case Token::MULASSIGN : outs << "TOKEN(MULASSIGN)"; break;
+        case Token::DIVASSIGN : outs << "TOKEN(DIVASSIGN)"; break;
+        case Token::MODASSIGN : outs << "TOKEN(MODASSIGN)"; break;
         default: outs << "TOKEN(UNKNOWN)"; break;
     }
     return outs;

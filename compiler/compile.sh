@@ -1,7 +1,8 @@
 #!/bin/bash
 
 if [ "$1" == "-b" ]; then
-    g++ main.cpp exp.cpp parser.cpp scanner.cpp token.cpp visitor.cpp -o compiler || {
+    # el g++ debe compilar todos los .cpp
+    g++ main.cpp scanner.cpp token.cpp -o compiler || {
         exit 1
     }
     shift
@@ -11,5 +12,5 @@ if [ -z "$1" ]; then
     exit 1
 fi
 ./compiler "$1" || exit 1
-gcc output.s -o exec
-./exec
+gcc output.s -o output
+./output

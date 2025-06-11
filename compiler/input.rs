@@ -1,5 +1,5 @@
 fn main() {
-    let a = 4;
-    let b = 3 * a;
-    println!("{}", a + b);
+    let mut a = 2;
+    a %= 2;
+    println!("{}", a);
 }

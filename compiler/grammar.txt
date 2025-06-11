@@ -87,7 +87,7 @@ Type ::= id
 StmtList ::= ( Stmt )*
 
 // los ';' como serían? notemos que los stmt terminan en ; siempre
-Stmt ::= id = AExp ; |
+Stmt ::= id (= | += | -= | *= | /= | %=) AExp ; |
     println!("{}", AExp ) ; |
     if AExp { Body } [else { Body } ] |
     while AExp { Body } |
@@ -117,7 +117,7 @@ CExp ::= Exp [(<|<=|>|>=|==|!=) Exp]
 
 Exp ::= Term ((+ | -) Term)*
 
-Term ::= Factor ((*|/) Factor)*
+Term ::= Factor ((*|/|%) Factor)*
 
 Factor ::= id | Num | Bool | ( AExp ) | if AExp {AExp} else {AExp} | id ( [ArgList] )
 

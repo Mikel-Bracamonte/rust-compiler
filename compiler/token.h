@@ -6,10 +6,55 @@
 class Token {
 public:
     enum Type {
-        ERR, END, PLUS, MINUS, MUL, DIV, MOD, NUM, PD, PI, LD, LI, ID, PRINTLN, ASSIGN, PC, 
-        LT, LE, GT, GE, EQ, NEQ, IF, ELSE, WHILE, COMMA, DOT, LET, MUT, FOR, TRUE,
-        FALSE, RETURN, FN, BREAK, CONTINUE, IN, COLON, STRUCT, AND, NOT, OR, QUOTE,
-        ARROW, PLUSASSIGN, MINUSASSIGN, MULASSIGN, DIVASSIGN, MODASSIGN
+        ERR, //
+        END, //
+        PLUS, // +
+        MINUS, // -
+        MUL, // *
+        DIV, // /
+        MOD, // %
+        NUM, // numero 
+        PD, // )
+        PI, // (
+        LD, // }
+        LI, // {
+        ID, // string for ids
+        PRINTLN, // println
+        ASSIGN, // =
+        PC, // ;
+        LT, // <
+        LE, // <= 
+        GT, // >
+        GE, // >= 
+        EQ, // =
+        NEQ, // !=
+        IF, // if
+        ELSE, // else
+        WHILE, // while
+        COMMA, // ,
+        DOT, // .
+        LET, // let
+        MUT, // mut
+        FOR, // for
+        TRUE, // true
+        FALSE, // false
+        RETURN, // return
+        FN, // fn
+        BREAK, // break
+        CONTINUE, // continue
+        IN, // in
+        COLON, // :
+        STRUCT, // struct
+        AND, // and
+        NOT, // not
+        OR, // or
+        QUOTE, // \"
+        ARROW, // ->
+        PLUSASSIGN, // +=
+        MINUSASSIGN, // -=
+        MULASSIGN, // *=
+        DIVASSIGN, // /=
+        MODASSIGN // %=
     };
 
     Type type;

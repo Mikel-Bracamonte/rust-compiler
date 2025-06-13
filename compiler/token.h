@@ -45,10 +45,10 @@ public:
         IN, // in
         COLON, // :
         STRUCT, // struct
-        AND, // and
-        NOT, // not
-        OR, // or
-        QUOTE, // \"
+        AND, // &&
+        NOT, // !
+        OR, // ||
+        QUOTE, // "
         ARROW, // ->
         PLUSASSIGN, // +=
         MINUSASSIGN, // -=

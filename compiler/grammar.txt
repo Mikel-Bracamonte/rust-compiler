@@ -5,6 +5,7 @@ FunDec ::= fn id ([ParamDecList]) [-> Type] { Body }
 // deberiamos asegurar que haya un return? (en el typechecker)?
 
 Body ::= VarDecList StmtList
+// solo parsear StmtList, y agregar a VarDecList
 
 ParamDecList ::= id : [mut] Type (, id : [mut] Type )*
 

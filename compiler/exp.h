@@ -3,7 +3,6 @@
 #include "imp_value.hh"
 #include "imp_type.hh"
 #include <string>
-#include <unordered_map>
 #include <list>
 #include "visitor.h"
 using namespace std;
@@ -13,6 +12,7 @@ enum BinaryOp { PLUS_OP, MINUS_OP, MUL_OP, DIV_OP, LT_OP, LE_OP, EQ_OP, GT_OP, G
 enum AssignOp { PLUS_OP, MINUS_OP, MUL_OP, DIV_OP, MOD_OP, ASSIGN_OP }
 
 class Body;
+
 class ImpValueVisitor;
 
 class Exp {
@@ -96,8 +96,8 @@ public:
 class AssignStatement : public Stm {
 public:
     string name;
-    AssignOp op;
     Exp* right;
+    AssignOp op;
     AssignStatement(string n, Exp* r, AssignOp o);
     int accept(Visitor* visitor);
     void accept(ImpValueVisitor* v);

@@ -214,7 +214,7 @@ public:
 class Program {
 public:
     list<FunDec*> funs;
-    Program(Body* b);
+    Program();
     int accept(Visitor* v);
     void accept(ImpValueVisitor* v);
     ~Program();

@@ -66,7 +66,7 @@ public:
     Exp* condition;
     Exp* then; 
     Exp* els;
-    IFExp(Exp *cond, Exp* t, Exp* e);
+    IFExp(Exp *c, Exp* t, Exp* e);
     int accept(Visitor* visitor);
     ImpValue accept(ImpValueVisitor* v);
     ~IFExp();

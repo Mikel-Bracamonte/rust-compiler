@@ -61,7 +61,7 @@ int Body::accept(Visitor* visitor) {
 
 int PrintVisitor::visit(BinaryExp* exp) {
     exp->left->accept(this);
-    cout << ' ' << Exp::binopToChar(exp->op) << ' ';
+    cout << ' ' << Exp::binOpToChar(exp->op) << ' ';
     exp->right->accept(this);
     return 0;
 }

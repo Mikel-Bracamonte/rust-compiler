@@ -2,10 +2,10 @@
 #include <fstream>
 #include <string>
 #include "scanner.h"
-#include "parser.h"
-#include "visitor.h"
-#include "gencode.h"
-#include "imp_type.h"
+//#include "parser.h"
+//#include "visitor.h"
+//#include "gencode.h"
+//#include "imp_type.h"
 
 using namespace std;
 

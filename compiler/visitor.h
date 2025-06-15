@@ -1,7 +1,6 @@
 #ifndef VISITOR_H
 #define VISITOR_H
 #include "exp.h"
-#include <list>
 
 class Visitor {
 public:

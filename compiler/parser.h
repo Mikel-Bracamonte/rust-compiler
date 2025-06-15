@@ -12,19 +12,20 @@ private:
     bool check(Token::Type ttype);
     bool advance();
     bool isAtEnd();
-    list<Stm*> parseStmList();
+public:
+    Parser(Scanner* scanner);
+    Program* parseProgram();
+    FunDec* parseFunDec();
+    ParamDec* parseParamDec();
+    Body* parseBody();
+    StatementList* parseStatementList();
+    Stm* parseStatement();
+    Exp* parseAExp();
+    Exp* parseBExp();
     Exp* parseCExp();
     Exp* parseExpression();
     Exp* parseTerm();
     Exp* parseFactor();
-public:
-    Parser(Scanner* scanner);
-    Program* parseProgram();
-    Stm* parseStatement();
-    StatementList* parseStatementList();
-    VarDec* parseVarDec();
-    VarDecList* parseVarDecList();
-    Body* parseBody();
 };
 
 #endif // PARSER_H

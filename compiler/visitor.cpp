@@ -20,6 +20,14 @@ int IdentifierExp::accept(Visitor* visitor) {
     return visitor->visit(this);
 }
 
+int IfExp::accept(Visitor* visitor) {
+    return visitor->visit(this);
+}
+
+int FunctionCallExp::accept(Visitor* visitor) {
+    return visitor->visit(this);
+}
+
 int AssignStatement::accept(Visitor* visitor) {
     visitor->visit(this);
     return 0;
@@ -39,15 +47,32 @@ int WhileStatement::accept(Visitor* visitor) {
     visitor->visit(this);
     return 0;
 }
+
+int ForStatement::accept(Visitor* visitor) {
+    visitor->visit(this);
+    return 0;
+}
+
+int ReturnStatement::accept(Visitor* visitor) {
+    visitor->visit(this);
+    return 0;
+}
+
 int VarDec::accept(Visitor* visitor) {
     visitor->visit(this);
     return 0;
 }
 
-int VarDecList::accept(Visitor* visitor) {
+int ParamDec::accept(Visitor* visitor) {
     visitor->visit(this);
     return 0;
 }
+
+int FunDec::accept(Visitor* visitor) {
+    visitor->visit(this);
+    return 0;
+}
+
 int StatementList::accept(Visitor* visitor) {
     visitor->visit(this);
     return 0;
@@ -59,9 +84,13 @@ int Body::accept(Visitor* visitor) {
 
 ///////////////////////////////////////////////////////////////////////////////////
 
+string PrintVisitor::get_spaces() {
+    return string(' ', offset*4);
+}
+
 int PrintVisitor::visit(BinaryExp* exp) {
     exp->left->accept(this);
-    cout << ' ' << Exp::binOpToChar(exp->op) << ' ';
+    cout << " " << Exp::binOpToChar(exp->op) << " ";
     exp->right->accept(this);
     return 0;
 }
@@ -82,60 +111,116 @@ int PrintVisitor::visit(IdentifierExp* exp) {
     return 0;
 }
 
+int PrintVisitor::visit(IfExp* exp) {
+    cout << "if ";
+    exp->condition->accept(this);
+    cout << " { ";
+    exp->then->accept(this);
+    cout << " } else { ";
+    exp->els->accept(this);
+    cout << " }";
+    return 0;
+}
+
+int PrintVisitor::visit(FunctionCallExp* exp) {
+    cout << exp->name;
+    cout << "(";
+    for(auto it = exp->argList.begin(); it != exp->argList.end(); ++it) {
+        (*it)->accept(this);
+        if(next(it) != exp->argList.end()) {
+            cout << ", ";
+        }
+    }
+    cout << ");";
+    return 0;
+}
+
 void PrintVisitor::visit(AssignStatement* stm) {
-    cout << stm->id << " = ";
-    stm->rhs->accept(this);
+    cout << get_spaces() << stm->name << " " << Exp::assignOpToChar(stm->op) << " ";
+    stm->right->accept(this);
     cout << ";";
 }
 
 void PrintVisitor::visit(PrintStatement* stm) {
-    cout << "print(";
-    stm->e->accept(this);
+    cout << get_spaces() << "println!(\"{}\", ";
+    stm->exp->accept(this);
     cout << ");";
 }
 
 void PrintVisitor::visit(IfStatement* stm) {
-    cout << "if ";
+    cout << get_spaces() << "if ";
     stm->condition->accept(this);
-    cout << " then" << endl;
+    cout << " {" << endl;
+    ++offset;
     stm->then->accept(this);
+    --offset;
+    cout << get_spaces() << "} ";
     if(stm->els){
-        cout << "else" << endl;
+        cout << "else {" << endl;
+        ++offset;
         stm->els->accept(this);
+        --offset;
+        cout << get_spaces() << "}";
     }
-    cout << "endif";
 }
-
-void PrintVisitor::imprimir(Program* program){
-    program->body->accept(this);
-};
-
 
 void PrintVisitor::visit(WhileStatement* stm){
-    cout << "while ";
+    cout << get_spaces() << "while ";
     stm->condition->accept(this);
-    cout << " do" << endl;
-    stm->b->accept(this);
-    cout << "endwhile";
+    cout << " {" << endl;
+    ++offset;
+    stm->body->accept(this);
+    --offset;
+    cout << get_spaces() << "}";
 }
 
+void PrintVisitor::visit(ForStatement* stm){
+    cout << get_spaces() << "for " << stm->name << " in ";
+    stm->start->accept(this);
+    cout << "..";
+    stm->end->accept(this);
+    cout << " {" << endl;
+    ++offset;
+    stm->body->accept(this);
+    --offset;
+    cout << get_spaces() << "}";
+}
 
-void PrintVisitor::visit(VarDec* stm){
-    cout << "var ";
-    cout << stm->type;
-    cout << " ";
-    for(auto i: stm->vars){
-        cout << i;
-        if(i != stm->vars.back()) cout << ", ";
-    }
+void PrintVisitor::visit(ReturnStatement* stm){
+    cout << get_spaces() << "return ";
+    stm->exp->accept(this);
     cout << ";";
 }
 
-void PrintVisitor::visit(VarDecList* stm){
-    for(auto i: stm->vardecs){
-        i->accept(this);
-        cout << endl;
+void PrintVisitor::visit(VarDec* stm){
+    cout << get_spaces() << "let ";
+    if(stm->mut) {
+        cout << "mut ";
     }
+    cout << stm->name << " = ";
+    stm->exp->accept(this);
+    cout << ": " << stm->type << ";";
+}
+
+void PrintVisitor::visit(ParamDec* stm){
+    cout << stm->name << ": " << stm->type;
+}
+
+void PrintVisitor::visit(FunDec* stm){
+    cout << get_spaces() << "fn ";
+    cout << stm->name;
+    cout << "(";
+    for(auto it = stm->params.begin(); it != stm->params.end(); ++it){
+        (*it)->accept(this);
+        if(next(it) != stm->params.end()) {
+            cout << ", ";
+        }
+    }
+    cout << "{" << endl;
+    ++offset;
+    stm->body->accept(this);
+    --offset;
+    cout << get_spaces() << "}";
 }
 
 void PrintVisitor::visit(StatementList* stm){
@@ -146,8 +231,12 @@ void PrintVisitor::visit(StatementList* stm){
 }
 
 void PrintVisitor::visit(Body* stm){
-    stm->vardecs->accept(this);
-    cout << endl;
-    stm->slist->accept(this);
+    stm->stmList->accept(this);
 }
 
+void PrintVisitor::print(Program* program){
+    offset = 0;
+    for(auto f : program->funs) {
+        f->accept(this);
+    }
+};

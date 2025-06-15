@@ -12,13 +12,13 @@ NumberExp::~NumberExp() { }
 BoolExp::~BoolExp() { }
 IdentifierExp::~IdentifierExp() { }
 
-AssignStatement::AssignStatement(string id, Exp* e): id(id), rhs(e) {}
+AssignStatement::AssignStatement(const string& n, Exp* r, AssignOp o): name(n), right(r), op(o) {}
 AssignStatement::~AssignStatement() {
-    delete rhs;
+    delete right;
 }
-PrintStatement::PrintStatement(Exp* e): e(e) {}
+PrintStatement::PrintStatement(Exp* e): exp(e) {}
 PrintStatement::~PrintStatement() {
-    delete e;
+    delete exp;
 }
 
 IfStatement::IfStatement(Exp* c, Body* t, Body* e): condition(c), then(t), els(e) {}
@@ -27,25 +27,17 @@ IfStatement::~IfStatement() {
     delete then;
     delete els;
 }
-WhileStatement::WhileStatement(Exp* c, Body* t): condition(c), b(t) {}
+WhileStatement::WhileStatement(Exp* c, Body* b): condition(c), body(b) {}
 WhileStatement::~WhileStatement() {
     delete condition;
-    delete b;
+    delete body;
 }
 
 
 
-VarDec::VarDec(string type, list<string> vars): type(type), vars(vars) {}
-VarDec::~VarDec() {}
-
-VarDecList::VarDecList(): vardecs() {}
-void VarDecList::add(VarDec* v) {
-    vardecs.push_back(v);
-}
-VarDecList::~VarDecList() {
-    for (auto v: vardecs) {
-        delete v;
-    }
+VarDec::VarDec(string n, string t, bool m, Exp* e): name(n), type(t), mut(m), exp(e) {}
+VarDec::~VarDec() {
+    delete exp;
 }
 
 StatementList::StatementList(): stms() {}
@@ -59,43 +51,40 @@ StatementList::~StatementList() {
     }
 }
 
-Body::Body(VarDecList* v, StatementList* s): vardecs(v), slist(s) {}
+Body::Body(StatementList* s): stmList(s) {}
 Body::~Body() {
-    delete vardecs;
-    delete slist;
+    delete stmList;
 }
 
-
-
-
-
-
-Program::Program(Body* b): body(b) {}
+Program::Program() {}
 
 Program::~Program() {
-    delete body;
+    for (auto f : funs) {
+        delete f;
+    }
 }
+
 Stm::~Stm() {}
 string Exp::binOpToChar(BinaryOp op) {
     string  c;
     switch(op) {
-        case PLUS_OP: c = "+"; break;
-        case MINUS_OP: c = "-"; break;
-        case MUL_OP: c = "*"; break;
-        case DIV_OP: c = "/"; break;
-        case LT_OP: c = "<"; break;
-        case LE_OP: c = "<="; break;
-        case EQ_OP: c = "=="; break;
-        case GT_OP: c = ">"; break;
-        case GE_OP: c = ">="; break;
-        case NEQ_OP: c = "!="; break;
-        case MOD_OP: c = "%"; break;
+        case BinaryOp::PLUS_OP: c = "+"; break;
+        case BinaryOp::MINUS_OP: c = "-"; break;
+        case BinaryOp::MUL_OP: c = "*"; break;
+        case BinaryOp::DIV_OP: c = "/"; break;
+        case BinaryOp::LT_OP: c = "<"; break;
+        case BinaryOp::LE_OP: c = "<="; break;
+        case BinaryOp::EQ_OP: c = "=="; break;
+        case BinaryOp::GT_OP: c = ">"; break;
+        case BinaryOp::GE_OP: c = ">="; break;
+        case BinaryOp::NEQ_OP: c = "!="; break;
+        case BinaryOp::MOD_OP: c = "%"; break;
         default: c = "$";
     }
     return c;
 }
 
-string Exp::assignOpToChar(BinaryOp op) {
+string Exp::assignOpToChar(AssignOp op) {
     string  c;
     switch(op) {
         case PLUS_OP: c = "+="; break;

@@ -2,7 +2,7 @@
 
 if [ "$1" == "-b" ]; then
     # el g++ debe compilar todos los .cpp
-    g++ main.cpp scanner.cpp token.cpp -o compiler || {
+    g++ *.cpp -o compiler || {
         exit 1
     }
     shift

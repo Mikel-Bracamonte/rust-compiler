@@ -1,7 +1,7 @@
 #ifndef EXP_H
 #define EXP_H
-#include "imp_value.hh"
-#include "imp_type.hh"
+#include "imp_value.h"
+#include "imp_type.h"
 #include <string>
 #include <list>
 #include "visitor.h"
@@ -21,6 +21,7 @@ public:
     virtual ImpValue accept(ImpValueVisitor* v) = 0;
     virtual ~Exp() = 0;
     static string binOpToChar(BinaryOp o);
+    static string assignOpToChar(AssignOp);
 };
 
 class BinaryExp : public Exp {
@@ -55,7 +56,7 @@ public:
 class IdentifierExp : public Exp {
 public:
     string name;
-    IdentifierExp(string n);
+    IdentifierExp(const string& n);
     int accept(Visitor* visitor);
     ImpValue accept(ImpValueVisitor* v);
     ~IdentifierExp();
@@ -66,10 +67,10 @@ public:
     Exp* condition;
     Exp* then; 
     Exp* els;
-    IFExp(Exp *c, Exp* t, Exp* e);
+    IfExp(Exp *c, Exp* t, Exp* e);
     int accept(Visitor* visitor);
     ImpValue accept(ImpValueVisitor* v);
-    ~IFExp();
+    ~IfExp();
 };
 
 class FunctionCallExp : public Exp {
@@ -98,7 +99,7 @@ public:
     string name;
     Exp* right;
     AssignOp op;
-    AssignStatement(string n, Exp* r, AssignOp o);
+    AssignStatement(const string& n, Exp* r, AssignOp o);
     int accept(Visitor* visitor);
     void accept(ImpValueVisitor* v);
     ~AssignStatement();
@@ -159,8 +160,9 @@ class VarDec : public Stm {
 public:
     string name;
     string type;
+    bool mut;
     Exp* exp;
-    VarDec(string n, string t, Exp* e);
+    VarDec(string n, string t, bool m, Exp* e);
     int accept(Visitor* visitor);
     void accept(ImpValueVisitor* v);
     ~VarDec();
@@ -176,19 +178,19 @@ public:
     int accept(Visitor* visitor);
     void accept(ImpValueVisitor* v);
     ~ParamDec();
-}
+};
 
 class FunDec {
 public:
     string name;
     string type; // default = 'void'
-    list<ParamDec> params;
+    list<ParamDec*> params;
     Body* body;
     FunDec();
     int accept(Visitor* visitor);
     void accept(ImpValueVisitor* v);
     ~FunDec();
-}
+};
 
 class StatementList {
 public:

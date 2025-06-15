@@ -4,9 +4,8 @@
 #include "scanner.h"
 #include "parser.h"
 #include "visitor.h"
-#include "imp_interpreter.hh"
-#include "gencode.hh"
-#include "imp_type.hh"
+#include "gencode.h"
+#include "imp_type.h"
 
 using namespace std;
 

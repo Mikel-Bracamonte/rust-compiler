@@ -132,31 +132,31 @@ Program::~Program() {
 string Exp::binOpToChar(BinaryOp op) {
     string  c;
     switch(op) {
-        case PLUS_OP: c = "+"; break;
-        case MINUS_OP: c = "-"; break;
-        case MUL_OP: c = "*"; break;
-        case DIV_OP: c = "/"; break;
-        case LT_OP: c = "<"; break;
-        case LE_OP: c = "<="; break;
-        case EQ_OP: c = "=="; break;
-        case GT_OP: c = ">"; break;
-        case GE_OP: c = ">="; break;
-        case NEQ_OP: c = "!="; break;
-        case MOD_OP: c = "%"; break;
+        case BinaryOp::PLUS_OP: c = "+"; break;
+        case BinaryOp::MINUS_OP: c = "-"; break;
+        case BinaryOp::MUL_OP: c = "*"; break;
+        case BinaryOp::DIV_OP: c = "/"; break;
+        case BinaryOp::LT_OP: c = "<"; break;
+        case BinaryOp::LE_OP: c = "<="; break;
+        case BinaryOp::EQ_OP: c = "=="; break;
+        case BinaryOp::GT_OP: c = ">"; break;
+        case BinaryOp::GE_OP: c = ">="; break;
+        case BinaryOp::NEQ_OP: c = "!="; break;
+        case BinaryOp::MOD_OP: c = "%"; break;
         default: c = "$";
     }
     return c;
 }
 
-string Exp::assignOpToChar(BinaryOp op) {
+string Exp::assignOpToChar(AssignOp op) {
     string  c;
     switch(op) {
-        case PLUS_OP: c = "+="; break;
-        case MINUS_OP: c = "-="; break;
-        case MUL_OP: c = "*="; break;
-        case DIV_OP: c = "/="; break;
-        case MOD_OP: c = "%="; break;
-        case ASSIGN_OP: c = "="; break;
+        case AssignOp::PLUS_OP: c = "+="; break;
+        case AssignOp::MINUS_OP: c = "-="; break;
+        case AssignOp::MUL_OP: c = "*="; break;
+        case AssignOp::DIV_OP: c = "/="; break;
+        case AssignOp::MOD_OP: c = "%="; break;
+        case AssignOp::ASSIGN_OP: c = "="; break;
         default: c = "$";
     }
     return c;

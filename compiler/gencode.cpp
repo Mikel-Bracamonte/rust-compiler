@@ -1,71 +1,78 @@
-#include "gencode.hh"
+#include "gencode.h"
 
-ImpValue BinaryExp::accept(ImpValueVisitor* v) {
-    return v->visit(this);
+ImpValue BinaryExp::accept(ImpValueVisitor* visitor) {
+    return visitor->visit(this);
 }
 
-ImpValue BoolExp::accept(ImpValueVisitor* v) {
-    return v->visit(this);
+ImpValue NumberExp::accept(ImpValueVisitor* visitor) {
+    return visitor->visit(this);
 }
 
-ImpValue NumberExp::accept(ImpValueVisitor* v) {
-    return v->visit(this);
+ImpValue BoolExp::accept(ImpValueVisitor* visitor) {
+    return visitor->visit(this);
 }
 
-ImpValue IdentifierExp::accept(ImpValueVisitor* v) {
-    return v->visit(this);
+ImpValue IdentifierExp::accept(ImpValueVisitor* visitor) {
+    return visitor->visit(this);
 }
 
-
-
-
-
-void AssignStatement::accept(ImpValueVisitor* v) {
-    return v->visit(this);
+ImpValue IfExp::accept(ImpValueVisitor* visitor) {
+    return visitor->visit(this);
 }
 
-void PrintStatement::accept(ImpValueVisitor* v) {
-    return v->visit(this);
+ImpValue FunctionCallExp::accept(ImpValueVisitor* visitor) {
+    return visitor->visit(this);
 }
 
-void IfStatement::accept(ImpValueVisitor* v) {
-    return v->visit(this);
+void AssignStatement::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
 }
 
-void WhileStatement::accept(ImpValueVisitor* v) {
-    return v->visit(this);
+void PrintStatement::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
 }
 
-
-
-
-void StatementList::accept(ImpValueVisitor* v) {
-    return v->visit(this);
+void IfStatement::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
 }
 
-void VarDec::accept(ImpValueVisitor* v) {
-    return v->visit(this);
+void WhileStatement::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
 }
 
-
-void VarDecList::accept(ImpValueVisitor* v) {
-    return v->visit(this);
+void ForStatement::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
 }
 
-
-
-void Body::accept(ImpValueVisitor* v) {
-    return v->visit(this);
+void ReturnStatement::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
 }
 
-void Program::accept(ImpValueVisitor* v) {
-    return v->visit(this);
+void VarDec::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
 }
 
-void ImpCODE::interpret(Program* p) {
+void ParamDec::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
+}
+
+void FunDec::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
+}
+
+void StatementList::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
+}
+void Body::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+void GenCodeVisitor::gencode(Program* p) {
     env.clear();
-    etiquetas = 0;
-    current_offset = 0;
+    label_counter = 0;
+    offset = 0;
 
     cout << ".data" << endl;
     cout << "print_fmt: .string \"%ld\\n\"" << endl;
@@ -81,15 +88,9 @@ void ImpCODE::interpret(Program* p) {
     cout << ".section .note.GNU-stack,\"\",@progbits" << endl;
 }
 
-void ImpCODE::visit(Program* p) {
+void GenCodeVisitor::visit(Body* b) {
     env.add_level();
-    p->body->accept(this);
-    env.remove_level();
-}
-
-void ImpCODE::visit(Body* b) {
-    env.add_level();
-    long old_offset = current_offset;
+    long old_offset = offset;
     b->vardecs->accept(this);
     long locals_size = -current_offset;
     if (locals_size > 0)
@@ -100,13 +101,7 @@ void ImpCODE::visit(Body* b) {
     env.remove_level();
 }
 
-void ImpCODE::visit(VarDecList* decs) {
-    for (auto it : decs->vardecs) {
-        it->accept(this);
-    }
-}
-
-void ImpCODE::visit(VarDec* vd) {
+void GenCodeVisitor::visit(VarDec* vd) {
     ImpVType tt = ImpValue::get_basic_type(vd->type);
     for (const auto& var : vd->vars) {
         ImpValue v;
@@ -117,18 +112,18 @@ void ImpCODE::visit(VarDec* vd) {
     }
 }
 
-void ImpCODE::visit(StatementList* s) {
+void GenCodeVisitor::visit(StatementList* s) {
     for (auto it : s->stms) {
         it->accept(this);
     }
 }
-void ImpCODE::visit(AssignStatement* s) {
+void GenCodeVisitor::visit(AssignStatement* s) {
     ImpValue val = s->rhs->accept(this); 
     cout << "  movq %rax, " << stack_offsets[s->id] << "(%rbp)" << endl;
     env.update(s->id, val);  
 }
 
-void ImpCODE::visit(PrintStatement* s) {
+void GenCodeVisitor::visit(PrintStatement* s) {
     s->e->accept(this);
     cout << "  movq %rax, %rsi" << endl;
     cout << "  leaq print_fmt(%rip), %rdi" << endl;
@@ -136,7 +131,7 @@ void ImpCODE::visit(PrintStatement* s) {
     cout << "  call printf@PLT" << endl;
 }
 
-void ImpCODE::visit(IfStatement* s) {
+void GenCodeVisitor::visit(IfStatement* s) {
     int lbl = etiquetas++;
     s->condition->accept(this);
     cout << "  cmpq $0, %rax" << endl;
@@ -148,7 +143,7 @@ void ImpCODE::visit(IfStatement* s) {
     cout << "endif_" << lbl << ":" << endl;
 }
 
-void ImpCODE::visit(WhileStatement* s) {
+void GenCodeVisitor::visit(WhileStatement* s) {
     int lbl_cond = etiquetas++;
     int lbl_end  = etiquetas++;
     cout << "while_" << lbl_cond << ":" << endl;
@@ -160,9 +155,7 @@ void ImpCODE::visit(WhileStatement* s) {
     cout << "endwhile_" << lbl_end << ":" << endl;
 }
 
-
-
-ImpValue ImpCODE::visit(BinaryExp* e) {
+ImpValue GenCodeVisitor::visit(BinaryExp* e) {
     ImpValue result;
     e->left->accept(this);        
     cout << "  pushq %rax" << endl;
@@ -221,7 +214,7 @@ ImpValue ImpCODE::visit(BinaryExp* e) {
     return result;
 }
 
-ImpValue ImpCODE::visit(NumberExp* e) {
+ImpValue GenCodeVisitor::visit(NumberExp* e) {
     ImpValue v;
     v.set_default_value(TINT);
     v.int_value = e->value;
@@ -229,7 +222,7 @@ ImpValue ImpCODE::visit(NumberExp* e) {
     return v;
 }
 
-ImpValue ImpCODE::visit(BoolExp* e) {
+ImpValue GenCodeVisitor::visit(BoolExp* e) {
     ImpValue v;
     v.set_default_value(TBOOL);
     v.bool_value = e->value;
@@ -237,7 +230,7 @@ ImpValue ImpCODE::visit(BoolExp* e) {
     return v;
 }
 
-ImpValue ImpCODE::visit(IdentifierExp* e) {
+ImpValue GenCodeVisitor::visit(IdentifierExp* e) {
     if (env.check(e->name)) {
         cout << "  movq " << stack_offsets[e->name] << "(%rbp), %rax" << endl;
         return env.lookup(e->name);
@@ -245,4 +238,10 @@ ImpValue ImpCODE::visit(IdentifierExp* e) {
         cerr << "Error: variable " << e->name << " no declarada" << endl;
         exit(1);
     }
+}
+
+////////////////////////////////////////////////////
+
+void CheckVisitor::check(Program* p) {
+    
 }

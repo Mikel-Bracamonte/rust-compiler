@@ -5,7 +5,9 @@
 
 using namespace std;
 
-Scanner::Scanner(const char* s):input(s),first(0), current(0) { }
+Scanner::Scanner(const char* s):input(s),first(0), current(0) { 
+    errorHandler = ErrorHandler("Scanner");
+}
 
 
 bool is_white_space(char c) {
@@ -185,14 +187,16 @@ void Scanner::reset() {
     current = 0;
 }
 
-Scanner::~Scanner() { }
+Scanner::~Scanner() { 
+    errorHandler = ErrorHandler("Scanner");
+}
 
 void test_scanner(Scanner* scanner) {
     Token* current;
     cout << "Iniciando Scanner:" << endl<< endl;
     while ((current = scanner->nextToken())->type != Token::END) {
         if (current->type == Token::ERR) {
-            cout << "Error en scanner - carácter inválido: " << current->text << endl;
+            scanner->errorHandler.error("carácter inválido: " + current->text);
             break;
         } else {
             cout << *current << endl;

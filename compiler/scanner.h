@@ -3,12 +3,13 @@
 
 #include <string>
 #include "token.h"
-
+#include "error_handler.h"
 class Scanner {
 private:
     std::string input;
     int first, current;
 public:
+    ErrorHandler errorHandler;
     Scanner(const char* in_s);
     Token* nextToken();
     void reset();

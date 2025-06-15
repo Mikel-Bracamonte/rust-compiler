@@ -40,6 +40,7 @@ bool Parser::isAtEnd() {
 }
 
 Parser::Parser(Scanner* sc):scanner(sc) {
+    errorHandler = ErrorHandler("Parser");
     previous = NULL;
     current = scanner->nextToken();
     if (current->type == Token::ERR) {

@@ -48,47 +48,28 @@ Parser::Parser(Scanner* sc):scanner(sc) {
     }
 }
 
-VarDec* Parser::parseVarDec() {
-    VarDec* vd = NULL;
-    if (match(Token::VAR)) {
-        if (!match(Token::ID)) {
-            cout << "Error: se esperaba un identificador después de 'var'." << endl;
-            exit(1);
-        }
-        string type = previous->text;
-        list<string> ids;
-        if (!match(Token::ID)) {
-            cout << "Error: se esperaba un identificador después de 'var'." << endl;
-            exit(1);
-        }
-        ids.push_back(previous->text);
-        while (match(Token::COMA)) {
-            if (!match(Token::ID)) {
-                cout << "Error: se esperaba un identificador después de ','." << endl;
-                exit(1);
-            }
-            ids.push_back(previous->text);
-        }
-        if (!match(Token::PC)) {
-            cout << "Error: se esperaba un ';' al final de la declaración." << endl;
-            exit(1);
-        }
-        vd = new VarDec(type, ids);
-    }
-    return vd;
+// parse funcs
+Program* Parser::parseProgram() {
+    //Body* v = parseBody();
+    return new Program(v);
 }
 
-VarDecList* Parser::parseVarDecList() {
-    VarDecList* vdl = new VarDecList();
-    VarDec* aux;
-    aux = parseVarDec();
-    while (aux != NULL) {
-        vdl->add(aux);
-        aux = parseVarDec();
-    }
-    return vdl;
+FunDec* Parser::parseFunDec() {
+
 }
 
+ParamDec* Parser::parseParamDec() {
+
+}
+
+// check '}'
+Body* Parser::parseBody() {
+    StatementList* sl = parseStatementList();
+    // assert (previous->token == Token::LD )
+    return new Body(sl);
+}
+
+// while !match(Token::LD)
 StatementList* Parser::parseStatementList() {
     StatementList* sl = new StatementList();
     sl->add(parseStatement());
@@ -98,30 +79,9 @@ StatementList* Parser::parseStatementList() {
     return sl;
 }
 
-
-Body* Parser::parseBody() {
-    VarDecList* vdl = parseVarDecList();
-    StatementList* sl = parseStatementList();
-    return new Body(vdl, sl);
-}
-
-
-
-Program* Parser::parseProgram() {
-    Body* v = parseBody();
-    return new Program(v);
-}
-
-list<Stm*> Parser::parseStmList() {
-    list<Stm*> slist;
-    slist.push_back(parseStatement());
-    while(match(Token::PC)) {
-        slist.push_back(parseStatement());
-    }
-    return slist;
-}
-
+// do again all
 Stm* Parser::parseStatement() {
+    /*
     Stm* s = NULL;
     Exp* e = NULL;
     Body* tb = NULL; //true case
@@ -189,10 +149,20 @@ Stm* Parser::parseStatement() {
         cout << "Error: Se esperaba un identificador o 'print', pero se encontró: " << *current << endl;
         exit(1);
     }
-    return s;
+    return s;*/
 }
 
+Exp* Parser::parseAExp(){
+    // TODO 
+}
+
+Exp* Parser::parseBExp(){
+    // TODO 
+}
+
+
 Exp* Parser::parseCExp(){
+    /*
     Exp* left = parseExpression();
     if (match(Token::LT) || match(Token::LE) || match(Token::EQ)){
         BinaryOp op;
@@ -207,10 +177,11 @@ Exp* Parser::parseCExp(){
         }
         Exp* right = parseExpression();
         left = new BinaryExp(left, right, op);
-    }
+    }*/
     return left;
 }
 
+// checked!
 Exp* Parser::parseExpression() {
     Exp* left = parseTerm();
     while (match(Token::PLUS) || match(Token::MINUS)) {
@@ -227,6 +198,8 @@ Exp* Parser::parseExpression() {
     return left;
 }
 
+// add %
+// check order, make sense: a % b % c * d / e?
 Exp* Parser::parseTerm() {
     Exp* left = parseFactor();
     while (match(Token::MUL) || match(Token::DIV)) {
@@ -243,6 +216,7 @@ Exp* Parser::parseTerm() {
     return left;
 }
 
+// IfExp, FunctionCallExp
 Exp* Parser::parseFactor() {
     Exp* e;
     Exp* e1;
@@ -270,4 +244,3 @@ Exp* Parser::parseFactor() {
     cout << "Error: se esperaba un número o identificador." << endl;
     exit(0);
 }
-

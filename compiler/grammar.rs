@@ -2,7 +2,9 @@ Program ::= (FunDec)+
 
 FunDec ::= fn id ([ParamDecList]) [-> Type] { Body }
 
-ParamDecList ::= id : [mut] Type (, id : [mut] Type )*
+ParamDecList ::= ParamDec (, ParamDec )*
+
+ParamDec ::= id : [ mut ] Type
 
 Type ::= id
 
@@ -12,11 +14,11 @@ StmtList ::= ( Stmt )*
 
 Stmt ::= id (= | += | -= | *= | /= | %=) AExp ; |
     println!("{}", AExp ) ; |
-    if AExp { Body } [else { Body } ] |
+    if AExp { Body } [ else { Body } ] |
     while AExp { Body } |
     for [ mut ] id in AExp..AExp { Body } |
     return [ AExp ] ;
-	let [mut] id : Type [ = AExp] ;
+	let [ mut ] id : Type [ = AExp] ;
 
 AExp ::= BExp ((&& | ||) BExp)*
 

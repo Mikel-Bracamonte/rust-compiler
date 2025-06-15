@@ -9,7 +9,7 @@ using namespace std;
 
 enum BinaryOp { PLUS_OP, MINUS_OP, MUL_OP, DIV_OP, LT_OP, LE_OP, EQ_OP, GT_OP, GE_OP, NEQ_OP, MOD_OP };
 
-enum AssignOp { PLUS_OP, MINUS_OP, MUL_OP, DIV_OP, MOD_OP, ASSIGN_OP }
+enum AssignOp { PLUS_OP, MINUS_OP, MUL_OP, DIV_OP, MOD_OP, ASSIGN_OP };
 
 class Body;
 

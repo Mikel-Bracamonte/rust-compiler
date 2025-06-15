@@ -1,24 +1,55 @@
 #include <iostream>
 #include "exp.h"
 using namespace std;
-BinaryExp::BinaryExp(Exp* l, Exp* r, BinaryOp op):left(l),right(r),op(op) {}
-NumberExp::NumberExp(int v):value(v) {}
-BoolExp::BoolExp(bool v):value(v) {}
-IdentifierExp::IdentifierExp(const string& n):name(n) {}
 
 Exp::~Exp() {}
+
+BinaryExp::BinaryExp(Exp* l, Exp* r, BinaryOp op):left(l),right(r),op(op) {}
 BinaryExp::~BinaryExp() { delete left; delete right; }
+
+NumberExp::NumberExp(int v):value(v) {}
 NumberExp::~NumberExp() { }
+
+BoolExp::BoolExp(bool v):value(v) {}
 BoolExp::~BoolExp() { }
+
+IdentifierExp::IdentifierExp(string n):name(n) {}
 IdentifierExp::~IdentifierExp() { }
 
-AssignStatement::AssignStatement(string id, Exp* e): id(id), rhs(e) {}
-AssignStatement::~AssignStatement() {
-    delete rhs;
+IfExp::IfExp(Exp *c, Exp *t, Exp *e) {
+    condition = c;
+    then = t;
+    els = e;
 }
-PrintStatement::PrintStatement(Exp* e): e(e) {}
+IfExp::~IfExp() {
+    delete condition;
+    delete then;
+    delete els;
+}
+
+FunctionCallExp::FunctionCallExp() {}
+FunctionCallExp::~FunctionCallExp(){
+    for(auto i : argList){
+        delete i;
+    }
+}
+
+//////////////////////////////////////////////////
+
+Stm::~Stm() {}
+
+AssignStatement::AssignStatement(string n, Exp* r, AssignOp o) {
+    name = n;
+    right = r;
+    op = o;
+}
+AssignStatement::~AssignStatement() {
+    delete right;
+}
+
+PrintStatement::PrintStatement(Exp* e): exp(e) {}
 PrintStatement::~PrintStatement() {
-    delete e;
+    delete exp;
 }
 
 IfStatement::IfStatement(Exp* c, Body* t, Body* e): condition(c), then(t), els(e) {}
@@ -27,55 +58,77 @@ IfStatement::~IfStatement() {
     delete then;
     delete els;
 }
-WhileStatement::WhileStatement(Exp* c, Body* t): condition(c), b(t) {}
+
+WhileStatement::WhileStatement(Exp* c, Body* b): condition(c), body(b) {}
 WhileStatement::~WhileStatement() {
     delete condition;
-    delete b;
+    delete body;
 }
 
-
-
-VarDec::VarDec(string type, list<string> vars): type(type), vars(vars) {}
-VarDec::~VarDec() {}
-
-VarDecList::VarDecList(): vardecs() {}
-void VarDecList::add(VarDec* v) {
-    vardecs.push_back(v);
+ForStatement::ForStatement(std::string n, Exp *s, Exp *e, Body *b) {
+    name = n;
+    start = s;
+    end = e;
+    body = b;
 }
-VarDecList::~VarDecList() {
-    for (auto v: vardecs) {
-        delete v;
-    }
+ForStatement::~ForStatement() {
+    delete start;
+    delete end;
+    delete body;
+}
+
+ReturnStatement::ReturnStatement(Exp *e) {
+    exp=e;
+}
+ReturnStatement::~ReturnStatement(){
+    delete exp;
+}
+
+VarDec::VarDec(string n, string t, Exp* e) {
+    name = n;
+    type = t;
+    exp = e;
+}
+VarDec::~VarDec() {
+    delete exp;
+}
+
+////////////////////////////////////////////////////
+
+ParamDec::ParamDec(std::string n, std::string t) {
+    name = n;
+    type = t;
+}
+ParamDec::~ParamDec() {}
+
+FunDec::FunDec() {}
+
+FunDec::~FunDec() {
+    delete body;
 }
 
 StatementList::StatementList(): stms() {}
 void StatementList::add(Stm* s) {
     stms.push_back(s);
 }
-
 StatementList::~StatementList() {
     for (auto s: stms) {
         delete s;
     }
 }
 
-Body::Body(VarDecList* v, StatementList* s): vardecs(v), slist(s) {}
+Body::Body(StatementList* s): stmList(s) {}
 Body::~Body() {
-    delete vardecs;
-    delete slist;
+    delete stmList;
 }
 
-
-
-
-
-
-Program::Program(Body* b): body(b) {}
-
+Program::Program() {}
 Program::~Program() {
-    delete body;
+    for(auto i : funs){
+        delete i;
+    }
 }
-Stm::~Stm() {}
+
 string Exp::binOpToChar(BinaryOp op) {
     string  c;
     switch(op) {
@@ -108,4 +161,5 @@ string Exp::assignOpToChar(BinaryOp op) {
     }
     return c;
 }
+
 

@@ -16,7 +16,7 @@ Stmt ::= id (= | += | -= | *= | /= | %=) AExp ; |
     println!("{}", AExp ) ; |
     if AExp { Body } [ else { Body } ] |
     while AExp { Body } |
-    for [ mut ] id in AExp..AExp { Body } |
+    for mut id in AExp..AExp { Body } |
     return [ AExp ] ;
 	let [ mut ] id : Type [ = AExp] ;
 

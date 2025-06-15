@@ -160,7 +160,7 @@ class VarDec : public Stm {
 public:
     string name;
     string type;
-    bool mut;
+    bool isMut;
     Exp* exp;
     VarDec(string n, string t, bool m, Exp* e);
     int accept(Visitor* visitor);
@@ -174,7 +174,8 @@ class ParamDec {
 public: 
     string name;
     string type;
-    ParamDec(string n, string t);
+    bool isMut;
+    ParamDec(string n, string t, bool m);
     int accept(Visitor* visitor);
     void accept(ImpValueVisitor* v);
     ~ParamDec();

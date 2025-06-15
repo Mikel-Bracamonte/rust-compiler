@@ -13,7 +13,7 @@ NumberExp::~NumberExp() { }
 BoolExp::BoolExp(bool v):value(v) {}
 BoolExp::~BoolExp() { }
 
-IdentifierExp::IdentifierExp(string n):name(n) {}
+IdentifierExp::IdentifierExp(std::string n):name(n) {}
 IdentifierExp::~IdentifierExp() { }
 
 IfExp::IfExp(Exp *c, Exp *t, Exp *e) {
@@ -38,7 +38,7 @@ FunctionCallExp::~FunctionCallExp(){
 
 Stm::~Stm() {}
 
-AssignStatement::AssignStatement(string n, Exp* r, AssignOp o) {
+AssignStatement::AssignStatement(std::string n, Exp* r, AssignOp o) {
     name = n;
     right = r;
     op = o;
@@ -84,9 +84,10 @@ ReturnStatement::~ReturnStatement(){
     delete exp;
 }
 
-VarDec::VarDec(string n, string t, Exp* e) {
+VarDec::VarDec(std::string n, std::string t, bool m, Exp* e) {
     name = n;
     type = t;
+    isMut = m;
     exp = e;
 }
 VarDec::~VarDec() {
@@ -95,9 +96,10 @@ VarDec::~VarDec() {
 
 ////////////////////////////////////////////////////
 
-ParamDec::ParamDec(std::string n, std::string t) {
+ParamDec::ParamDec(std::string n, std::string t, bool m) {
     name = n;
     type = t;
+    isMut = m;
 }
 ParamDec::~ParamDec() {}
 

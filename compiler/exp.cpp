@@ -28,6 +28,9 @@ IfExp::~IfExp() {
 }
 
 FunctionCallExp::FunctionCallExp() {}
+void FunctionCallExp::add(Exp* e) {
+    argList.push_back(e);
+}
 FunctionCallExp::~FunctionCallExp(){
     for(auto i : argList){
         delete i;
@@ -104,7 +107,6 @@ ParamDec::ParamDec(std::string n, std::string t, bool m) {
 ParamDec::~ParamDec() {}
 
 FunDec::FunDec() {}
-
 FunDec::~FunDec() {
     delete body;
 }

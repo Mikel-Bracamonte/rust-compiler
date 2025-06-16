@@ -228,27 +228,62 @@ Exp* Parser::parseTerm() {
 // IfExp, FunctionCallExp
 Exp* Parser::parseFactor() {
     Exp* e;
-    Exp* e1;
-    Exp* e2;
-    if (match(Token::TRUE)){
-        return new BoolExp(1);
-    }else if (match(Token::FALSE)){
-        return new BoolExp(0);
+    if (match(Token::ID)) {
+        string texto = previous->text;
+        if(match(Token::PI)) {
+            FunctionCallExp* f;
+            f->name = texto;
+            if(match(Token::PD)) {
+                return f;
+            }
+            else {
+                do {
+                    f->add(parseAExp());
+                } while (match(Token::COMMA));
+                if(!match(Token::PD)) {
+                    errorHandler.expect(Token::PD, current->text);
+                }
+                return f;
+            }
+        }
+        return new IdentifierExp(texto);
     }
     else if (match(Token::NUM)) {
         return new NumberExp(stoi(previous->text));
     }
-    else if (match(Token::ID)) {
-        string texto = previous->text;
-        return new IdentifierExp(previous->text);
+    else if (match(Token::TRUE)) {
+        return new BoolExp(1);
     }
-    else if (match(Token::PI)){
-        e = parseCExp();
-        if (!match(Token::PD)){
-            cout << "Falta paréntesis derecho" << endl;
-            exit(0);
+    else if (match(Token::FALSE)) {
+        return new BoolExp(0);
+    }
+    else if (match(Token::PI)) {
+        e = parseAExp();
+        if (!match(Token::PD)) {
+            errorHandler.expect(Token::PD, current->text);
         }
         return e;
+    }
+    else if (match(Token::IF)) {
+        Exp* e1 = parseAExp();
+        if (!match(Token::LI)) {
+            errorHandler.expect(Token::LI, current->text);
+        }
+        Exp* e2 = parseAExp();
+        if (!match(Token::LD)) {
+            errorHandler.expect(Token::LD, current->text);
+        }
+        if (!match(Token::ELSE)) {
+            errorHandler.expect(Token::ELSE, current->text);
+        }
+        if (!match(Token::LI)) {
+            errorHandler.expect(Token::LI, current->text);
+        }
+        Exp* e3 = parseAExp();
+        if (!match(Token::LD)) {
+            errorHandler.expect(Token::LD, current->text);
+        }
+        return new IfExp(e1, e2, e3);
     }
     cout << "Error: se esperaba un número o identificador." << endl;
     exit(0);

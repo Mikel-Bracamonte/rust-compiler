@@ -36,6 +36,14 @@ public:
         throw std::runtime_error(oss.str());
     }
 
+    void expect(const Token& expected, std::string found) {
+        std::ostringstream oss;
+        oss << "[" << moduleName << "] Error: se esperaba: "
+            << expected << ", pero se encontró: "
+            << found;
+        throw std::runtime_error(oss.str());
+    }
+
     // Solo imprime un mensaje de error contextual y lanza excepción
     void error(const std::string& msg) const {
         std::ostringstream oss;

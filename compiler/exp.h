@@ -78,6 +78,7 @@ public:
     string name;
     list<Exp*> argList;
     FunctionCallExp();
+    void add(Exp* e);
     int accept(Visitor* visitor);
     ImpValue accept(ImpValueVisitor* v);
     ~FunctionCallExp();

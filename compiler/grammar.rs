@@ -14,11 +14,13 @@ StmtList ::= ( Stmt )*
 
 Stmt ::= id (= | += | -= | *= | /= | %=) AExp ; |
     println!("{}", AExp ) ; |
+    print!("{}", AExp ); |
     if AExp { Body } [ else { Body } ] |
     while AExp { Body } |
     for mut id in AExp..AExp { Body } |
     return [ AExp ] ;
 	let [ mut ] id : Type [ = AExp] ;
+    AExp; // a conversar
 
 AExp ::= BExp ((&& | ||) BExp)*
 
@@ -30,7 +32,7 @@ Exp ::= Term ((+ | -) Term)*
 
 Term ::= Factor ((*|/|%) Factor)*
 
-Factor ::= id | Num | Bool | ( AExp ) | if AExp {AExp} else {AExp} | id ( [ArgList] )
+Factor ::= [-] (id | Num | Bool | ( AExp ) | if AExp {AExp} else {AExp} | id ( [ArgList] ))
 
 ArgList ::= AExp (, AExp)*
 

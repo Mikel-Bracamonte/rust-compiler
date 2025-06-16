@@ -70,6 +70,7 @@ void Body::accept(ImpValueVisitor* visitor) {
 //////////////////////////////////////////////////////////////////////////////////
 
 void GenCodeVisitor::gencode(Program* p) {
+    /*
     env.clear();
     label_counter = 0;
     offset = 0;
@@ -86,76 +87,11 @@ void GenCodeVisitor::gencode(Program* p) {
     cout << "  leave" << endl;
     cout << "  ret" << endl;
     cout << ".section .note.GNU-stack,\"\",@progbits" << endl;
-}
-
-void GenCodeVisitor::visit(Body* b) {
-    env.add_level();
-    long old_offset = offset;
-    b->vardecs->accept(this);
-    long locals_size = -current_offset;
-    if (locals_size > 0)
-        cout << "  subq $" << locals_size << ", %rsp" << endl;
-
-    b->slist->accept(this);
-    current_offset = old_offset;
-    env.remove_level();
-}
-
-void GenCodeVisitor::visit(VarDec* vd) {
-    ImpVType tt = ImpValue::get_basic_type(vd->type);
-    for (const auto& var : vd->vars) {
-        ImpValue v;
-        v.set_default_value(tt);
-        env.add_var(var, v);
-        current_offset -= 8;
-        stack_offsets[var] = current_offset;
-    }
-}
-
-void GenCodeVisitor::visit(StatementList* s) {
-    for (auto it : s->stms) {
-        it->accept(this);
-    }
-}
-void GenCodeVisitor::visit(AssignStatement* s) {
-    ImpValue val = s->rhs->accept(this); 
-    cout << "  movq %rax, " << stack_offsets[s->id] << "(%rbp)" << endl;
-    env.update(s->id, val);  
-}
-
-void GenCodeVisitor::visit(PrintStatement* s) {
-    s->e->accept(this);
-    cout << "  movq %rax, %rsi" << endl;
-    cout << "  leaq print_fmt(%rip), %rdi" << endl;
-    cout << "  movl $0, %eax" << endl;
-    cout << "  call printf@PLT" << endl;
-}
-
-void GenCodeVisitor::visit(IfStatement* s) {
-    int lbl = etiquetas++;
-    s->condition->accept(this);
-    cout << "  cmpq $0, %rax" << endl;
-    cout << "  je else_" << lbl << endl;
-    s->then->accept(this);
-    cout << "  jmp endif_" << lbl << endl;
-    cout << "else_" << lbl << ":" << endl;
-    if (s->els) s->els->accept(this);
-    cout << "endif_" << lbl << ":" << endl;
-}
-
-void GenCodeVisitor::visit(WhileStatement* s) {
-    int lbl_cond = etiquetas++;
-    int lbl_end  = etiquetas++;
-    cout << "while_" << lbl_cond << ":" << endl;
-    s->condition->accept(this);
-    cout << "  testq %rax, %rax" << endl;
-    cout << "  je endwhile_" << lbl_end << endl;
-    s->b->accept(this);
-    cout << "  jmp while_" << lbl_cond << endl;
-    cout << "endwhile_" << lbl_end << ":" << endl;
+    */
 }
 
 ImpValue GenCodeVisitor::visit(BinaryExp* e) {
+    /*
     ImpValue result;
     e->left->accept(this);        
     cout << "  pushq %rax" << endl;
@@ -212,25 +148,34 @@ ImpValue GenCodeVisitor::visit(BinaryExp* e) {
     }
 
     return result;
+    */
+    return ImpValue();
 }
 
 ImpValue GenCodeVisitor::visit(NumberExp* e) {
+    /*
     ImpValue v;
     v.set_default_value(TINT);
     v.int_value = e->value;
     cout << "  movq $" << e->value << ", %rax" << endl;
     return v;
+    */
+    return ImpValue();
 }
 
 ImpValue GenCodeVisitor::visit(BoolExp* e) {
+    /*
     ImpValue v;
     v.set_default_value(TBOOL);
     v.bool_value = e->value;
     cout << "  movq $" << (e->value ? 1 : 0) << ", %rax" << endl;
     return v;
+    */
+    return ImpValue();
 }
 
 ImpValue GenCodeVisitor::visit(IdentifierExp* e) {
+    /*
     if (env.check(e->name)) {
         cout << "  movq " << stack_offsets[e->name] << "(%rbp), %rax" << endl;
         return env.lookup(e->name);
@@ -238,10 +183,119 @@ ImpValue GenCodeVisitor::visit(IdentifierExp* e) {
         cerr << "Error: variable " << e->name << " no declarada" << endl;
         exit(1);
     }
+    */
+    return ImpValue();
+}
+
+ImpValue GenCodeVisitor::visit(IfExp* e) {
+    return ImpValue();
+}
+
+ImpValue GenCodeVisitor::visit(FunctionCallExp* e) {
+    return ImpValue();
+}
+
+void GenCodeVisitor::visit(AssignStatement* s) {
+    /*
+    ImpValue val = s->rhs->accept(this); 
+    cout << "  movq %rax, " << stack_offsets[s->id] << "(%rbp)" << endl;
+    env.update(s->id, val);  
+    */
+}
+
+void GenCodeVisitor::visit(PrintStatement* s) {
+    /*
+    s->e->accept(this);
+    cout << "  movq %rax, %rsi" << endl;
+    cout << "  leaq print_fmt(%rip), %rdi" << endl;
+    cout << "  movl $0, %eax" << endl;
+    cout << "  call printf@PLT" << endl;
+    */
+}
+
+void GenCodeVisitor::visit(IfStatement* s) {
+    /*
+    int lbl = etiquetas++;
+    s->condition->accept(this);
+    cout << "  cmpq $0, %rax" << endl;
+    cout << "  je else_" << lbl << endl;
+    s->then->accept(this);
+    cout << "  jmp endif_" << lbl << endl;
+    cout << "else_" << lbl << ":" << endl;
+    if (s->els) s->els->accept(this);
+    cout << "endif_" << lbl << ":" << endl;
+    */
+}
+
+void GenCodeVisitor::visit(WhileStatement* s) {
+    /*
+    int lbl_cond = etiquetas++;
+    int lbl_end  = etiquetas++;
+    cout << "while_" << lbl_cond << ":" << endl;
+    s->condition->accept(this);
+    cout << "  testq %rax, %rax" << endl;
+    cout << "  je endwhile_" << lbl_end << endl;
+    s->b->accept(this);
+    cout << "  jmp while_" << lbl_cond << endl;
+    cout << "endwhile_" << lbl_end << ":" << endl;
+    */
+}
+
+void GenCodeVisitor::visit(ForStatement* s) {
+    
+}
+
+void GenCodeVisitor::visit(ReturnStatement* s) {
+    
+}
+
+void GenCodeVisitor::visit(VarDec* vd) {
+    /*
+    ImpVType tt = ImpValue::get_basic_type(vd->type);
+    for (const auto& var : vd->vars) {
+        ImpValue v;
+        v.set_default_value(tt);
+        env.add_var(var, v);
+        current_offset -= 8;
+        stack_offsets[var] = current_offset;
+    }
+    */
+}
+
+void GenCodeVisitor::visit(ParamDec* vd) {
+
+}
+
+void GenCodeVisitor::visit(FunDec* vd) {
+
+}
+
+void GenCodeVisitor::visit(StatementList* s) {
+    /*
+    for (auto it : s->stms) {
+        it->accept(this);
+    }
+    */
+}
+
+void GenCodeVisitor::visit(Body* b) {
+    /*
+    env.add_level();
+    long old_offset = offset;
+    b->vardecs->accept(this);
+    long locals_size = -current_offset;
+    if (locals_size > 0)
+        cout << "  subq $" << locals_size << ", %rsp" << endl;
+
+    b->slist->accept(this);
+    current_offset = old_offset;
+    env.remove_level();
+    */
 }
 
 ////////////////////////////////////////////////////
 
 void CheckVisitor::check(Program* p) {
-    
+    /*
+    */
 }

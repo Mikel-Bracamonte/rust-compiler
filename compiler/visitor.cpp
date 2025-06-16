@@ -194,7 +194,7 @@ void PrintVisitor::visit(ReturnStatement* stm){
 
 void PrintVisitor::visit(VarDec* stm){
     cout << get_spaces() << "let ";
-    if(stm->mut) {
+    if(stm->isMut) {
         cout << "mut ";
     }
     cout << stm->name << " = ";

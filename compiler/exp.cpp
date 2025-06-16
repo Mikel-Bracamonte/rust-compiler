@@ -153,12 +153,12 @@ string Exp::binOpToChar(BinaryOp op) {
 string Exp::assignOpToChar(AssignOp op) {
     string  c;
     switch(op) {
-        case AssignOp::PLUS_OP: c = "+="; break;
-        case AssignOp::MINUS_OP: c = "-="; break;
-        case AssignOp::MUL_OP: c = "*="; break;
-        case AssignOp::DIV_OP: c = "/="; break;
-        case AssignOp::MOD_OP: c = "%="; break;
-        case AssignOp::ASSIGN_OP: c = "="; break;
+        case AssignOp::AS_PLUS_OP: c = "+="; break;
+        case AssignOp::AS_MINUS_OP: c = "-="; break;
+        case AssignOp::AS_MUL_OP: c = "*="; break;
+        case AssignOp::AS_DIV_OP: c = "/="; break;
+        case AssignOp::AS_MOD_OP: c = "%="; break;
+        case AssignOp::AS_ASSIGN_OP: c = "="; break;
         default: c = "$";
     }
     return c;

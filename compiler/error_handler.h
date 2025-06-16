@@ -13,8 +13,7 @@ private:
 
 public:
     ErrorHandler() {}
-    ErrorHandler(const std::string& name)
-        : moduleName(name) {}
+    ErrorHandler(std::string name) : moduleName(name) {}
 
     // Muestra y lanza error si el token actual no es el esperado
     void expect(const Token& expected, const Token& bef, const Token& found) {

@@ -2,6 +2,25 @@
 #define VISITOR_H
 #include "exp.h"
 
+class BinaryExp;
+class NumberExp;
+class BoolExp;
+class IdentifierExp;
+class IfExp;
+class FunctionCallExp;
+class AssignStatement;
+class PrintStatement;
+class IfStatement;
+class WhileStatement;
+class ForStatement;
+class ReturnStatement;
+class VarDec;
+class ParamDec;
+class FunDec;
+class StatementList;
+class Body;
+class Program;
+
 class Visitor {
 public:
     virtual int visit(BinaryExp* exp) = 0;

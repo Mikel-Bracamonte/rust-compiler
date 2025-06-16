@@ -9,7 +9,7 @@ using namespace std;
 
 enum BinaryOp { PLUS_OP, MINUS_OP, MUL_OP, DIV_OP, LT_OP, LE_OP, EQ_OP, GT_OP, GE_OP, NEQ_OP, MOD_OP };
 
-enum AssignOp { PLUS_OP, MINUS_OP, MUL_OP, DIV_OP, MOD_OP, ASSIGN_OP };
+enum AssignOp { AS_PLUS_OP, AS_MINUS_OP, AS_MUL_OP, AS_DIV_OP, AS_MOD_OP, AS_ASSIGN_OP };
 
 class Body;
 
@@ -56,7 +56,7 @@ public:
 class IdentifierExp : public Exp {
 public:
     string name;
-    IdentifierExp(const string& n);
+    IdentifierExp(string n);
     int accept(Visitor* visitor);
     ImpValue accept(ImpValueVisitor* v);
     ~IdentifierExp();
@@ -99,7 +99,7 @@ public:
     string name;
     Exp* right;
     AssignOp op;
-    AssignStatement(const string& n, Exp* r, AssignOp o);
+    AssignStatement(string n, Exp* r, AssignOp o);
     int accept(Visitor* visitor);
     void accept(ImpValueVisitor* v);
     ~AssignStatement();

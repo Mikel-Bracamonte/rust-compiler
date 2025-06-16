@@ -7,7 +7,6 @@
 
 class Parser {
 private:
-    ErrorHandler error_handler;
     Scanner* scanner;
     Token *current, *previous;
     bool match(Token::Type ttype);
@@ -15,6 +14,7 @@ private:
     bool advance();
     bool isAtEnd();
 public:
+    ErrorHandler errorHandler;
     Parser(Scanner* scanner);
     Program* parseProgram();
     FunDec* parseFunDec();

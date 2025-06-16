@@ -51,16 +51,18 @@ Parser::Parser(Scanner* sc):scanner(sc) {
 
 // parse funcs
 Program* Parser::parseProgram() {
-    //Body* v = parseBody();
-    return new Program(v);
+    Program* p = NULL;
+    return p;
 }
 
 FunDec* Parser::parseFunDec() {
-
+    FunDec* e = NULL;
+    return e;
 }
 
 ParamDec* Parser::parseParamDec() {
-
+    ParamDec* e = NULL;
+    return e;
 }
 
 // check '}'
@@ -82,8 +84,9 @@ StatementList* Parser::parseStatementList() {
 
 // do again all
 Stm* Parser::parseStatement() {
-    /*
+    
     Stm* s = NULL;
+    /*
     Exp* e = NULL;
     Body* tb = NULL; //true case
     Body* fb = NULL; //false case
@@ -150,15 +153,20 @@ Stm* Parser::parseStatement() {
         cout << "Error: Se esperaba un identificador o 'print', pero se encontró: " << *current << endl;
         exit(1);
     }
-    return s;*/
+    */
+    return s;
 }
 
 Exp* Parser::parseAExp(){
     // TODO 
+    Exp* e = NULL;
+    return e;
 }
 
 Exp* Parser::parseBExp(){
     // TODO 
+    Exp* e = NULL;
+    return e;
 }
 
 Exp* Parser::parseCExp(){
@@ -178,7 +186,8 @@ Exp* Parser::parseCExp(){
         Exp* right = parseExpression();
         left = new BinaryExp(left, right, op);
     }*/
-    return left;
+    Exp* e = NULL;
+    return e;
 }
 
 // checked!

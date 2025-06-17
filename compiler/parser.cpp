@@ -157,22 +157,35 @@ Stm* Parser::parseStatement() {
     return s;
 }
 
+// make sense: a && b || c && d?
 Exp* Parser::parseAExp(){
-    // TODO 
-    Exp* e = NULL;
-    return e;
+    Exp* left = parseBExp();
+    while (match(Token::AND) || match(Token::OR)) {
+        BinaryOp op;
+        if (previous->type == Token::AND){
+            op = AND_OP;
+        }
+        else if (previous->type == Token::OR){
+            op = OR_OP;
+        }
+        Exp* right = parseBExp();
+        left = new BinaryExp(left, right, op);
+    }
+    return left;
 }
 
+//check!
 Exp* Parser::parseBExp(){
-    // TODO 
-    Exp* e = NULL;
-    return e;
+    if (match(Token::NOT)){
+        return new UnaryExp(parseCExp(), UnaryOp::U_NOT_OP);
+    }
+    return parseCExp();
 }
 
+//check!
 Exp* Parser::parseCExp(){
-    /*
     Exp* left = parseExpression();
-    if (match(Token::LT) || match(Token::LE) || match(Token::EQ)){
+    if (match(Token::LT) || match(Token::LE) || match(Token::GT) || match(Token::GE) || match(Token::EQ) || match(Token::NEQ)){
         BinaryOp op;
         if (previous->type == Token::LT){
             op = LT_OP;
@@ -180,14 +193,22 @@ Exp* Parser::parseCExp(){
         else if (previous->type == Token::LE){
             op = LE_OP;
         }
+        else if (previous->type == Token::GT){
+            op = GT_OP;
+        }
+        else if (previous->type == Token::GE){
+            op = GE_OP;
+        }
         else if (previous->type == Token::EQ){
             op = EQ_OP;
         }
+        else if (previous->type == Token::NEQ){
+            op = NEQ_OP;
+        }
         Exp* right = parseExpression();
         left = new BinaryExp(left, right, op);
-    }*/
-    Exp* e = NULL;
-    return e;
+    }
+    return left;
 }
 
 // checked!
@@ -265,6 +286,7 @@ Exp* Parser::parseFactor() {
     }
     else if (match(Token::PI)) {
         e = parseAExp();
+        e->hasParenthesis = true;
         if (!match(Token::PD)) {
             errorHandler.expect(Token::PD, current->text);
         }

@@ -39,7 +39,7 @@ int main(int argc, const char* argv[]) {
     cout << "Iniciando parsing:" << endl;
     Parser parser(&scanner); 
     try {
-        Exp* exp = parser.parseFactor();
+        Exp* exp = parser.parseAExp();
         cout << "Parsing exitoso" << endl << endl;
         cout << "Iniciando Visitor:" << endl;
         PrintVisitor* printVisitor = new PrintVisitor();

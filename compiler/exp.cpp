@@ -150,6 +150,8 @@ string Exp::binOpToChar(BinaryOp op) {
         case BinaryOp::GE_OP: c = ">="; break;
         case BinaryOp::NEQ_OP: c = "!="; break;
         case BinaryOp::MOD_OP: c = "%"; break;
+        case BinaryOp::AND_OP: c = "&&"; break;
+        case BinaryOp::OR_OP: c = "||"; break;
         default: c = "$";
     }
     return c;
@@ -173,7 +175,7 @@ string Exp::unaryOpToChar(UnaryOp op) {
     string c;
     switch(op) {
         case UnaryOp::U_NEG_OP: c = "-"; break;
-        case UnaryOp::U_OPPOSITE_OP: c = "!"; break;
+        case UnaryOp::U_NOT_OP: c = "!"; break;
         default: c = "$";
     }
     return c;

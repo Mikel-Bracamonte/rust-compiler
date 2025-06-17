@@ -8,6 +8,10 @@ int BinaryExp::accept(Visitor* visitor) {
     return visitor->visit(this);
 }
 
+int UnaryExp::accept(Visitor* visitor) {
+    return visitor->visit(this);
+}
+
 int NumberExp::accept(Visitor* visitor) {
     return visitor->visit(this);
 }
@@ -89,29 +93,46 @@ string PrintVisitor::get_spaces() {
 }
 
 int PrintVisitor::visit(BinaryExp* exp) {
+    if(exp->hasParenthesis) cout << "(";
     exp->left->accept(this);
     cout << " " << Exp::binOpToChar(exp->op) << " ";
     exp->right->accept(this);
+    if(exp->hasParenthesis) cout << ")";
+    return 0;
+}
+
+int PrintVisitor::visit(UnaryExp* exp) {
+    if(exp->hasParenthesis) cout << "(";
+    cout << Exp::unaryOpToChar(exp->op);
+    exp->exp->accept(this);
+    if(exp->hasParenthesis) cout << ")";
     return 0;
 }
 
 int PrintVisitor::visit(NumberExp* exp) {
+    if(exp->hasParenthesis) cout << "(";
     cout << exp->value;
+    if(exp->hasParenthesis) cout << ")";
     return 0;
 }
 
 int PrintVisitor::visit(BoolExp* exp) {
+    if(exp->hasParenthesis) cout << "(";
     if(exp->value) cout << "true";
     else cout << "false";
+    if(exp->hasParenthesis) cout << ")";
     return 0;
 }
 
 int PrintVisitor::visit(IdentifierExp* exp) {
+    if(exp->hasParenthesis) cout << "(";
     cout << exp->name;
+    if(exp->hasParenthesis) cout << ")";
     return 0;
 }
 
 int PrintVisitor::visit(IfExp* exp) {
+    if(exp->hasParenthesis) cout << "(";
     cout << "if ";
     exp->condition->accept(this);
     cout << " { ";
@@ -119,10 +140,12 @@ int PrintVisitor::visit(IfExp* exp) {
     cout << " } else { ";
     exp->els->accept(this);
     cout << " }";
+    if(exp->hasParenthesis) cout << ")";
     return 0;
 }
 
 int PrintVisitor::visit(FunctionCallExp* exp) {
+    if(exp->hasParenthesis) cout << "(";
     cout << exp->name;
     cout << "(";
     for(auto it = exp->argList.begin(); it != exp->argList.end(); ++it) {
@@ -131,7 +154,8 @@ int PrintVisitor::visit(FunctionCallExp* exp) {
             cout << ", ";
         }
     }
-    cout << ");";
+    cout << ")";
+    if(exp->hasParenthesis) cout << ")";
     return 0;
 }
 

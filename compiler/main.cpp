@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include "scanner.h"
-//#include "parser.h"
+#include "parser.h"
 //#include "visitor.h"
 //#include "gencode.h"
 //#include "imp_type.h"
@@ -34,29 +34,29 @@ int main(int argc, const char* argv[]) {
     Scanner scanner_test(input_copy.c_str());
     test_scanner(&scanner_test);
     cout << "Scanner exitoso" << endl;
-    /*
+    
     cout << endl;
     cout << "Iniciando parsing:" << endl;
     Parser parser(&scanner); 
     try {
-        Program* program = parser.parseProgram();
+        Exp* exp = parser.parseAExp();
         cout << "Parsing exitoso" << endl << endl;
         cout << "Iniciando Visitor:" << endl;
-        PrintVisitor printVisitor;
-        ImpCODE interpreter;
+        PrintVisitor* printVisitor = new PrintVisitor();
+        //ImpCODE interpreter;
         cout << endl;
         cout << "IMPRIMIR:" << endl;
-        printVisitor.imprimir(program);
-        cout  << endl;
-        cout << endl << "Run program:" << endl;
-        interpreter.interpret(program);
-        cout << "End of program execution" << endl;
-        delete program;
+        exp->accept(printVisitor);
+        //cout  << endl;
+        //cout << endl << "Run program:" << endl;
+        //interpreter.interpret(program);
+        //cout << "End of program execution" << endl;
+        delete exp;
     } catch (const exception& e) {
         cout << "Error durante la ejecución: " << e.what() << endl;
         return 1;
     }
-    */
+    
 
     return 0;
 }

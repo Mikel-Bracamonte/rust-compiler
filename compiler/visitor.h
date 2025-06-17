@@ -3,6 +3,7 @@
 #include "exp.h"
 
 class BinaryExp;
+class UnaryExp;
 class NumberExp;
 class BoolExp;
 class IdentifierExp;
@@ -24,6 +25,7 @@ class Program;
 class Visitor {
 public:
     virtual int visit(BinaryExp* exp) = 0;
+    virtual int visit(UnaryExp* exp) = 0;
     virtual int visit(NumberExp* exp) = 0;
     virtual int visit(BoolExp* exp) = 0;
     virtual int visit(IdentifierExp* exp) = 0;
@@ -49,6 +51,7 @@ private:
 public:
     void print(Program* p);
     int visit(BinaryExp* exp) override;
+    int visit(UnaryExp* exp) override;
     int visit(NumberExp* exp) override;
     int visit(BoolExp* exp) override;
     int visit(IdentifierExp* exp) override;

@@ -4,6 +4,10 @@ ImpValue BinaryExp::accept(ImpValueVisitor* visitor) {
     return visitor->visit(this);
 }
 
+ImpValue UnaryExp::accept(ImpValueVisitor* visitor) {
+    return visitor->visit(this);
+}
+
 ImpValue NumberExp::accept(ImpValueVisitor* visitor) {
     return visitor->visit(this);
 }
@@ -149,6 +153,10 @@ ImpValue GenCodeVisitor::visit(BinaryExp* e) {
 
     return result;
     */
+    return ImpValue();
+}
+
+ImpValue GenCodeVisitor::visit(UnaryExp* e) {
     return ImpValue();
 }
 

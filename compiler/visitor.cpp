@@ -141,7 +141,7 @@ int PrintVisitor::visit(FunctionCallExp* exp) {
             cout << ", ";
         }
     }
-    cout << ");";
+    cout << ")";
     return 0;
 }
 

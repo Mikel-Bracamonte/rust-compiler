@@ -225,16 +225,22 @@ Exp* Parser::parseTerm() {
     return left;
 }
 
-// IfExp, FunctionCallExp
+// check!
 Exp* Parser::parseFactor() {
-    Exp* e;
+    Exp* e = NULL;
+    bool isUnary = false;
+    UnaryOp op;
+    if (match(Token::MINUS)) {
+        isUnary = true;
+        op = U_NEG_OP;
+    }
     if (match(Token::ID)) {
         string texto = previous->text;
         if(match(Token::PI)) {
-            FunctionCallExp* f;
+            FunctionCallExp* f = new FunctionCallExp();
             f->name = texto;
             if(match(Token::PD)) {
-                return f;
+                e = f;
             }
             else {
                 do {
@@ -243,26 +249,25 @@ Exp* Parser::parseFactor() {
                 if(!match(Token::PD)) {
                     errorHandler.expect(Token::PD, current->text);
                 }
-                return f;
+                e = f;
             }
         }
-        return new IdentifierExp(texto);
+        else e = new IdentifierExp(texto);
     }
     else if (match(Token::NUM)) {
-        return new NumberExp(stoi(previous->text));
+        e = new NumberExp(stoi(previous->text));
     }
     else if (match(Token::TRUE)) {
-        return new BoolExp(1);
+        e = new BoolExp(1);
     }
     else if (match(Token::FALSE)) {
-        return new BoolExp(0);
+        e = new BoolExp(0);
     }
     else if (match(Token::PI)) {
         e = parseAExp();
         if (!match(Token::PD)) {
             errorHandler.expect(Token::PD, current->text);
         }
-        return e;
     }
     else if (match(Token::IF)) {
         Exp* e1 = parseAExp();
@@ -274,17 +279,24 @@ Exp* Parser::parseFactor() {
             errorHandler.expect(Token::LD, current->text);
         }
         if (!match(Token::ELSE)) {
-            errorHandler.expect(Token::ELSE, current->text);
+            errorHandler.expect(Token::ELSE, Token::LD, current->text);
         }
         if (!match(Token::LI)) {
-            errorHandler.expect(Token::LI, current->text);
+            errorHandler.expect(Token::LI, Token::ELSE, current->text);
         }
         Exp* e3 = parseAExp();
         if (!match(Token::LD)) {
             errorHandler.expect(Token::LD, current->text);
         }
-        return new IfExp(e1, e2, e3);
+        e = new IfExp(e1, e2, e3);
     }
-    cout << "Error: se esperaba un número o identificador." << endl;
-    exit(0);
+    if (e == NULL) {
+        errorHandler.error("Se esperaba un número o identificador.");
+    }
+    if(isUnary){
+        return new UnaryExp(e, op);
+    }
+    else {
+        return e;
+    }
 }

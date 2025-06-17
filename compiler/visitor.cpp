@@ -8,6 +8,10 @@ int BinaryExp::accept(Visitor* visitor) {
     return visitor->visit(this);
 }
 
+int UnaryExp::accept(Visitor* visitor) {
+    return visitor->visit(this);
+}
+
 int NumberExp::accept(Visitor* visitor) {
     return visitor->visit(this);
 }
@@ -92,6 +96,12 @@ int PrintVisitor::visit(BinaryExp* exp) {
     exp->left->accept(this);
     cout << " " << Exp::binOpToChar(exp->op) << " ";
     exp->right->accept(this);
+    return 0;
+}
+
+int PrintVisitor::visit(UnaryExp* exp) {
+    cout << " " << Exp::unaryOpToChar(exp->op);
+    exp->exp->accept(this);
     return 0;
 }
 

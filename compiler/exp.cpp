@@ -7,6 +7,9 @@ Exp::~Exp() {}
 BinaryExp::BinaryExp(Exp* l, Exp* r, BinaryOp op):left(l),right(r),op(op) {}
 BinaryExp::~BinaryExp() { delete left; delete right; }
 
+UnaryExp::UnaryExp(Exp* e, UnaryOp o):exp(e),op(o) {}
+UnaryExp::~UnaryExp() { delete exp; }
+
 NumberExp::NumberExp(int v):value(v) {}
 NumberExp::~NumberExp() { }
 
@@ -161,6 +164,16 @@ string Exp::assignOpToChar(AssignOp op) {
         case AssignOp::AS_DIV_OP: c = "/="; break;
         case AssignOp::AS_MOD_OP: c = "%="; break;
         case AssignOp::AS_ASSIGN_OP: c = "="; break;
+        default: c = "$";
+    }
+    return c;
+}
+
+string Exp::unaryOpToChar(UnaryOp op) {
+    string c;
+    switch(op) {
+        case UnaryOp::U_NEG_OP: c = "-"; break;
+        case UnaryOp::U_OPPOSITE_OP: c = "!"; break;
         default: c = "$";
     }
     return c;

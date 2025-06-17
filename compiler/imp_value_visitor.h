@@ -7,6 +7,7 @@
 class ImpValueVisitor {
 public:
     virtual ImpValue visit(BinaryExp* exp) = 0;
+    virtual ImpValue visit(UnaryExp* exp) = 0;
     virtual ImpValue visit(NumberExp* exp) = 0;
     virtual ImpValue visit(BoolExp* exp) = 0;
     virtual ImpValue visit(IdentifierExp* exp) = 0;

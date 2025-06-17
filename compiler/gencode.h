@@ -19,6 +19,7 @@ private:
 public:
     void gencode(Program* p);
     ImpValue visit(BinaryExp* exp) override;
+    ImpValue visit(UnaryExp* exp) override;
     ImpValue visit(NumberExp* exp) override;
     ImpValue visit(BoolExp* exp) override;
     ImpValue visit(IdentifierExp* exp) override;
@@ -37,11 +38,12 @@ public:
     void visit(Body* b) override;
 };
 
-class CheckVisitor : ImpValueVisitor {
+class CheckVisitor : public ImpValueVisitor {
 private:
     Environment<ImpValue> env;
 public:
     ImpValue visit(BinaryExp* exp) override;
+    ImpValue visit(UnaryExp* exp) override;
     ImpValue visit(NumberExp* exp) override;
     ImpValue visit(BoolExp* exp) override;
     ImpValue visit(IdentifierExp* exp) override;

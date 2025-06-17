@@ -211,7 +211,7 @@ Exp* Parser::parseCExp(){
     return left;
 }
 
-// checked!
+//check!
 Exp* Parser::parseExpression() {
     Exp* left = parseTerm();
     while (match(Token::PLUS) || match(Token::MINUS)) {
@@ -228,17 +228,19 @@ Exp* Parser::parseExpression() {
     return left;
 }
 
-// add %
-// check order, make sense: a % b % c * d / e?
+//check!
 Exp* Parser::parseTerm() {
     Exp* left = parseFactor();
-    while (match(Token::MUL) || match(Token::DIV)) {
+    while (match(Token::MUL) || match(Token::DIV) || match(Token::MOD)) {
         BinaryOp op;
         if (previous->type == Token::MUL){
             op = MUL_OP;
         }
         else if (previous->type == Token::DIV){
             op = DIV_OP;
+        }
+        else if (previous->type == Token::MOD){
+            op = MOD_OP;
         }
         Exp* right = parseFactor();
         left = new BinaryExp(left, right, op);

@@ -39,19 +39,19 @@ int main(int argc, const char* argv[]) {
     cout << "Iniciando parsing:" << endl;
     Parser parser(&scanner); 
     try {
-        Exp* exp = parser.parseAExp();
+        Program* program = parser.parseProgram();
         cout << "Parsing exitoso" << endl << endl;
         cout << "Iniciando Visitor:" << endl;
         PrintVisitor* printVisitor = new PrintVisitor();
         //ImpCODE interpreter;
         cout << endl;
         cout << "IMPRIMIR:" << endl;
-        exp->accept(printVisitor);
+        printVisitor->print(program);
         //cout  << endl;
         //cout << endl << "Run program:" << endl;
         //interpreter.interpret(program);
         //cout << "End of program execution" << endl;
-        delete exp;
+        delete program;
     } catch (const exception& e) {
         cout << "Error durante la ejecución: " << e.what() << endl;
         return 1;

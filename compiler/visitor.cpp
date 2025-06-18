@@ -67,6 +67,11 @@ int VarDec::accept(Visitor* visitor) {
     return 0;
 }
 
+int FunctionCallStatement::accept(Visitor* visitor) {
+    visitor->visit(this);
+    return 0;
+}
+
 int ParamDec::accept(Visitor* visitor) {
     visitor->visit(this);
     return 0;
@@ -224,6 +229,10 @@ void PrintVisitor::visit(VarDec* stm){
     cout << stm->name << " = ";
     stm->exp->accept(this);
     cout << ": " << stm->type << ";";
+}
+
+void PrintVisitor::visit(FunctionCallStatement* stm){
+
 }
 
 void PrintVisitor::visit(ParamDec* stm){

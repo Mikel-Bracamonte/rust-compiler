@@ -56,6 +56,10 @@ void VarDec::accept(ImpValueVisitor* visitor) {
     visitor->visit(this);
 }
 
+void FunctionCallStatement::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
+}
+
 void ParamDec::accept(ImpValueVisitor* visitor) {
     visitor->visit(this);
 }
@@ -268,6 +272,10 @@ void GenCodeVisitor::visit(VarDec* vd) {
         stack_offsets[var] = current_offset;
     }
     */
+}
+
+void GenCodeVisitor::visit(FunctionCallStatement* stm) {
+    
 }
 
 void GenCodeVisitor::visit(ParamDec* vd) {

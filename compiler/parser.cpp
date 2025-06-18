@@ -311,9 +311,8 @@ Stm* Parser::parseStatement() {
             errorHandler.expect(Token::PC, current->text);
         }
         return new VarDec(name, type, mut, exp);
-    } else {
-        return nullptr;
-    }
+    } 
+    return nullptr;
 }
 
 // make sense: a && b || c && d?

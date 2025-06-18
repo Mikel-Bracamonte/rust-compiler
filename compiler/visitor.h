@@ -16,6 +16,7 @@ class WhileStatement;
 class ForStatement;
 class ReturnStatement;
 class VarDec;
+class FunctionCallStatement;
 class ParamDec;
 class FunDec;
 class StatementList;
@@ -38,6 +39,7 @@ public:
     virtual void visit(ForStatement* stm) = 0;
     virtual void visit(ReturnStatement* stm) = 0;
     virtual void visit(VarDec* stm) = 0;
+    virtual void visit(FunctionCallStatement* stm) = 0;
     virtual void visit(ParamDec* stm) = 0;
     virtual void visit(FunDec* stm) = 0;
     virtual void visit(StatementList* stm) = 0;
@@ -63,6 +65,7 @@ public:
     void visit(WhileStatement* stm) override;
     void visit(ForStatement* stm) override;
     void visit(ReturnStatement* stm) override;
+    void visit(FunctionCallStatement* stm) override;
     void visit(VarDec* stm) override;
     void visit(ParamDec* stm) override;
     void visit(FunDec* stm) override;

@@ -20,6 +20,7 @@ public:
     virtual void visit(ForStatement* stm) = 0;
     virtual void visit(ReturnStatement* stm) = 0;
     virtual void visit(VarDec* stm) = 0;
+    virtual void visit(FunctionCallStatement* stm) = 0;
     virtual void visit(ParamDec* stm) = 0;
     virtual void visit(FunDec* stm) = 0;
     virtual void visit(StatementList* stm) = 0;

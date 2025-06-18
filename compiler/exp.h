@@ -123,7 +123,8 @@ public:
 class PrintStatement : public Stm {
 public:
     Exp* exp;
-    PrintStatement(Exp* e);
+    bool ln;
+    PrintStatement(Exp* e, bool l);
     int accept(Visitor* visitor);
     void accept(ImpValueVisitor* v);
     ~PrintStatement();
@@ -152,11 +153,12 @@ public:
 
 class ForStatement : public Stm {
 public:
+    bool mut;
     string name;
     Exp* start;
     Exp* end;
     Body* body;
-    ForStatement(string n, Exp* s, Exp* e, Body* b);
+    ForStatement(bool m, string n, Exp* s, Exp* e, Body* b);
     int accept(Visitor* visitor);
     void accept(ImpValueVisitor* v);
     ~ForStatement();
@@ -181,6 +183,17 @@ public:
     int accept(Visitor* visitor);
     void accept(ImpValueVisitor* v);
     ~VarDec();
+};
+
+class FunctionCallStatement : public Stm {
+public:
+    string name;
+    list<Exp*> argList;
+    FunctionCallStatement();
+    void add(Exp* e);
+    int accept(Visitor* visitor);
+    void accept(ImpValueVisitor* v);
+    ~FunctionCallStatement();
 };
 
 /////////////////////////////////////////

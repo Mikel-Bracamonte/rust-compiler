@@ -28,6 +28,7 @@ std::ostream& operator << ( std::ostream& outs, const Token & tok )
         case Token::END: outs << "TOKEN(END)"; break;
         case Token::ID: outs << "TOKEN(ID)"; break;
         case Token::PRINTLN: outs << "TOKEN(PRINTLN)"; break;
+        case Token::PRINT: outs << "TOKEN(PRINT)"; break;
         case Token::ASSIGN: outs << "TOKEN(ASSIGN)"; break;
         case Token::PC: outs << "TOKEN(PC)"; break;
         case Token::LT: outs << "TOKEN(LT)"; break;
@@ -41,6 +42,7 @@ std::ostream& operator << ( std::ostream& outs, const Token & tok )
         case Token::WHILE: outs << "TOKEN(WHILE)"; break;
         case Token::COMMA: outs << "TOKEN(COMMA)"; break;
         case Token::DOT: outs << "TOKEN(DOT)"; break;
+        case Token::DOTS: outs << "TOKEN(DOTS)"; break;
         case Token::LET: outs << "TOKEN(LET)"; break;
         case Token::MUT: outs << "TOKEN(MUT)"; break;
         case Token::FOR : outs << "TOKEN(FOR)"; break;

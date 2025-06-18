@@ -53,7 +53,7 @@ AssignStatement::~AssignStatement() {
     delete right;
 }
 
-PrintStatement::PrintStatement(Exp* e): exp(e) {}
+PrintStatement::PrintStatement(Exp* e, bool l): exp(e), ln(l) {}
 PrintStatement::~PrintStatement() {
     delete exp;
 }
@@ -71,7 +71,8 @@ WhileStatement::~WhileStatement() {
     delete body;
 }
 
-ForStatement::ForStatement(std::string n, Exp *s, Exp *e, Body *b) {
+ForStatement::ForStatement(bool m, std::string n, Exp *s, Exp *e, Body *b) {
+    mut = m;
     name = n;
     start = s;
     end = e;
@@ -98,6 +99,16 @@ VarDec::VarDec(std::string n, std::string t, bool m, Exp* e) {
 }
 VarDec::~VarDec() {
     delete exp;
+}
+
+FunctionCallStatement::FunctionCallStatement() {}
+void FunctionCallStatement::add(Exp* e) {
+    argList.push_back(e);
+}
+FunctionCallStatement::~FunctionCallStatement(){
+    for(auto i : argList){
+        delete i;
+    }
 }
 
 ////////////////////////////////////////////////////

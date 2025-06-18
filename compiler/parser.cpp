@@ -49,112 +49,271 @@ Parser::Parser(Scanner* sc):scanner(sc) {
     }
 }
 
-// parse funcs
+// check!
 Program* Parser::parseProgram() {
-    Program* p = NULL;
+    Program* p = new Program();
+    if(!match(Token::FN)) {
+        errorHandler.expect(Token::FN, current->text);
+    }
+    p->funs.push_back(parseFunDec());
+    while(match(Token::FN)) {
+        p->funs.push_front(parseFunDec());
+    }
     return p;
 }
 
+// check!
 FunDec* Parser::parseFunDec() {
-    FunDec* e = NULL;
+    FunDec* e = new FunDec();
+    if(!match(Token::ID)) {
+        errorHandler.expect(Token::ID, current->text);
+    }
+    e->name = previous->text;
+    if(!match(Token::PI)) {
+        errorHandler.expect(Token::PI, current->text);
+    }
+    if(!match(Token::PD)) {
+        e->params.push_back(parseParamDec());
+        while(match(Token::COMMA)) {
+            e->params.push_back(parseParamDec());
+        }
+        if(!match(Token::PD)) {
+            errorHandler.expect(Token::PD, current->text);
+        }
+    }
+    if(match(Token::ARROW)) {
+        if(!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text);
+        }
+        e->type = previous->text;
+    }
+    if(!match(Token::LI)) {
+        errorHandler.expect(Token::LI, current->text);
+    }
+    e->body = parseBody();
+    if(!match(Token::LD)) {
+        errorHandler.expect(Token::LD, current->text);
+    }
     return e;
 }
 
 ParamDec* Parser::parseParamDec() {
-    ParamDec* e = NULL;
-    return e;
+    if(!match(Token::ID)) {
+        errorHandler.expect(Token::ID, current->text);
+    }
+    string name = previous->text;
+    bool mut = false;
+    if(!match(Token::COLON)) {
+        errorHandler.expect(Token::COLON, current->text);
+    }
+    if(match(Token::MUT)) {
+        mut = true;
+    }
+    if(!match(Token::ID)) {
+        errorHandler.expect(Token::ID, current->text);
+    }
+    string type = previous->text;
+    return new ParamDec(name, type, mut);
 }
 
-// check '}'
+// check!
 Body* Parser::parseBody() {
     StatementList* sl = parseStatementList();
-    // assert (previous->token == Token::LD )
     return new Body(sl);
 }
 
-// while !match(Token::LD)
+// se ve bien
 StatementList* Parser::parseStatementList() {
     StatementList* sl = new StatementList();
-    sl->add(parseStatement());
-    while (match(Token::PC)) {
-        sl->add(parseStatement());
+    Stm* s = parseStatement();
+    if(!s) {
+        errorHandler.error("Expected statement");
+    }
+    sl->add(s);
+    s = parseStatement();
+    while(s) {
+        sl->add(s);
+        s = parseStatement();
     }
     return sl;
 }
 
-// do again all
+// check!
 Stm* Parser::parseStatement() {
-    
-    Stm* s = NULL;
-    /*
-    Exp* e = NULL;
-    Body* tb = NULL; //true case
-    Body* fb = NULL; //false case
-
-    if (current == NULL) {
-        cout << "Error: Token actual es NULL" << endl;
-        exit(1);
+    if(match(Token::ID)) {
+        string name = previous->text;
+        if(match(Token::PI)) {
+            FunctionCallStatement* stmt = new FunctionCallStatement();
+            stmt->name = name;
+            if(!match(Token::PD)) {
+                do {
+                    stmt->add(parseAExp());
+                } while (match(Token::COMMA));
+                if(!match(Token::PD)) {
+                    errorHandler.expect(Token::PD, current->text);
+                }
+            }
+            if(!match(Token::PC)) {
+                errorHandler.expect(Token::PC, current->text);
+            }
+            return stmt;
+        }
+        else if(match(Token::ASSIGN) || match(Token::PLUSASSIGN) || match(Token::MINUSASSIGN) || match(Token::MULASSIGN)
+        || match(Token::DIVASSIGN) || match(Token::MODASSIGN)) {
+            AssignOp op;
+            switch(previous->type) {
+                case Token::ASSIGN:
+                    op = AS_ASSIGN_OP;
+                    break;
+                case Token::PLUSASSIGN:
+                    op = AS_PLUS_OP;
+                    break;
+                case Token::MINUSASSIGN:
+                    op = AS_MINUS_OP;
+                    break;
+                case Token::MULASSIGN:
+                    op = AS_MUL_OP;
+                    break;
+                case Token::DIVASSIGN:
+                    op = AS_DIV_OP;
+                    break;
+                case Token::MODASSIGN:
+                    op = AS_MOD_OP;
+                    break;
+            }
+            Exp* exp = parseAExp();
+            if(!match(Token::PC)) {
+                errorHandler.expect(Token::PC, current->text);
+            }
+            return new AssignStatement(name, exp, op);
+        } else {
+            errorHandler.error("Expected assign");
+        }
+    } else if(match(Token::PRINTLN) || match(Token::PRINT)) {
+        bool ln = false;
+        if(previous->type == Token::PRINTLN) {
+            ln = true;
+        }
+        if(!match(Token::NOT)) {
+            errorHandler.expect(Token::NOT, current->text);
+        }
+        if(!match(Token::PI)) {
+            errorHandler.expect(Token::PI, current->text);
+        }
+        if(!match(Token::QUOTE)) {
+            errorHandler.expect(Token::QUOTE, current->text);
+        }
+        if(!match(Token::LI)) {
+            errorHandler.expect(Token::LI, current->text);
+        }
+        if(!match(Token::LD)) {
+            errorHandler.expect(Token::LD, current->text);
+        }
+        if(!match(Token::QUOTE)) {
+            errorHandler.expect(Token::QUOTE, current->text);
+        }
+        if(!match(Token::COMMA)) {
+            errorHandler.expect(Token::COMMA, current->text);
+        }
+        Exp* exp = parseAExp();
+        if(!match(Token::PD)) {
+            errorHandler.expect(Token::PD, current->text);
+        }
+        if(!match(Token::PC)) {
+            errorHandler.expect(Token::PC, current->text);
+        }
+        return new PrintStatement(exp, ln);
+    } else if(match(Token::IF)) {
+        Exp* condition = parseAExp();
+        if(!match(Token::LI)) {
+            errorHandler.expect(Token::LI, current->text);
+        }
+        Body* then = parseBody();
+        if(!match(Token::LD)) {
+            errorHandler.expect(Token::LD, current->text);
+        }
+        Body* els = nullptr;
+        if(match(Token::ELSE)) {
+            if(!match(Token::LI)) {
+                errorHandler.expect(Token::LI, current->text);
+            }
+            els = parseBody();
+            if(!match(Token::LD)) {
+                errorHandler.expect(Token::LD, current->text);
+            }
+        }
+        return new IfStatement(condition, then, els);
+    } else if(match(Token::WHILE)) {
+        Exp* condition = parseAExp();
+        if(!match(Token::LI)) {
+            errorHandler.expect(Token::LI, current->text);
+        }
+        Body* body = parseBody();
+        if(!match(Token::LD)) {
+            errorHandler.expect(Token::LD, current->text);
+        }
+        return new WhileStatement(condition, body);
+    } else if(match(Token::FOR)) {
+        bool mut = false;
+        if(match(Token::MUT)) {
+            mut = true;
+        }
+        if(!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text);
+        }
+        string name = previous->text;
+        if(!match(Token::IN)) {
+            errorHandler.expect(Token::IN, current->text);
+        }
+        Exp* start = parseAExp();
+        if(!match(Token::DOTS)) {
+            errorHandler.expect(Token::DOTS, current->text);
+        }
+        Exp* end = parseAExp();
+        if(!match(Token::LI)) {
+            errorHandler.expect(Token::LI, current->text);
+        }
+        Body* body = parseBody();
+        if(!match(Token::LD)) {
+            errorHandler.expect(Token::LD, current->text);
+        }
+        return new ForStatement(mut, name, start, end, body);
+    } else if(match(Token::RETURN)) {
+        Exp* exp = nullptr;
+        if(!match(Token::PC)) {
+            exp = parseAExp();
+            if(!match(Token::PC)) {
+                errorHandler.expect(Token::PC, current->text);
+            }
+        }
+        return new ReturnStatement(exp);
+    } else if(match(Token::LET)) {
+        bool mut = false;
+        if(match(Token::MUT)) {
+            mut = true;
+        }
+        if(!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text);
+        }
+        string name = previous->text;
+        if(!match(Token::COLON)) {
+            errorHandler.expect(Token::COLON, current->text);
+        }
+        if(!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text);
+        }
+        string type = previous->text;
+        Exp* exp = nullptr;
+        if(match(Token::ASSIGN)) {
+            exp = parseAExp();
+        }
+        if(!match(Token::PC)) {
+            errorHandler.expect(Token::PC, current->text);
+        }
+        return new VarDec(name, type, mut, exp);
+    } else {
+        return nullptr;
     }
-
-    if (match(Token::ID)) {
-        string lex = previous->text;
-
-        if (match(Token::ASSIGN)) {
-            e = parseCExp();
-            s = new AssignStatement(lex, e);
-        }
-
-    } else if (match(Token::PRINT)) {
-        if (!match(Token::PI)) {
-            cout << "Error: se esperaba un '(' después de 'print'." << endl;
-            exit(1);
-        }
-        e = parseCExp();
-        if (!match(Token::PD)) {
-            cout << "Error: se esperaba un ')' después de la expresión." << endl;
-            exit(1);
-        }
-        s = new PrintStatement(e);
-    }
-    else if (match(Token::IF)) {
-        e = parseCExp();
-        if (!match(Token::THEN)) {
-            cout << "Error: se esperaba 'then' después de la expresión." << endl;
-            exit(1);
-        }
-        
-        tb = parseBody();
-
-        if (match(Token::ELSE)) {
-            fb = parseBody();
-        }
-        if (!match(Token::ENDIF)) {
-            cout << "Error: se esperaba 'end' al final de la declaración." << endl;
-            exit(1);
-        }
-        s = new IfStatement(e, tb, fb);
-
-    }
-    else if (match(Token::WHILE)) {
-        e = parseCExp();
-        if (!match(Token::DO)) {
-            cout << "Error: se esperaba 'do' después de la expresión." << endl;
-            exit(1);
-        }
-        tb = parseBody();
-        if (!match(Token::ENDWHILE)) {
-            cout << "Error: se esperaba 'endwhile' al final de la declaración." << endl;
-            exit(1);
-        }
-        s = new WhileStatement(e, tb);
-
-    }
-    else {
-        cout << "Error: Se esperaba un identificador o 'print', pero se encontró: " << *current << endl;
-        exit(1);
-    }
-    */
-    return s;
 }
 
 // make sense: a && b || c && d?

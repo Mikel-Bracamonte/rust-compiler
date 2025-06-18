@@ -20,6 +20,7 @@ public:
         LI, // {
         ID, // string for ids
         PRINTLN, // println
+        PRINT, // print
         ASSIGN, // =
         PC, // ;
         LT, // <
@@ -33,6 +34,7 @@ public:
         WHILE, // while
         COMMA, // ,
         DOT, // .
+        DOTS, //..
         LET, // let
         MUT, // mut
         FOR, // for

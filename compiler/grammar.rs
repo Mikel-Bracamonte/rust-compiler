@@ -1,6 +1,6 @@
-Program ::= (FunDec)+
+Program ::= (fn FunDec)+
 
-FunDec ::= fn id ([ParamDecList]) [-> Type] { Body }
+FunDec ::= id ([ParamDecList]) [-> Type] { Body }
 
 ParamDecList ::= ParamDec (, ParamDec )*
 
@@ -13,14 +13,14 @@ Body ::= StmtList
 StmtList ::= ( Stmt )*
 
 Stmt ::= id (= | += | -= | *= | /= | %=) AExp ; |
+    id ( [ArgList] ) ; |
     println!("{}", AExp ) ; |
     print!("{}", AExp ); |
     if AExp { Body } [ else { Body } ] |
     while AExp { Body } |
-    for mut id in AExp..AExp { Body } |
+    for [ mut ] id in AExp..AExp { Body } |
     return [ AExp ] ;
 	let [ mut ] id : Type [ = AExp] ;
-    AExp; // a conversar
 
 AExp ::= BExp ((&& | ||) BExp)*
 

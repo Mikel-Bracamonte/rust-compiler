@@ -49,7 +49,7 @@ Parser::Parser(Scanner* sc):scanner(sc) {
     }
 }
 
-// parse funcs
+// check!
 Program* Parser::parseProgram() {
     Program* p = new Program();
     if(!match(Token::FN)) {
@@ -62,6 +62,7 @@ Program* Parser::parseProgram() {
     return p;
 }
 
+// check!
 FunDec* Parser::parseFunDec() {
     FunDec* e = new FunDec();
     if(!match(Token::ID)) {
@@ -102,6 +103,9 @@ ParamDec* Parser::parseParamDec() {
     }
     string name = previous->text;
     bool mut = false;
+    if(!match(Token::COLON)) {
+        errorHandler.expect(Token::COLON, current->text);
+    }
     if(match(Token::MUT)) {
         mut = true;
     }
@@ -112,14 +116,13 @@ ParamDec* Parser::parseParamDec() {
     return new ParamDec(name, type, mut);
 }
 
-// check '}'
+// check!
 Body* Parser::parseBody() {
     StatementList* sl = parseStatementList();
-    // assert (previous->token == Token::LD )
     return new Body(sl);
 }
 
-// while !match(Token::LD)
+// se ve bien
 StatementList* Parser::parseStatementList() {
     StatementList* sl = new StatementList();
     Stm* s = parseStatement();
@@ -135,7 +138,7 @@ StatementList* Parser::parseStatementList() {
     return sl;
 }
 
-// do again all
+// check!
 Stm* Parser::parseStatement() {
     if(match(Token::ID)) {
         string name = previous->text;
@@ -155,7 +158,7 @@ Stm* Parser::parseStatement() {
             }
             return stmt;
         }
-        if(match(Token::ASSIGN) || match(Token::PLUSASSIGN) || match(Token::MINUSASSIGN) || match(Token::MULASSIGN)
+        else if(match(Token::ASSIGN) || match(Token::PLUSASSIGN) || match(Token::MINUSASSIGN) || match(Token::MULASSIGN)
         || match(Token::DIVASSIGN) || match(Token::MODASSIGN)) {
             AssignOp op;
             switch(previous->type) {
@@ -251,12 +254,12 @@ Stm* Parser::parseStatement() {
         }
         return new WhileStatement(condition, body);
     } else if(match(Token::FOR)) {
-        if(!match(Token::ID)) {
-            errorHandler.expect(Token::ID, current->text);
-        }
         bool mut = false;
         if(match(Token::MUT)) {
             mut = true;
+        }
+        if(!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text);
         }
         string name = previous->text;
         if(!match(Token::IN)) {

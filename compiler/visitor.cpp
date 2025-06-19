@@ -226,9 +226,9 @@ void PrintVisitor::visit(VarDec* stm){
     if(stm->isMut) {
         cout << "mut ";
     }
-    cout << stm->name << " = ";
+    cout << stm->name << ": " << stm->type<<" = ";
     stm->exp->accept(this);
-    cout << ": " << stm->type << ";";
+    cout<< ";";
 }
 
 void PrintVisitor::visit(FunctionCallStatement* stm){

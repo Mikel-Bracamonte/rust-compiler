@@ -226,8 +226,11 @@ void PrintVisitor::visit(VarDec* stm){
     if(stm->isMut) {
         cout << "mut ";
     }
-    cout << stm->name << ": " << stm->type<<" = ";
-    stm->exp->accept(this);
+    cout << stm->name << ": " << stm->type;
+    if(stm->exp != nullptr){
+        cout <<" = ";
+        stm->exp->accept(this);
+    }
     cout<< ";";
 }
 

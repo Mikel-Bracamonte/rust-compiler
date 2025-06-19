@@ -94,7 +94,7 @@ int Body::accept(Visitor* visitor) {
 ///////////////////////////////////////////////////////////////////////////////////
 
 string PrintVisitor::get_spaces() {
-    return string(' ', offset*4);
+    return string(4 * offset, ' ');
 }
 
 int PrintVisitor::visit(BinaryExp* exp) {
@@ -226,9 +226,12 @@ void PrintVisitor::visit(VarDec* stm){
     if(stm->isMut) {
         cout << "mut ";
     }
-    cout << stm->name << " = ";
-    stm->exp->accept(this);
-    cout << ": " << stm->type << ";";
+    cout << stm->name << ": " << stm->type;
+    if(stm->exp != nullptr){
+        cout <<" = ";
+        stm->exp->accept(this);
+    }
+    cout<< ";";
 }
 
 void PrintVisitor::visit(FunctionCallStatement* stm){
@@ -249,11 +252,12 @@ void PrintVisitor::visit(FunDec* stm){
             cout << ", ";
         }
     }
+    cout << ")";
     cout << "{" << endl;
     ++offset;
     stm->body->accept(this);
     --offset;
-    cout << get_spaces() << "}";
+    cout << get_spaces() << "}" << endl;
 }
 
 void PrintVisitor::visit(StatementList* stm){

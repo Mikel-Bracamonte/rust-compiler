@@ -48,7 +48,7 @@ public:
 
 class PrintVisitor : public Visitor {
 private:
-    int offset;
+    int offset = 0;
     string get_spaces();
 public:
     void print(Program* p);

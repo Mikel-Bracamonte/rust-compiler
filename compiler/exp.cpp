@@ -7,6 +7,9 @@ Exp::~Exp() {}
 BinaryExp::BinaryExp(Exp* l, Exp* r, BinaryOp op):left(l),right(r),op(op) {}
 BinaryExp::~BinaryExp() { delete left; delete right; }
 
+UnaryExp::UnaryExp(Exp* e, UnaryOp o):exp(e),op(o) {}
+UnaryExp::~UnaryExp() { delete exp; }
+
 NumberExp::NumberExp(int v):value(v) {}
 NumberExp::~NumberExp() { }
 
@@ -28,6 +31,9 @@ IfExp::~IfExp() {
 }
 
 FunctionCallExp::FunctionCallExp() {}
+void FunctionCallExp::add(Exp* e) {
+    argList.push_back(e);
+}
 FunctionCallExp::~FunctionCallExp(){
     for(auto i : argList){
         delete i;
@@ -47,7 +53,7 @@ AssignStatement::~AssignStatement() {
     delete right;
 }
 
-PrintStatement::PrintStatement(Exp* e): exp(e) {}
+PrintStatement::PrintStatement(Exp* e, bool l): exp(e), ln(l) {}
 PrintStatement::~PrintStatement() {
     delete exp;
 }
@@ -65,7 +71,8 @@ WhileStatement::~WhileStatement() {
     delete body;
 }
 
-ForStatement::ForStatement(std::string n, Exp *s, Exp *e, Body *b) {
+ForStatement::ForStatement(bool m, std::string n, Exp *s, Exp *e, Body *b) {
+    mut = m;
     name = n;
     start = s;
     end = e;
@@ -94,6 +101,16 @@ VarDec::~VarDec() {
     delete exp;
 }
 
+FunctionCallStatement::FunctionCallStatement() {}
+void FunctionCallStatement::add(Exp* e) {
+    argList.push_back(e);
+}
+FunctionCallStatement::~FunctionCallStatement(){
+    for(auto i : argList){
+        delete i;
+    }
+}
+
 ////////////////////////////////////////////////////
 
 ParamDec::ParamDec(std::string n, std::string t, bool m) {
@@ -104,7 +121,6 @@ ParamDec::ParamDec(std::string n, std::string t, bool m) {
 ParamDec::~ParamDec() {}
 
 FunDec::FunDec() {}
-
 FunDec::~FunDec() {
     delete body;
 }
@@ -145,6 +161,8 @@ string Exp::binOpToChar(BinaryOp op) {
         case BinaryOp::GE_OP: c = ">="; break;
         case BinaryOp::NEQ_OP: c = "!="; break;
         case BinaryOp::MOD_OP: c = "%"; break;
+        case BinaryOp::AND_OP: c = "&&"; break;
+        case BinaryOp::OR_OP: c = "||"; break;
         default: c = "$";
     }
     return c;
@@ -159,6 +177,16 @@ string Exp::assignOpToChar(AssignOp op) {
         case AssignOp::AS_DIV_OP: c = "/="; break;
         case AssignOp::AS_MOD_OP: c = "%="; break;
         case AssignOp::AS_ASSIGN_OP: c = "="; break;
+        default: c = "$";
+    }
+    return c;
+}
+
+string Exp::unaryOpToChar(UnaryOp op) {
+    string c;
+    switch(op) {
+        case UnaryOp::U_NEG_OP: c = "-"; break;
+        case UnaryOp::U_NOT_OP: c = "!"; break;
         default: c = "$";
     }
     return c;

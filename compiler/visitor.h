@@ -3,6 +3,7 @@
 #include "exp.h"
 
 class BinaryExp;
+class UnaryExp;
 class NumberExp;
 class BoolExp;
 class IdentifierExp;
@@ -15,6 +16,7 @@ class WhileStatement;
 class ForStatement;
 class ReturnStatement;
 class VarDec;
+class FunctionCallStatement;
 class ParamDec;
 class FunDec;
 class StatementList;
@@ -24,6 +26,7 @@ class Program;
 class Visitor {
 public:
     virtual int visit(BinaryExp* exp) = 0;
+    virtual int visit(UnaryExp* exp) = 0;
     virtual int visit(NumberExp* exp) = 0;
     virtual int visit(BoolExp* exp) = 0;
     virtual int visit(IdentifierExp* exp) = 0;
@@ -36,6 +39,7 @@ public:
     virtual void visit(ForStatement* stm) = 0;
     virtual void visit(ReturnStatement* stm) = 0;
     virtual void visit(VarDec* stm) = 0;
+    virtual void visit(FunctionCallStatement* stm) = 0;
     virtual void visit(ParamDec* stm) = 0;
     virtual void visit(FunDec* stm) = 0;
     virtual void visit(StatementList* stm) = 0;
@@ -44,11 +48,12 @@ public:
 
 class PrintVisitor : public Visitor {
 private:
-    int offset;
+    int offset = 0;
     string get_spaces();
 public:
     void print(Program* p);
     int visit(BinaryExp* exp) override;
+    int visit(UnaryExp* exp) override;
     int visit(NumberExp* exp) override;
     int visit(BoolExp* exp) override;
     int visit(IdentifierExp* exp) override;
@@ -60,6 +65,7 @@ public:
     void visit(WhileStatement* stm) override;
     void visit(ForStatement* stm) override;
     void visit(ReturnStatement* stm) override;
+    void visit(FunctionCallStatement* stm) override;
     void visit(VarDec* stm) override;
     void visit(ParamDec* stm) override;
     void visit(FunDec* stm) override;

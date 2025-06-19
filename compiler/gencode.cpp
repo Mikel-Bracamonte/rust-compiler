@@ -4,6 +4,10 @@ ImpValue BinaryExp::accept(ImpValueVisitor* visitor) {
     return visitor->visit(this);
 }
 
+ImpValue UnaryExp::accept(ImpValueVisitor* visitor) {
+    return visitor->visit(this);
+}
+
 ImpValue NumberExp::accept(ImpValueVisitor* visitor) {
     return visitor->visit(this);
 }
@@ -49,6 +53,10 @@ void ReturnStatement::accept(ImpValueVisitor* visitor) {
 }
 
 void VarDec::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
+}
+
+void FunctionCallStatement::accept(ImpValueVisitor* visitor) {
     visitor->visit(this);
 }
 
@@ -149,6 +157,10 @@ ImpValue GenCodeVisitor::visit(BinaryExp* e) {
 
     return result;
     */
+    return ImpValue();
+}
+
+ImpValue GenCodeVisitor::visit(UnaryExp* e) {
     return ImpValue();
 }
 
@@ -260,6 +272,10 @@ void GenCodeVisitor::visit(VarDec* vd) {
         stack_offsets[var] = current_offset;
     }
     */
+}
+
+void GenCodeVisitor::visit(FunctionCallStatement* stm) {
+    
 }
 
 void GenCodeVisitor::visit(ParamDec* vd) {

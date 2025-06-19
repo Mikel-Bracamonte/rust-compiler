@@ -34,7 +34,9 @@ Token* Scanner::nextToken() {
         string word = input.substr(first, current - first);
         if (word == "println") {
             token = new Token(Token::PRINTLN, word, 0, word.length());
-        } else if (word == "if") {
+        } else if (word == "print") {
+            token = new Token(Token::PRINT, word, 0, word.length());
+        }  else if (word == "if") {
             token = new Token(Token::IF, word, 0, word.length());
         } else if (word == "else") {
             token = new Token(Token::ELSE, word, 0, word.length());
@@ -113,7 +115,14 @@ Token* Scanner::nextToken() {
                 }
                 break;
             case ',': token = new Token(Token::COMMA, c); break;
-            case '.': token = new Token(Token::DOT, c); break;
+            case '.':
+                if (current + 1 < input.length() && input[current + 1] == '.') {
+                    token = new Token(Token::DOTS, "..", 0, 2);
+                    current++;
+                } else {
+                    token = new Token(Token::DOT, c);
+                }
+                break;
             case '(': token = new Token(Token::PI, c); break;
             case ')': token = new Token(Token::PD, c); break;
             case '{': token = new Token(Token::LI, c); break;

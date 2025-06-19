@@ -19,6 +19,7 @@ private:
 public:
     void gencode(Program* p);
     ImpValue visit(BinaryExp* exp) override;
+    ImpValue visit(UnaryExp* exp) override;
     ImpValue visit(NumberExp* exp) override;
     ImpValue visit(BoolExp* exp) override;
     ImpValue visit(IdentifierExp* exp) override;
@@ -31,17 +32,19 @@ public:
     void visit(ForStatement* stm) override;
     void visit(ReturnStatement* stm) override;
     void visit(VarDec* stm) override;
+    void visit(FunctionCallStatement* stm) override;
     void visit(ParamDec* stm) override;
     void visit(FunDec* stm) override;
     void visit(StatementList* stm) override;
     void visit(Body* b) override;
 };
 
-class CheckVisitor : ImpValueVisitor {
+class CheckVisitor : public ImpValueVisitor {
 private:
     Environment<ImpValue> env;
 public:
     ImpValue visit(BinaryExp* exp) override;
+    ImpValue visit(UnaryExp* exp) override;
     ImpValue visit(NumberExp* exp) override;
     ImpValue visit(BoolExp* exp) override;
     ImpValue visit(IdentifierExp* exp) override;
@@ -54,6 +57,7 @@ public:
     void visit(ForStatement* stm) override;
     void visit(ReturnStatement* stm) override;
     void visit(VarDec* stm) override;
+    void visit(FunctionCallStatement* stm) override;
     void visit(ParamDec* stm) override;
     void visit(FunDec* stm) override;
     void visit(StatementList* stm) override;

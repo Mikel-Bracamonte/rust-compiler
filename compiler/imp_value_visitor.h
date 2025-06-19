@@ -7,6 +7,7 @@
 class ImpValueVisitor {
 public:
     virtual ImpValue visit(BinaryExp* exp) = 0;
+    virtual ImpValue visit(UnaryExp* exp) = 0;
     virtual ImpValue visit(NumberExp* exp) = 0;
     virtual ImpValue visit(BoolExp* exp) = 0;
     virtual ImpValue visit(IdentifierExp* exp) = 0;
@@ -19,6 +20,7 @@ public:
     virtual void visit(ForStatement* stm) = 0;
     virtual void visit(ReturnStatement* stm) = 0;
     virtual void visit(VarDec* stm) = 0;
+    virtual void visit(FunctionCallStatement* stm) = 0;
     virtual void visit(ParamDec* stm) = 0;
     virtual void visit(FunDec* stm) = 0;
     virtual void visit(StatementList* stm) = 0;

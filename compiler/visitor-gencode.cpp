@@ -1,85 +1,85 @@
-#include "gencode.h"
+#include "imp_visitor.h"
 
-ImpValue BinaryExp::accept(ImpValueVisitor* visitor) {
+ImpType BinaryExp::accept(ImpVisitor* visitor) {
     return visitor->visit(this);
 }
 
-ImpValue UnaryExp::accept(ImpValueVisitor* visitor) {
+ImpType UnaryExp::accept(ImpVisitor* visitor) {
     return visitor->visit(this);
 }
 
-ImpValue NumberExp::accept(ImpValueVisitor* visitor) {
+ImpType NumberExp::accept(ImpVisitor* visitor) {
     return visitor->visit(this);
 }
 
-ImpValue BoolExp::accept(ImpValueVisitor* visitor) {
+ImpType BoolExp::accept(ImpVisitor* visitor) {
     return visitor->visit(this);
 }
 
-ImpValue IdentifierExp::accept(ImpValueVisitor* visitor) {
+ImpType IdentifierExp::accept(ImpVisitor* visitor) {
     return visitor->visit(this);
 }
 
-ImpValue IfExp::accept(ImpValueVisitor* visitor) {
+ImpType IfExp::accept(ImpVisitor* visitor) {
     return visitor->visit(this);
 }
 
-ImpValue FunctionCallExp::accept(ImpValueVisitor* visitor) {
+ImpType FunctionCallExp::accept(ImpVisitor* visitor) {
     return visitor->visit(this);
 }
 
-void AssignStatement::accept(ImpValueVisitor* visitor) {
+void AssignStatement::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
-void PrintStatement::accept(ImpValueVisitor* visitor) {
+void PrintStatement::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
-void IfStatement::accept(ImpValueVisitor* visitor) {
+void IfStatement::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
-void WhileStatement::accept(ImpValueVisitor* visitor) {
+void WhileStatement::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
-void ForStatement::accept(ImpValueVisitor* visitor) {
+void ForStatement::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
-void ReturnStatement::accept(ImpValueVisitor* visitor) {
+void ReturnStatement::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
-void BreakStatement::accept(ImpValueVisitor* visitor) {
+void BreakStatement::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
-void ContinueStatement::accept(ImpValueVisitor* visitor) {
+void ContinueStatement::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
-void VarDec::accept(ImpValueVisitor* visitor) {
+void VarDec::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
-void FunctionCallStatement::accept(ImpValueVisitor* visitor) {
+void FunctionCallStatement::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
-void ParamDec::accept(ImpValueVisitor* visitor) {
+void ParamDec::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
-void FunDec::accept(ImpValueVisitor* visitor) {
+void FunDec::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
-void StatementList::accept(ImpValueVisitor* visitor) {
+void StatementList::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
-void Body::accept(ImpValueVisitor* visitor) {
+void Body::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
@@ -106,9 +106,9 @@ void GenCodeVisitor::gencode(Program* p) {
     */
 }
 
-ImpValue GenCodeVisitor::visit(BinaryExp* e) {
+ImpType GenCodeVisitor::visit(BinaryExp* e) {
     /*
-    ImpValue result;
+    ImpType result;
     e->left->accept(this);        
     cout << "  pushq %rax" << endl;
     e->right->accept(this);       
@@ -165,36 +165,36 @@ ImpValue GenCodeVisitor::visit(BinaryExp* e) {
 
     return result;
     */
-    return ImpValue();
+    return ImpType();
 }
 
-ImpValue GenCodeVisitor::visit(UnaryExp* e) {
-    return ImpValue();
+ImpType GenCodeVisitor::visit(UnaryExp* e) {
+    return ImpType();
 }
 
-ImpValue GenCodeVisitor::visit(NumberExp* e) {
+ImpType GenCodeVisitor::visit(NumberExp* e) {
     /*
-    ImpValue v;
+    ImpType v;
     v.set_default_value(TINT);
     v.int_value = e->value;
     cout << "  movq $" << e->value << ", %rax" << endl;
     return v;
     */
-    return ImpValue();
+    return ImpType();
 }
 
-ImpValue GenCodeVisitor::visit(BoolExp* e) {
+ImpType GenCodeVisitor::visit(BoolExp* e) {
     /*
-    ImpValue v;
+    ImpType v;
     v.set_default_value(TBOOL);
     v.bool_value = e->value;
     cout << "  movq $" << (e->value ? 1 : 0) << ", %rax" << endl;
     return v;
     */
-    return ImpValue();
+    return ImpType();
 }
 
-ImpValue GenCodeVisitor::visit(IdentifierExp* e) {
+ImpType GenCodeVisitor::visit(IdentifierExp* e) {
     /*
     if (env.check(e->name)) {
         cout << "  movq " << stack_offsets[e->name] << "(%rbp), %rax" << endl;
@@ -204,20 +204,20 @@ ImpValue GenCodeVisitor::visit(IdentifierExp* e) {
         exit(1);
     }
     */
-    return ImpValue();
+    return ImpType();
 }
 
-ImpValue GenCodeVisitor::visit(IfExp* e) {
-    return ImpValue();
+ImpType GenCodeVisitor::visit(IfExp* e) {
+    return ImpType();
 }
 
-ImpValue GenCodeVisitor::visit(FunctionCallExp* e) {
-    return ImpValue();
+ImpType GenCodeVisitor::visit(FunctionCallExp* e) {
+    return ImpType();
 }
 
 void GenCodeVisitor::visit(AssignStatement* s) {
     /*
-    ImpValue val = s->rhs->accept(this); 
+    ImpType val = s->rhs->accept(this); 
     cout << "  movq %rax, " << stack_offsets[s->id] << "(%rbp)" << endl;
     env.update(s->id, val);  
     */
@@ -279,9 +279,9 @@ void GenCodeVisitor::visit(ContinueStatement* s) {
 
 void GenCodeVisitor::visit(VarDec* vd) {
     /*
-    ImpVType tt = ImpValue::get_basic_type(vd->type);
+    ImpVType tt = ImpType::get_basic_type(vd->type);
     for (const auto& var : vd->vars) {
-        ImpValue v;
+        ImpType v;
         v.set_default_value(tt);
         env.add_var(var, v);
         current_offset -= 8;
@@ -326,8 +326,3 @@ void GenCodeVisitor::visit(Body* b) {
 }
 
 ////////////////////////////////////////////////////
-
-void CheckVisitor::check(Program* p) {
-    /*
-    */
-}

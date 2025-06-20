@@ -1,6 +1,5 @@
 #ifndef EXP_H
 #define EXP_H
-#include "imp_value.h"
 #include "imp_type.h"
 #include <string>
 #include <list>
@@ -15,12 +14,12 @@ enum UnaryOp { U_NEG_OP, U_NOT_OP };
 
 class Body;
 
-class ImpValueVisitor;
+class ImpVisitor;
 
 class Exp {
 public:
     virtual int  accept(Visitor* visitor) = 0;
-    virtual ImpValue accept(ImpValueVisitor* v) = 0;
+    virtual ImpType accept(ImpVisitor* v) = 0;
     virtual ~Exp() = 0;
     bool hasParenthesis = false;
     static string binOpToChar(BinaryOp o);
@@ -35,7 +34,7 @@ public:
     BinaryOp op;
     BinaryExp(Exp* l, Exp* r, BinaryOp o);
     int accept(Visitor* visitor);
-    ImpValue accept(ImpValueVisitor* v);
+    ImpType accept(ImpVisitor* v);
     ~BinaryExp();
 };
 
@@ -45,7 +44,7 @@ public:
     UnaryOp op;
     UnaryExp(Exp* e, UnaryOp o);
     int accept(Visitor* visitor);
-    ImpValue accept(ImpValueVisitor* v);
+    ImpType accept(ImpVisitor* v);
     ~UnaryExp();
 };
 
@@ -54,7 +53,7 @@ public:
     int value;
     NumberExp(int v);
     int accept(Visitor* visitor);
-    ImpValue accept(ImpValueVisitor* v);
+    ImpType accept(ImpVisitor* v);
     ~NumberExp();
 };
 
@@ -63,7 +62,7 @@ public:
     int value;
     BoolExp(bool v);
     int accept(Visitor* visitor);
-    ImpValue accept(ImpValueVisitor* v);
+    ImpType accept(ImpVisitor* v);
     ~BoolExp();
 };
 
@@ -72,7 +71,7 @@ public:
     string name;
     IdentifierExp(string n);
     int accept(Visitor* visitor);
-    ImpValue accept(ImpValueVisitor* v);
+    ImpType accept(ImpVisitor* v);
     ~IdentifierExp();
 };
 
@@ -83,7 +82,7 @@ public:
     Exp* els;
     IfExp(Exp *c, Exp* t, Exp* e);
     int accept(Visitor* visitor);
-    ImpValue accept(ImpValueVisitor* v);
+    ImpType accept(ImpVisitor* v);
     ~IfExp();
 };
 
@@ -94,7 +93,7 @@ public:
     FunctionCallExp();
     void add(Exp* e);
     int accept(Visitor* visitor);
-    ImpValue accept(ImpValueVisitor* v);
+    ImpType accept(ImpVisitor* v);
     ~FunctionCallExp();
 };
 
@@ -105,7 +104,7 @@ class Stm {
 public:
     virtual int accept(Visitor* visitor) = 0;
     virtual ~Stm() = 0;
-    virtual void accept(ImpValueVisitor* v) = 0;
+    virtual void accept(ImpVisitor* v) = 0;
 };
 
 
@@ -116,7 +115,7 @@ public:
     AssignOp op;
     AssignStatement(string n, Exp* r, AssignOp o);
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~AssignStatement();
 };
 
@@ -126,7 +125,7 @@ public:
     bool ln;
     PrintStatement(Exp* e, bool l);
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~PrintStatement();
 };
 
@@ -137,7 +136,7 @@ public:
     Body* els;
     IfStatement(Exp* c, Body* t, Body* e);
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~IfStatement();
 };
 
@@ -147,7 +146,7 @@ public:
     Body* body;
     WhileStatement(Exp* c, Body* b);
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~WhileStatement();
 };
 
@@ -160,7 +159,7 @@ public:
     Body* body;
     ForStatement(bool m, string n, Exp* s, Exp* e, Body* b);
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~ForStatement();
 };
 
@@ -169,7 +168,7 @@ public:
     Exp* exp;
     ReturnStatement(Exp* e);
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~ReturnStatement();
 };
 
@@ -177,7 +176,7 @@ class BreakStatement : public Stm {
 public:
     BreakStatement();
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~BreakStatement();
 };
 
@@ -185,7 +184,7 @@ class ContinueStatement : public Stm {
 public:
     ContinueStatement();
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~ContinueStatement();
 };
 
@@ -197,7 +196,7 @@ public:
     Exp* exp;
     VarDec(string n, string t, bool m, Exp* e);
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~VarDec();
 };
 
@@ -208,7 +207,7 @@ public:
     FunctionCallStatement();
     void add(Exp* e);
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~FunctionCallStatement();
 };
 
@@ -221,7 +220,7 @@ public:
     bool isMut;
     ParamDec(string n, string t, bool m);
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~ParamDec();
 };
 
@@ -233,7 +232,7 @@ public:
     Body* body;
     FunDec();
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~FunDec();
 };
 
@@ -243,7 +242,7 @@ public:
     StatementList();
     void add(Stm* s);
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~StatementList();
 };
 
@@ -253,7 +252,7 @@ public:
     StatementList* stmList;
     Body(StatementList* s);
     int accept(Visitor* visitor);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~Body();
 };
 
@@ -263,7 +262,7 @@ public:
     list<FunDec*> funs;
     Program();
     int accept(Visitor* v);
-    void accept(ImpValueVisitor* v);
+    void accept(ImpVisitor* v);
     ~Program();
 };
 

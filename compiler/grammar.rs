@@ -19,8 +19,10 @@ Stmt ::= id (= | += | -= | *= | /= | %=) AExp ; |
     if AExp { Body } [ else { Body } ] |
     while AExp { Body } |
     for [ mut ] id in AExp..AExp { Body } |
-    return [ AExp ] ;
-	let [ mut ] id : Type [ = AExp] ;
+    return [ AExp ] ; |
+	let [ mut ] id : Type [ = AExp] ; |
+    break ; |
+    continue ; 
 
 AExp ::= BExp ((&& | ||) BExp)*
 

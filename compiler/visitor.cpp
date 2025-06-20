@@ -62,6 +62,16 @@ int ReturnStatement::accept(Visitor* visitor) {
     return 0;
 }
 
+int BreakStatement::accept(Visitor* visitor) {
+    visitor->visit(this);
+    return 0;
+}
+
+int ContinueStatement::accept(Visitor* visitor) {
+    visitor->visit(this);
+    return 0;
+}
+
 int VarDec::accept(Visitor* visitor) {
     visitor->visit(this);
     return 0;
@@ -204,7 +214,11 @@ void PrintVisitor::visit(WhileStatement* stm){
 }
 
 void PrintVisitor::visit(ForStatement* stm){
-    cout << get_spaces() << "for " << stm->name << " in ";
+    cout << get_spaces() << "for ";
+    if(stm->mut) {
+        cout << "mut ";
+    }
+    cout << stm->name << " in ";
     stm->start->accept(this);
     cout << "..";
     stm->end->accept(this);
@@ -221,6 +235,14 @@ void PrintVisitor::visit(ReturnStatement* stm){
     cout << ";";
 }
 
+void PrintVisitor::visit(BreakStatement* stm){
+    cout << get_spaces() << "break;";
+}
+
+void PrintVisitor::visit(ContinueStatement* stm){
+    cout << get_spaces() << "continue;";
+}
+
 void PrintVisitor::visit(VarDec* stm){
     cout << get_spaces() << "let ";
     if(stm->isMut) {
@@ -235,7 +257,14 @@ void PrintVisitor::visit(VarDec* stm){
 }
 
 void PrintVisitor::visit(FunctionCallStatement* stm){
-
+    cout << get_spaces() << stm->name << "(";
+    for(auto it = stm->argList.begin(); it != stm->argList.end(); ++it) {
+        (*it)->accept(this);
+        if(next(it) != stm->argList.end()) {
+            cout << ", ";
+        }
+    }
+    cout << ")";
 }
 
 void PrintVisitor::visit(ParamDec* stm){
@@ -252,7 +281,10 @@ void PrintVisitor::visit(FunDec* stm){
             cout << ", ";
         }
     }
-    cout << ")";
+    cout << ") ";
+    if(stm->type != "") {
+        cout << "-> " << stm->type << " ";
+    }
     cout << "{" << endl;
     ++offset;
     stm->body->accept(this);

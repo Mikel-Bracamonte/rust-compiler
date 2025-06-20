@@ -57,7 +57,7 @@ Program* Parser::parseProgram() {
     }
     p->funs.push_back(parseFunDec());
     while(match(Token::FN)) {
-        p->funs.push_front(parseFunDec());
+        p->funs.push_back(parseFunDec());
     }
     return p;
 }
@@ -287,6 +287,16 @@ Stm* Parser::parseStatement() {
             }
         }
         return new ReturnStatement(exp);
+    } else if(match(Token::BREAK)) {
+        if(!match(Token::PC)) {
+            errorHandler.expect(Token::PC, current->text);
+        }
+        return new BreakStatement();
+    } else if(match(Token::CONTINUE)) {
+        if(!match(Token::PC)) {
+            errorHandler.expect(Token::PC, current->text);
+        }
+        return new ContinueStatement();
     } else if(match(Token::LET)) {
         bool mut = false;
         if(match(Token::MUT)) {

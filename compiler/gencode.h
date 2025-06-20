@@ -31,6 +31,8 @@ public:
     void visit(WhileStatement* stm) override;
     void visit(ForStatement* stm) override;
     void visit(ReturnStatement* stm) override;
+    void visit(BreakStatement* stm) override;
+    void visit(ContinueStatement* stm) override;
     void visit(VarDec* stm) override;
     void visit(FunctionCallStatement* stm) override;
     void visit(ParamDec* stm) override;
@@ -56,6 +58,8 @@ public:
     void visit(WhileStatement* stm) override;
     void visit(ForStatement* stm) override;
     void visit(ReturnStatement* stm) override;
+    void visit(BreakStatement* stm) override;
+    void visit(ContinueStatement* stm) override;
     void visit(VarDec* stm) override;
     void visit(FunctionCallStatement* stm) override;
     void visit(ParamDec* stm) override;

@@ -173,6 +173,22 @@ public:
     ~ReturnStatement();
 };
 
+class BreakStatement : public Stm {
+public:
+    BreakStatement();
+    int accept(Visitor* visitor);
+    void accept(ImpValueVisitor* v);
+    ~BreakStatement();
+};
+
+class ContinueStatement : public Stm {
+public:
+    ContinueStatement();
+    int accept(Visitor* visitor);
+    void accept(ImpValueVisitor* v);
+    ~ContinueStatement();
+};
+
 class VarDec : public Stm {
 public:
     string name;

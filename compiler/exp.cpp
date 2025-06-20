@@ -91,6 +91,12 @@ ReturnStatement::~ReturnStatement(){
     delete exp;
 }
 
+BreakStatement::BreakStatement() {}
+BreakStatement::~BreakStatement() {}
+
+ContinueStatement::ContinueStatement() {}
+ContinueStatement::~ContinueStatement() {}
+
 VarDec::VarDec(std::string n, std::string t, bool m, Exp* e) {
     name = n;
     type = t;

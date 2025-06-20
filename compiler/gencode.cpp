@@ -52,6 +52,14 @@ void ReturnStatement::accept(ImpValueVisitor* visitor) {
     visitor->visit(this);
 }
 
+void BreakStatement::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
+}
+
+void ContinueStatement::accept(ImpValueVisitor* visitor) {
+    visitor->visit(this);
+}
+
 void VarDec::accept(ImpValueVisitor* visitor) {
     visitor->visit(this);
 }
@@ -258,6 +266,14 @@ void GenCodeVisitor::visit(ForStatement* s) {
 }
 
 void GenCodeVisitor::visit(ReturnStatement* s) {
+    
+}
+
+void GenCodeVisitor::visit(BreakStatement* s) {
+    
+}
+
+void GenCodeVisitor::visit(ContinueStatement* s) {
     
 }
 

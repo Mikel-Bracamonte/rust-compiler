@@ -19,6 +19,8 @@ public:
     virtual void visit(WhileStatement* stm) = 0;
     virtual void visit(ForStatement* stm) = 0;
     virtual void visit(ReturnStatement* stm) = 0;
+    virtual void visit(BreakStatement* stm) = 0;
+    virtual void visit(ContinueStatement* stm) = 0;
     virtual void visit(VarDec* stm) = 0;
     virtual void visit(FunctionCallStatement* stm) = 0;
     virtual void visit(ParamDec* stm) = 0;

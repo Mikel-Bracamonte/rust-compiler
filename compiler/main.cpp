@@ -41,6 +41,12 @@ int main(int argc, const char* argv[]) {
     try {
         Program* program = parser.parseProgram();
         cout << "Parsing exitoso" << endl << endl;
+        cout<<"Iniciando checker:"<<endl;
+        CheckVisitor checkVisitor;
+        checkVisitor.check(program);
+        //checkVisitor.check(program);
+        cout << "CheckVisitor exitoso" << endl << endl;
+
         cout << "Iniciando Visitor:" << endl;
         PrintVisitor* printVisitor = new PrintVisitor();
         //ImpCODE interpreter;

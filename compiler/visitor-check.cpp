@@ -1,5 +1,6 @@
 #include "imp_visitor.h"
 
+
 void CheckVisitor::check(Program* p) {
     /*
     */

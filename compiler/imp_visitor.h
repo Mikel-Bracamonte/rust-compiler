@@ -38,10 +38,19 @@ class GenCodeVisitor : public ImpVisitor {
 private:
     Environment<ImpType> env;
     int label_counter;
-    int offset;
     stack<int> label_stack;
+    std::ostream& out;
 public:
-    ErrorHandler errorHandler = ErrorHandler("GenCodeVisitor");
+    GenCodeVisitor(std::ostream& out) : out(out) {
+        errorHandler = ErrorHandler("GenCodeVisitor");
+    }
+    ErrorHandler errorHandler;
+    unordered_map<string, int> memoria;
+    int offset = -8;
+    int labelcont = 0;
+    bool entornoFuncion = false;
+    string nombreFuncion;
+
     void gencode(Program* p);
     ImpType visit(BinaryExp* exp) override;
     ImpType visit(UnaryExp* exp) override;

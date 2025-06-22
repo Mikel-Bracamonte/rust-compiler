@@ -1,4 +1,5 @@
 #include "imp_visitor.h"
+#include <cassert>
 
 ImpType BinaryExp::accept(ImpVisitor* visitor) {
     return visitor->visit(this);
@@ -86,6 +87,16 @@ void Body::accept(ImpVisitor* visitor) {
 //////////////////////////////////////////////////////////////////////////////////
 
 void GenCodeVisitor::gencode(Program* p) {
+    out << ".data" << endl;
+    out << "print_fmt: .string \"%ld \\n\""<<endl;
+    out << ".text" << endl;
+
+    for(auto f: p->funs){
+        f->accept(this);
+    }
+
+    out << ".section .note.GNU-stack,\"\",@progbits"<<endl;
+
     /*
     env.clear();
     label_counter = 0;
@@ -106,7 +117,33 @@ void GenCodeVisitor::gencode(Program* p) {
     */
 }
 
+
+
 ImpType GenCodeVisitor::visit(BinaryExp* e) {
+    e->left->accept(this);
+    out << " pushq %rax" << endl;
+    e->right->accept(this);
+    out << " movq %rax, %rcx" << endl;
+    out << " popq %rax" << endl;
+
+    switch (e->op) {
+        case PLUS_OP:  out << " addq %rcx, %rax" << endl; break;
+        case MINUS_OP: out << " subq %rcx, %rax" << endl; break;
+        case MUL_OP:   out << " imulq %rcx, %rax" << endl; break;
+        case LE_OP:
+            out << " cmpq %rcx, %rax" << endl
+                      << " movl $0, %eax" << endl
+                      << " setle %al" << endl
+                      << " movzbq %al, %rax" << endl;
+            break;
+        case LT_OP:
+            out << " cmpq %rcx, %rax" << endl
+                      << " movl $0, %eax" << endl
+                      << " setl %al" << endl
+                      << " movzbq %al, %rax" << endl;
+            break;
+    }
+
     /*
     ImpType result;
     e->left->accept(this);        
@@ -173,6 +210,7 @@ ImpType GenCodeVisitor::visit(UnaryExp* e) {
 }
 
 ImpType GenCodeVisitor::visit(NumberExp* e) {
+    out << " movq $" << e->value << ", %rax"<<endl;
     /*
     ImpType v;
     v.set_default_value(TINT);
@@ -195,6 +233,8 @@ ImpType GenCodeVisitor::visit(BoolExp* e) {
 }
 
 ImpType GenCodeVisitor::visit(IdentifierExp* e) {
+    assert(memoria.count(e->name));
+    out << " movq " << memoria[e->name] << "(%rbp), %rax"<<endl;
     /*
     if (env.check(e->name)) {
         cout << "  movq " << stack_offsets[e->name] << "(%rbp), %rax" << endl;
@@ -216,6 +256,8 @@ ImpType GenCodeVisitor::visit(FunctionCallExp* e) {
 }
 
 void GenCodeVisitor::visit(AssignStatement* s) {
+    s->right->accept(this);
+    out << " movq %rax, " << memoria[s->name] << "(%rbp)"<<endl;
     /*
     ImpType val = s->rhs->accept(this); 
     cout << "  movq %rax, " << stack_offsets[s->id] << "(%rbp)" << endl;
@@ -224,6 +266,12 @@ void GenCodeVisitor::visit(AssignStatement* s) {
 }
 
 void GenCodeVisitor::visit(PrintStatement* s) {
+    s->exp->accept(this);
+    out <<
+        " movq %rax, %rsi" << endl
+        << " leaq print_fmt(%rip), %rdi" << endl
+        << " movl $0, %eax" << endl
+        << " call printf@PLT" << endl;
     /*
     s->e->accept(this);
     cout << "  movq %rax, %rsi" << endl;
@@ -266,7 +314,8 @@ void GenCodeVisitor::visit(ForStatement* s) {
 }
 
 void GenCodeVisitor::visit(ReturnStatement* s) {
-    
+    s->exp->accept(this);
+    out << "jmp .end_" << nombreFuncion << endl;
 }
 
 void GenCodeVisitor::visit(BreakStatement* s) {
@@ -278,6 +327,8 @@ void GenCodeVisitor::visit(ContinueStatement* s) {
 }
 
 void GenCodeVisitor::visit(VarDec* vd) {
+    memoria[vd->name] = offset;
+    offset -= 8;
     /*
     ImpVType tt = ImpType::get_basic_type(vd->type);
     for (const auto& var : vd->vars) {
@@ -298,19 +349,47 @@ void GenCodeVisitor::visit(ParamDec* vd) {
 
 }
 
-void GenCodeVisitor::visit(FunDec* vd) {
+void GenCodeVisitor::visit(FunDec* f) {
+    entornoFuncion = true;
+    memoria.clear();
+    offset = -16;
+    nombreFuncion = f->name;
 
+    vector<std::string> argRegs = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
+    
+    out << ".globl " << f->name << endl;
+    out << f->name << ":" << endl;
+    out << "pushq %rbp" << endl;
+    out << "movq %rsp, %rbp" << endl;
+    
+    /*
+    // paramDec
+    int size = f->params.size();
+    for(int i = 0;i<size;i++){
+        memoria[f->params[i]] = offset;
+        out << " mov %" << argRegs[i] << ", " << offset << "(%rbp)" << endl;
+        offset -= 8;
+    }
+    */
+    // f->cuerpo->vardecs->accept(this);
+    int reserva = -offset; // deberia ser calculado con las variables
+    out << " subq $" << reserva << ", %rsp" << endl;
+    f->body->accept(this);
+
+    out << ".end_" << nombreFuncion << ":" << endl;
+    out << "leave" << endl;
+    out << "ret" << endl;
+    entornoFuncion = false;
 }
 
 void GenCodeVisitor::visit(StatementList* s) {
-    /*
     for (auto it : s->stms) {
         it->accept(this);
     }
-    */
 }
 
 void GenCodeVisitor::visit(Body* b) {
+    b->stmList->accept(this);
     /*
     env.add_level();
     long old_offset = offset;

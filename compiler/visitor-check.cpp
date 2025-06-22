@@ -81,15 +81,17 @@ void CheckVisitor::visit(WhileStatement* stm) {
 
 void CheckVisitor::visit(ForStatement* s) {
     // tiene que ser mut, int
+    if(!s->mut){
+        errorHandler.error("Error: el for debe ser mut.");
+    }
 
-    if(s->start->accept(this).ttype == ImpType::INT){
-        if(s->end->accept(this).ttype == ImpType::INT ){
-            s->body->accept(this);
-        } else {
-            errorHandler.error("Error: el final del for debe ser un entero.");
-        }
-    } else {
+    ImpType startT = s->start->accept(this);
+    if (startT.ttype != ImpType::INT) {
         errorHandler.error("Error: el inicio del for debe ser un entero.");
+    }
+    ImpType endT = s->end->accept(this);
+    if (endT.ttype != ImpType::INT) {
+        errorHandler.error("Error: el final del for debe ser un entero.");
     }
 }
 

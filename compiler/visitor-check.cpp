@@ -4,11 +4,9 @@
 void CheckVisitor::check(Program* p) {
     env.clear();      
     env.add_level();
-    cout<<"hola"<<endl;
     for(auto i : p->funs){
         i->accept(this);
     }
-    cout<<"chau"<<endl;
 }
 
 ImpType CheckVisitor::visit(BinaryExp* e) {
@@ -47,34 +45,52 @@ ImpType CheckVisitor::visit(FunctionCallExp* e) {
 }
 
 void CheckVisitor::visit(AssignStatement* s) { 
-    cout<<"probando assign"<<endl;
     if(!env.check(s->name)) {
-        cout << "Error: varible '" << s->name << "' no declarada." << endl;
-        exit(1);
+        errorHandler.error("Error: varible '" + s->name + "' no declarada.");
     }
-    ImpType type = env.lookup(s->name);
-    ImpType exp = s->right->accept(this);
-    if(!type.match(exp)){
-        cout<<"Error: tipo incompatible de asignación con " << s->name<<"\n";
-        exit(1);
+    if(env.lookup(s->name).ttype == ImpType::INT) {
+        s->right->accept(this);
+    } else if(env.lookup(s->name).ttype == ImpType::BOOL) {
+        s->right->accept(this);
+    }else {
+        errorHandler.error("No coincide la asignación");
     }
-    }
+}
 
 void CheckVisitor::visit(PrintStatement* s) {
-    s->exp->accept(this); // falt pero es pa que corra
-
+    s->exp->accept(this); 
 }
 
 void CheckVisitor::visit(IfStatement* s) {
-
+    if (s->condition->accept(this).ttype == ImpType::BOOL) {
+        s->then->accept(this);
+        if (s->els) s->els->accept(this);
+    } else{
+        errorHandler.error("Error: la condición del if debe ser bool.");
+    }
+    
 }
 
-void CheckVisitor::visit(WhileStatement* s) {
+void CheckVisitor::visit(WhileStatement* stm) {
+    if(stm->condition->accept(this).ttype == ImpType::BOOL) {
+        stm->body->accept(this);
+    }
+    else {
+        errorHandler.error("Error: la condición del while debe ser bool.");
+    }
 
 }
 
 void CheckVisitor::visit(ForStatement* s) {
-    
+    if(s->start->accept(this).ttype == ImpType::INT){
+        if(s->end->accept(this).ttype == ImpType::INT ){
+            s->body->accept(this);
+        } else {
+            errorHandler.error("Error: el final del for debe ser un entero.");
+        }
+    } else {
+        errorHandler.error("Error: el inicio del for debe ser un entero.");
+    }
 }
 
 void CheckVisitor::visit(ReturnStatement* s) {
@@ -91,21 +107,23 @@ void CheckVisitor::visit(ContinueStatement* s) {
 
 void CheckVisitor::visit(VarDec* vd) {
     if (env.check(vd->name)) {
-        cout << "Error: variable '" << vd->name << "' ya declarada." << endl;
-        exit(1);
+        errorHandler.error("Error: variable '" + vd->name + "' ya declarada.");
     }
 
     ImpType type;
+    // long int?
     if (vd->type == "i32") {
         type.set_basic_type(ImpType::INT);
+        env.add_var(vd->name,type);
+        
     } else if (vd->type == "bool") {
         type.set_basic_type(ImpType::BOOL);
+        env.add_var(vd->name, type);
+        
     } else {
-        cout << "Tipo no reconocido: '" << vd->type << "'." << endl;
-        exit(1);
+        errorHandler.error("Error: tipo de variable no reconocido: '" + vd->type + "'.");
     }
 
-    env.add_var(vd->name, type);
 }
 
 void CheckVisitor::visit(FunctionCallStatement* stm) {
@@ -113,12 +131,24 @@ void CheckVisitor::visit(FunctionCallStatement* stm) {
 }
 
 void CheckVisitor::visit(ParamDec* vd) {
-
+    ImpType t;
+    env.add_level();
+    if (vd->type == "i32") {
+        t.set_basic_type(ImpType::INT);
+        env.add_var(vd->name, t);
+    } else if (vd->type == "bool") {
+        t.set_basic_type(ImpType::BOOL);
+        env.add_var(vd->name, t);
+    } else {
+        errorHandler.error("Error: tipo de parámetro no reconocido: '" + vd->type + "'.");
+    }
+    env.remove_level();
 }
 
 void CheckVisitor::visit(FunDec* vd) {
     ImpType ftype;
     list<string> argTypes;
+    
     for (auto p : vd->params)
         argTypes.push_back(p->type);
     ftype.set_fun_type(argTypes, vd->type);
@@ -126,8 +156,7 @@ void CheckVisitor::visit(FunDec* vd) {
 
     for (auto p : vd->params)
         p->accept(this);
-
-
+    
     vd->body->accept(this); 
 }
 

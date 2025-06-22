@@ -47,8 +47,10 @@ int main(int argc, const char* argv[]) {
         cout << endl;
         cout << "IMPRIMIR:" << endl;
         printVisitor->print(program);
-        //cout  << endl;
+        cout  << endl;
         //cout << endl << "Run program:" << endl;
+        GenCodeVisitor* gencodeVisitor = new GenCodeVisitor();
+        gencodeVisitor->gencode(program);
         //interpreter.interpret(program);
         //cout << "End of program execution" << endl;
         delete program;

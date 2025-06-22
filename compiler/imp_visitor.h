@@ -4,6 +4,7 @@
 #include "exp.h"
 #include "imp_type.h"
 #include "environment.h"
+#include "error_handler.h"
 
 #include <unordered_map>
 #include <stack>
@@ -40,6 +41,7 @@ private:
     int offset;
     stack<int> label_stack;
 public:
+    ErrorHandler errorHandler = ErrorHandler("GenCodeVisitor");
     void gencode(Program* p);
     ImpType visit(BinaryExp* exp) override;
     ImpType visit(UnaryExp* exp) override;
@@ -68,6 +70,7 @@ class CheckVisitor : public ImpVisitor {
 private:
     Environment<ImpType> env;
 public:
+    ErrorHandler errorHandler = ErrorHandler("CheckVisitor");
     void check(Program* p);
     ImpType visit(BinaryExp* exp) override;
     ImpType visit(UnaryExp* exp) override;

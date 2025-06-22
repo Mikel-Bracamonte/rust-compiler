@@ -48,12 +48,10 @@ void CheckVisitor::visit(AssignStatement* s) {
     if(!env.check(s->name)) {
         errorHandler.error("Error: varible '" + s->name + "' no declarada.");
     }
-    if(env.lookup(s->name).ttype == ImpType::INT) {
-        s->right->accept(this);
-    } else if(env.lookup(s->name).ttype == ImpType::BOOL) {
-        s->right->accept(this);
-    }else {
-        errorHandler.error("No coincide la asignación");
+    ImpType target = env.lookup(s->name);
+    ImpType src = s->right->accept(this);
+    if (!target.match(src)) {
+        errorHandler.error("Tipo incompatible en asignación a '" + s->name + "'.");
     }
 }
 
@@ -82,6 +80,8 @@ void CheckVisitor::visit(WhileStatement* stm) {
 }
 
 void CheckVisitor::visit(ForStatement* s) {
+    // tiene que ser mut, int
+
     if(s->start->accept(this).ttype == ImpType::INT){
         if(s->end->accept(this).ttype == ImpType::INT ){
             s->body->accept(this);
@@ -112,6 +112,7 @@ void CheckVisitor::visit(VarDec* vd) {
 
     ImpType type;
     // long int?
+    // mut?
     if (vd->type == "i32") {
         type.set_basic_type(ImpType::INT);
         env.add_var(vd->name,type);

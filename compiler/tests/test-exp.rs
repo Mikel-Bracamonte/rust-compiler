@@ -2,10 +2,10 @@ fn main() {
     let mut x : i32;
     x = 2;
     println!("{}", x);
-    println!("{}", if true {10} else {20});
-    println!("{}", if false {10} else {20});
+    print!("{}", if true {10} else {20});
+    println!("{}", if !(false) {10} else {20});
 
-    println!("{}", -5);
+    print!("{}", -5);
     println!("{}", 8/3);
 
     let mut y : i32;

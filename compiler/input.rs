@@ -1,22 +1,16 @@
-fn add(a: i32, b: i32, c: bool) -> i32 {
-    if c {
-        return a + b;
-    } else {
+fn fibo(a: i32) {
+    if a < 2 {
         return a;
+    } else {
+        return fibo(a - 2) + fibo(a - 1);
     }
 }
 
 fn main() {
-    let x: i32 = 2;
-    let y: i32 = 10;
-    let z: bool = true;
-    for a in x..add(x, y, z) {
-        if !z {
-            continue;
-        }
-        while(true) {
-            break;
-        }
+    let mut a: i32;
+    a = 0;
+    while a < 20 {
+        println!("{}", fibo(a));
+        a = a + 1;
     }
-    println!("{}", add(add(x, -1*-y, !z), -y, !z));
 }

@@ -36,7 +36,7 @@ public:
 
 class GenCodeVisitor : public ImpVisitor {
 private:
-    Environment<ImpType> env;
+    Environment<tuple<ImpType, int>> env;
     stack<int> label_stack;
     std::ostream& out;
 public:

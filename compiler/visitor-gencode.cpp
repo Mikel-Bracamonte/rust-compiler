@@ -88,7 +88,8 @@ void Body::accept(ImpVisitor* visitor) {
 
 void GenCodeVisitor::gencode(Program* p) {
     out << ".data" << endl;
-    out << "print_fmt: .string \"%ld \\n\""<<endl;
+    out << "print_fmt_ln: .string \"%ld \\n\""<<endl;
+    out << "print_fmt: .string \"%ld \""<<endl;
     out << ".text" << endl;
 
     for(auto f: p->funs){
@@ -159,6 +160,11 @@ ImpType GenCodeVisitor::visit(BinaryExp* e) {
                 << " movzbq %al, %rax" << endl;
             break;
         case GT_OP:
+            out << " cmpq %rcx, %rax" << endl
+                << " movl $0, %eax" << endl
+                << " setg %al" << endl
+                << " movzbq %al, %rax" << endl;
+        
             break;
         case GE_OP:
             break;
@@ -183,7 +189,7 @@ ImpType GenCodeVisitor::visit(UnaryExp* e) {
             out << " neg %rax" << endl; 
             break;
         case U_NOT_OP:
-            // TODO 
+            out << " not %rax" << endl; 
             break;
         default:
             errorHandler.error("Not unaryOp supported");
@@ -253,9 +259,14 @@ void GenCodeVisitor::visit(AssignStatement* s) {
 void GenCodeVisitor::visit(PrintStatement* s) {
     s->exp->accept(this);
     out <<
-        " movq %rax, %rsi" << endl
-        << " leaq print_fmt(%rip), %rdi" << endl
-        << " movl $0, %eax" << endl
+        " movq %rax, %rsi" << endl;
+    if(s->ln){
+        out << " leaq print_fmt_ln(%rip), %rdi" << endl;
+    }
+    else {
+        out << " leaq print_fmt(%rip), %rdi" << endl;
+    }
+    out << " movl $0, %eax" << endl
         << " call printf@PLT" << endl;
 }
 
@@ -274,6 +285,8 @@ void GenCodeVisitor::visit(IfStatement* s) {
 
 void GenCodeVisitor::visit(WhileStatement* s) {
     int lbl = label_counter++;
+    
+    nombreLoop.push("while_" + to_string(lbl));
     out << "while_" << lbl << ":" << endl;
     s->condition->accept(this);
     out << "  testq %rax, %rax" << endl; 
@@ -281,8 +294,15 @@ void GenCodeVisitor::visit(WhileStatement* s) {
     s->body->accept(this);
     out << "  jmp while_" << lbl << endl;
     out << "endwhile_" << lbl << ":" << endl;
-}
 
+    nombreLoop.pop();
+}
+/* Los loops se llaman
+while_10
+endwhile_10
+for_5
+endfor_5
+*/
 void GenCodeVisitor::visit(ForStatement* s) {
     int lbl = label_counter++;
     out << "for_" << lbl << ":" << endl;
@@ -295,12 +315,16 @@ void GenCodeVisitor::visit(ReturnStatement* s) {
     out << "jmp .end_" << nombreFuncion << endl;
 }
 
+// check!
 void GenCodeVisitor::visit(BreakStatement* s) {
-    
+    assert(!nombreLoop.empty());
+    out << "jmp end" << nombreLoop.top() << endl;
 }
 
+// check!
 void GenCodeVisitor::visit(ContinueStatement* s) {
-    
+    assert(!nombreLoop.empty());
+    out << "jmp " << nombreLoop.top() << endl;
 }
 
 // seems check!
@@ -353,7 +377,6 @@ void GenCodeVisitor::visit(FunDec* f) {
         (*it)->accept(this);
         ++i;
     }
-    
     f->body->accept(this);
 
     out << ".end_" << nombreFuncion << ":" << endl;

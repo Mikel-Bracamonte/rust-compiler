@@ -13,4 +13,3 @@ fn main() {
         println!("{}", fibo(a));
         a = a + 1;
     }
-}

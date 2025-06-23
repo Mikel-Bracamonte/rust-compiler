@@ -12,7 +12,9 @@ using namespace std;
 
 class ImpType {
 public:
-    string TType;
+    string ttype;
+    // ttypes: "int", "bool", "void"
+    
     vector<string> types;
     ImpType(string s);
     ImpType();

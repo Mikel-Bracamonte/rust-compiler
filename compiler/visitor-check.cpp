@@ -12,34 +12,34 @@ void CheckVisitor::check(Program* p) {
 ImpType CheckVisitor::visit(BinaryExp* exp) {
     ImpType v1 = exp->left->accept(this);
     ImpType v2 = exp->right->accept(this);
-    // si es void o notype -> ignorar
-    if(v1.ttype == ImpType::VOID || v1.ttype == ImpType::NOTYPE || v2.ttype == ImpType::NOTYPE || v2.ttype == ImpType::VOID) {
-        errorHandler.error("Operando inválido.");
+    // si es void -> ignorar
+    if(v1.ttype == "void"  || v2.ttype == "void") {
+        errorHandler.error("Operación binaria no puede ser con tipo 'void'.");
     }
 
     switch (exp->op) {
         case PLUS_OP: case MINUS_OP: case MUL_OP: case DIV_OP: // long int
-            if (v1.ttype == ImpType::INT && v2.ttype == ImpType::INT) return ImpType("int");
+            if (v1.ttype == "int" && v2.ttype == "int") return ImpType("int");
             else {
                 errorHandler.error("Operación aritmética requiere enteros (int).");
             }
         case LT_OP: case LE_OP: case GT_OP: case GE_OP: // long int
-            if (v1.ttype == ImpType::INT && v2.ttype == ImpType::INT) return ImpType("bool"); 
+            if (v1.ttype == "int" && v2.ttype == "int") return ImpType("bool"); 
             else {
                 errorHandler.error("Operación de comparación requiere enteros (int).");
             }
         case EQ_OP: case NEQ_OP:
-            if(v1.ttype ==v2.ttype) return ImpType("bool"); 
+            if(v1.ttype ==v2.ttype) return ImpType("bool"); // mismo tipo: bool, int
             else{
                 errorHandler.error("Operación requiere de igualdad enteros (int) o booleanos (bool).");
             }
         case MOD_OP: // long int
-            if (v1.ttype == ImpType::INT && v2.ttype == ImpType::INT) return ImpType(ImpType::INT); 
+            if (v1.ttype == "int" && v2.ttype == "int") return ImpType("int"); 
             else{
                 errorHandler.error("Operación de módulo requiere enteros (int).");
             }           
         case AND_OP: case OR_OP:
-            if (v1.ttype == ImpType::BOOL && v2.ttype == ImpType::BOOL) return ImpType(ImpType::BOOL);
+            if (v1.ttype == "bool" && v2.ttype == "bool") return ImpType("bool");
             else {
                 errorHandler.error("Operación lógica requiere booleanos (bool).");
             }
@@ -52,28 +52,21 @@ ImpType CheckVisitor::visit(BinaryExp* exp) {
 ImpType CheckVisitor::visit(UnaryExp* exp) {
     ImpType e = exp->exp->accept(this);
     ImpType result;
-
-    result.type = e.type;
+    // int, longint
+    if(e.ttype == "void") {
+        errorHandler.error("Operación unaria no puede ser con tipo 'void'.");
+    }
 
     switch(exp->op) {
-        case: U_NEG_OP:
+        case U_NEG_OP:
+            if(e.ttype=="int") return ImpType("int");
 
-        
-
-    if (exp->op == NOT_OP) {
-        if(result.type == ImpType::BOOL){
-            return result;
-        }
-        else{
-            cout<<"Debería ser un booleano";
-            exit(0);
-        }
+        case U_NOT_OP:
+            if(e.ttype=="bool") return ImpType("bool");
+        default:
+        errorHandler.error("Operador unario no reconocido: " + Exp::unaryOpToChar(exp->op));        
     }
-    
-    
     return ImpType();
-    
-    
 }
 
 ImpType CheckVisitor::visit(NumberExp* e) {
@@ -117,7 +110,7 @@ void CheckVisitor::visit(PrintStatement* s) {
 }
 
 void CheckVisitor::visit(IfStatement* s) {
-    if (s->condition->accept(this).ttype == ImpType::BOOL) {
+    if (s->condition->accept(this).ttype == "bool") {
         s->then->accept(this);
         if (s->els) s->els->accept(this);
     } else{
@@ -127,7 +120,7 @@ void CheckVisitor::visit(IfStatement* s) {
 }
 
 void CheckVisitor::visit(WhileStatement* stm) {
-    if(stm->condition->accept(this).ttype == ImpType::BOOL) {
+    if(stm->condition->accept(this).ttype == "bool") {
         stm->body->accept(this);
     }
     else {
@@ -142,11 +135,11 @@ void CheckVisitor::visit(ForStatement* s) {
     }
 
     ImpType startT = s->start->accept(this);
-    if (startT.ttype != ImpType::INT) {
+    if (startT.ttype != "int") {
         errorHandler.error("El inicio del for debe ser un entero.");
     }
     ImpType endT = s->end->accept(this);
-    if (endT.ttype != ImpType::INT) {
+    if (endT.ttype != "int") {
         errorHandler.error("El final del for debe ser un entero.");
     }
 
@@ -189,11 +182,11 @@ void CheckVisitor::visit(VarDec* vd) {
     // mapa con variables mutables
     
     if (vd->type == "i32") {
-        type.set_basic_type(ImpType::INT);
+        type.set_basic_type("int");
         env.add_var(vd->name,type);
         
     } else if (vd->type == "bool") {
-        type.set_basic_type(ImpType::BOOL);
+        type.set_basic_type("bool");
         env.add_var(vd->name, type);
     } else {
         errorHandler.error("Tipo de variable no reconocido: '" + vd->type + "'.");
@@ -209,10 +202,10 @@ void CheckVisitor::visit(ParamDec* vd) {
     ImpType t;
     
     if (vd->type == "i32") {
-        t.set_basic_type(ImpType::INT);
+        t.set_basic_type("int");
         env.add_var(vd->name, t);
     } else if (vd->type == "bool") {
-        t.set_basic_type(ImpType::BOOL);
+        t.set_basic_type("bool");
         env.add_var(vd->name, t);
     } else {
         errorHandler.error("Tipo de parámetro no reconocido: '" + vd->type + "'.");

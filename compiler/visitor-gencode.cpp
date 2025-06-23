@@ -160,6 +160,11 @@ ImpType GenCodeVisitor::visit(BinaryExp* e) {
                 << " movzbq %al, %rax" << endl;
             break;
         case GT_OP:
+            out << " cmpq %rcx, %rax" << endl
+                << " movl $0, %eax" << endl
+                << " setg %al" << endl
+                << " movzbq %al, %rax" << endl;
+        
             break;
         case GE_OP:
             break;

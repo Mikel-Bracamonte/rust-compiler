@@ -211,8 +211,8 @@ ImpType GenCodeVisitor::visit(BoolExp* e) {
 
 // seems check!
 ImpType GenCodeVisitor::visit(IdentifierExp* e) {
-    assert(memoria.count(e->name));
-    out << " movq " << memoria[e->name] << "(%rbp), %rax"<<endl;
+    assert(env.check(e->name));
+    out << " movq " << get<1>(env.lookup(e->name)) << "(%rbp), %rax"<<endl;
     return ImpType();
 }
 
@@ -232,12 +232,22 @@ ImpType GenCodeVisitor::visit(IfExp* e) {
 }
 
 ImpType GenCodeVisitor::visit(FunctionCallExp* e) {
+    vector<std::string> argRegs = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
+    int i = 0;
+    for(auto it = e->argList.begin(); it != e->argList.end(); ++it) {
+        (*it)->accept(this);
+        out << " mov %rax, " << argRegs[i] << endl;
+        ++i;
+    }
+    out << " call " << e->name << endl;
+
     return ImpType();
 }
 
 void GenCodeVisitor::visit(AssignStatement* s) {
+    assert(env.check(s->name));
     s->right->accept(this);
-    out << " movq %rax, " << memoria[s->name] << "(%rbp)"<<endl;
+    out << " movq %rax, " << get<1>(env.lookup(s->name)) << "(%rbp)" << endl;
     /*
     ImpType val = s->rhs->accept(this); 
     cout << "  movq %rax, " << stack_offsets[s->id] << "(%rbp)" << endl;
@@ -294,7 +304,10 @@ for_5
 endfor_5
 */
 void GenCodeVisitor::visit(ForStatement* s) {
-    
+    int lbl = label_counter++;
+    out << "for_" << lbl << ":" << endl;
+
+
 }
 
 void GenCodeVisitor::visit(ReturnStatement* s) {
@@ -316,31 +329,34 @@ void GenCodeVisitor::visit(ContinueStatement* s) {
 
 // seems check!
 void GenCodeVisitor::visit(VarDec* vd) {
-    memoria[vd->name] = offset;
+    ImpType type;
+    type.set_basic_type(vd->type);
+    env.add_var(vd->name, {type, offset});
     offset -= 8;
-    /*
-    ImpVType tt = ImpType::get_basic_type(vd->type);
-    for (const auto& var : vd->vars) {
-        ImpType v;
-        v.set_default_value(tt);
-        env.add_var(var, v);
-        current_offset -= 8;
-        stack_offsets[var] = current_offset;
-    }
-    */
 }
 
 void GenCodeVisitor::visit(FunctionCallStatement* stm) {
-    
+    vector<std::string> argRegs = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
+    int i = 0;
+    for(auto it = stm->argList.begin(); it != stm->argList.end(); ++it) {
+        (*it)->accept(this);
+        out << " mov %rax, " << argRegs[i] << endl;
+        ++i;
+    }
+    out << " call " << stm->name << endl;
 }
 
 void GenCodeVisitor::visit(ParamDec* vd) {
-
+    ImpType type;
+    type.set_basic_type(vd->type);
+    env.add_var(vd->name, {type, offset});
+    offset -= 8;
 }
 
 void GenCodeVisitor::visit(FunDec* f) {
     entornoFuncion = true;
-    memoria.clear();
+    env.clear();
+    env.add_level();
     offset = -8;
     nombreFuncion = f->name;
 
@@ -348,21 +364,19 @@ void GenCodeVisitor::visit(FunDec* f) {
     
     out << ".globl " << f->name << endl;
     out << f->name << ":" << endl;
-    out << "pushq %rbp" << endl;
-    out << "movq %rsp, %rbp" << endl;
+    out << " pushq %rbp" << endl;
+    out << " movq %rsp, %rbp" << endl;
     
-    /*
-    // paramDec
+    int reserva = 80; // deberia ser calculado con las variables
+    out << " subq $" << reserva << ", %rsp" << endl;
+
     int size = f->params.size();
-    for(int i = 0;i<size;i++){
-        memoria[f->params[i]] = offset;
-        out << " mov %" << argRegs[i] << ", " << offset << "(%rbp)" << endl;
-        offset -= 8;
+    int i = 0;
+    for(auto it = f->params.begin(); it != f->params.end(); ++it){
+        out << " mov " << argRegs[i] << ", " << offset << "(%rbp)" << endl;
+        (*it)->accept(this);
+        ++i;
     }
-    */
-    // f->cuerpo->vardecs->accept(this);
-    int reserva = -offset; // deberia ser calculado con las variables
-    out << " subq $" << -80 << ", %rsp" << endl;
     f->body->accept(this);
 
     out << ".end_" << nombreFuncion << ":" << endl;

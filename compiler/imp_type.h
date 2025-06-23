@@ -16,6 +16,9 @@ public:
     static const char* type_names[5];
     TType ttype;
     vector<TType> types;
+    ImpType(TType tt);
+    ImpType(string s);
+    ImpType();
     bool match(const ImpType&);
     bool set_basic_type(string s);
     bool set_basic_type(TType tt);

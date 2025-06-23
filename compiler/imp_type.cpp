@@ -2,6 +2,32 @@
 
 const char* ImpType::type_names[5] = { "notype", "void", "int", "bool", "fun" };
 
+ImpType::ImpType(TType tt){
+  bool ret = true;
+  switch(tt) {
+  case ImpType::INT:
+  case ImpType::BOOL:
+  case ImpType::VOID:
+    this->ttype = tt; break;
+  default:
+    ret = false;
+  }
+}
+
+ImpType::ImpType(string s) {
+  TType tt;
+  bool ret = true;
+  tt = string_to_type(s);
+  if (tt == ImpType::NOTYPE) ret = false;
+  this->ttype = tt;
+}
+
+ImpType::ImpType() {
+  this->ttype = ImpType::NOTYPE;
+  types.clear();
+}
+
+
 bool ImpType::match(const ImpType& t) {
   if (this->ttype != t.ttype) return false;
   if (this->ttype == ImpType::FUN) {

@@ -50,10 +50,16 @@ ImpType CheckVisitor::visit(BinaryExp* exp) {
 }
 
 ImpType CheckVisitor::visit(UnaryExp* exp) {
-    /*
     ImpType e = exp->exp->accept(this);
     ImpType result;
+
     result.type = e.type;
+
+    switch(exp->op) {
+        case: U_NEG_OP:
+
+        
+
     if (exp->op == NOT_OP) {
         if(result.type == ImpType::BOOL){
             return result;
@@ -63,7 +69,7 @@ ImpType CheckVisitor::visit(UnaryExp* exp) {
             exit(0);
         }
     }
-    */
+    
     
     return ImpType();
     

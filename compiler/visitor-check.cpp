@@ -70,17 +70,23 @@ ImpType CheckVisitor::visit(UnaryExp* exp) {
 }
 
 ImpType CheckVisitor::visit(NumberExp* e) {
-
-    return ImpType();
+    return ImpType("int"); // long int
 }
 
 ImpType CheckVisitor::visit(BoolExp* e) {
-
-    return ImpType();
+    return ImpType("bool");
 }
 
 ImpType CheckVisitor::visit(IdentifierExp* e) {
+    // chequear variable en entorno
+    auto tipo= env.lookup(e->name);
+    cout<<tipo.ttype<<endl;
+    // FALTA CHEQUEAR ACAAA
+    //e->accept(this);
+    if(tipo.ttype == "i32") return ImpType("int");
+    if(tipo.ttype == "bool") return ImpType("bool");
 
+    errorHandler.error("Variable '" + e->name + "' no declarada o tipo no reconocido.");
     return ImpType();
 }
 
@@ -100,6 +106,7 @@ void CheckVisitor::visit(AssignStatement* s) {
     }
     ImpType target = env.lookup(s->name);
     ImpType src = s->right->accept(this);
+    
     if (!target.match(src)) {
         errorHandler.error("Tipo incompatible en asignación a '" + s->name + "'.");
     }
@@ -116,7 +123,6 @@ void CheckVisitor::visit(IfStatement* s) {
     } else{
         errorHandler.error("La condición del if debe ser bool.");
     }
-    
 }
 
 void CheckVisitor::visit(WhileStatement* stm) {
@@ -175,23 +181,17 @@ void CheckVisitor::visit(VarDec* vd) {
     if (env.check(vd->name)) {
         errorHandler.error("Variable '" + vd->name + "' ya declarada.");
     }
-
-    ImpType type;
     // long int?
     // mut?
     // mapa con variables mutables
-    
+    cout<<"vd type"<<vd->type<<endl;
     if (vd->type == "i32") {
-        type.set_basic_type("int");
-        env.add_var(vd->name,type);
-        
+        env.add_var(vd->name,vd->type);
     } else if (vd->type == "bool") {
-        type.set_basic_type("bool");
-        env.add_var(vd->name, type);
+        env.add_var(vd->name, vd->type);
     } else {
         errorHandler.error("Tipo de variable no reconocido: '" + vd->type + "'.");
     }
-
 }
 
 void CheckVisitor::visit(FunctionCallStatement* stm) {
@@ -201,12 +201,8 @@ void CheckVisitor::visit(FunctionCallStatement* stm) {
 void CheckVisitor::visit(ParamDec* vd) {
     ImpType t;
     
-    if (vd->type == "i32") {
-        t.set_basic_type("int");
-        env.add_var(vd->name, t);
-    } else if (vd->type == "bool") {
-        t.set_basic_type("bool");
-        env.add_var(vd->name, t);
+    if (vd->type == "i32" || vd->type == "i64" || vd->type == "bool") {
+        env.add_var(vd->name, vd->type);
     } else {
         errorHandler.error("Tipo de parámetro no reconocido: '" + vd->type + "'.");
     }

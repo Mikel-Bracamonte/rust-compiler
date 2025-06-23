@@ -12,23 +12,34 @@ void CheckVisitor::check(Program* p) {
 ImpType CheckVisitor::visit(BinaryExp* exp) {
     ImpType v1 = exp->left->accept(this);
     ImpType v2 = exp->right->accept(this);
+    // si es void o notype -> ignorar
+    if(v1.ttype == ImpType::VOID || v1.ttype == ImpType::NOTYPE || v2.ttype == ImpType::NOTYPE || v2.ttype == ImpType::VOID) {
+        errorHandler.error("Operando inválido.");
+    }
 
     switch (exp->op) {
-        case PLUS_OP:
-        case MINUS_OP:
-        case MUL_OP:
-        case DIV_OP:
-            if (v1.ttype == ImpType::INT && v2.ttype == ImpType::INT) return ImpType(ImpType::INT);
+        case PLUS_OP: case MINUS_OP: case MUL_OP: case DIV_OP: // long int
+            if (v1.ttype == ImpType::INT && v2.ttype == ImpType::INT) return ImpType("int");
             else {
                 errorHandler.error("Operación aritmética requiere enteros (int).");
             }
-        case LT_OP: case LE_OP: case EQ_OP:
-            if (v1.ttype == ImpType::INT && v2.ttype == ImpType::INT) return ImpType(ImpType::BOOL); // comparación válida
+        case LT_OP: case LE_OP: case GT_OP: case GE_OP: // long int
+            if (v1.ttype == ImpType::INT && v2.ttype == ImpType::INT) return ImpType("bool"); 
             else {
                 errorHandler.error("Operación de comparación requiere enteros (int).");
             }
+        case EQ_OP: case NEQ_OP:
+            if(v1.ttype ==v2.ttype) return ImpType("bool"); 
+            else{
+                errorHandler.error("Operación requiere de igualdad enteros (int) o booleanos (bool).");
+            }
+        case MOD_OP: // long int
+            if (v1.ttype == ImpType::INT && v2.ttype == ImpType::INT) return ImpType(ImpType::INT); 
+            else{
+                errorHandler.error("Operación de módulo requiere enteros (int).");
+            }           
         case AND_OP: case OR_OP:
-            if (v1.ttype == ImpType::BOOL && v2.ttype == ImpType::BOOL) return ImpType(ImpType::BOOL); // comparación válida
+            if (v1.ttype == ImpType::BOOL && v2.ttype == ImpType::BOOL) return ImpType(ImpType::BOOL);
             else {
                 errorHandler.error("Operación lógica requiere booleanos (bool).");
             }
@@ -52,10 +63,10 @@ ImpType CheckVisitor::visit(UnaryExp* exp) {
             exit(0);
         }
     }
-
+    */
     
     return ImpType();
-    */
+    
     
 }
 
@@ -116,7 +127,6 @@ void CheckVisitor::visit(WhileStatement* stm) {
     else {
         errorHandler.error("La condición del while debe ser bool.");
     }
-
 }
 
 void CheckVisitor::visit(ForStatement* s) {
@@ -137,7 +147,7 @@ void CheckVisitor::visit(ForStatement* s) {
 }
 
 void CheckVisitor::visit(ReturnStatement* s) {
-    
+
 }
 
 void CheckVisitor::visit(BreakStatement* s) {
@@ -179,7 +189,6 @@ void CheckVisitor::visit(VarDec* vd) {
     } else if (vd->type == "bool") {
         type.set_basic_type(ImpType::BOOL);
         env.add_var(vd->name, type);
-        
     } else {
         errorHandler.error("Tipo de variable no reconocido: '" + vd->type + "'.");
     }

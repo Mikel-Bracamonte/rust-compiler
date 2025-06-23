@@ -64,8 +64,8 @@ int main(int argc, const char* argv[]) {
             return 1;
         }
         cout << "Generando codigo ensamblador en " << outputFilename << endl;
-        
-        GenCodeVisitor* gencodeVisitor = new GenCodeVisitor(outfile);
+        unordered_map<string, int> map;
+        GenCodeVisitor* gencodeVisitor = new GenCodeVisitor(outfile, map);
         
         gencodeVisitor->gencode(program);
         outfile.close();

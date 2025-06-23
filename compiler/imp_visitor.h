@@ -37,17 +37,18 @@ public:
 class GenCodeVisitor : public ImpVisitor {
 private:
     Environment<ImpType> env;
-    int label_counter;
     stack<int> label_stack;
     std::ostream& out;
 public:
-    GenCodeVisitor(std::ostream& out) : out(out) {
+    GenCodeVisitor(std::ostream& out, unordered_map<string, int> m) : out(out) {
         errorHandler = ErrorHandler("GenCodeVisitor");
+        reserva_function = m;
     }
+    unordered_map<string, int> reserva_function;
     ErrorHandler errorHandler;
     unordered_map<string, int> memoria;
     int offset = -8;
-    int labelcont = 0;
+    int label_counter = 0;
     bool entornoFuncion = false;
     string nombreFuncion;
 

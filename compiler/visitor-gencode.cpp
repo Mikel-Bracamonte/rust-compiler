@@ -312,7 +312,14 @@ void GenCodeVisitor::visit(VarDec* vd) {
 }
 
 void GenCodeVisitor::visit(FunctionCallStatement* stm) {
-    
+    vector<std::string> argRegs = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
+    int i = 0;
+    for(auto it = stm->argList.begin(); it != stm->argList.end(); ++it) {
+        (*it)->accept(this);
+        out << " mov %rax, " << argRegs[i] << endl;
+        ++i;
+    }
+    out << " call " << stm->name << endl;
 }
 
 void GenCodeVisitor::visit(ParamDec* vd) {

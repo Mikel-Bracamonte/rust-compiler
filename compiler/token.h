@@ -27,7 +27,7 @@ public:
         LE, // <= 
         GT, // >
         GE, // >= 
-        EQ, // =
+        EQ, // ==
         NEQ, // !=
         IF, // if
         ELSE, // else

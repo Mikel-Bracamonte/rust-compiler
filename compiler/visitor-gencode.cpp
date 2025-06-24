@@ -88,7 +88,8 @@ void Body::accept(ImpVisitor* visitor) {
 
 void GenCodeVisitor::gencode(Program* p) {
     out << ".data" << endl;
-    out << "print_fmt: .string \"%ld \\n\""<<endl;
+    out << "print_fmt_ln: .string \"%ld \\n\""<<endl;
+    out << "print_fmt: .string \"%ld \""<<endl;
     out << ".text" << endl;
 
     for(auto f: p->funs){
@@ -96,25 +97,6 @@ void GenCodeVisitor::gencode(Program* p) {
     }
 
     out << ".section .note.GNU-stack,\"\",@progbits"<<endl;
-
-    /*
-    env.clear();
-    label_counter = 0;
-    offset = 0;
-
-    cout << ".data" << endl;
-    cout << "print_fmt: .string \"%ld\\n\"" << endl;
-    cout << ".text" << endl;
-    cout << ".globl main" << endl;
-    cout << "main:" << endl;
-    cout << "  pushq %rbp" << endl;
-    cout << "  movq %rsp, %rbp" << endl;
-    p->accept(this);  
-    cout << "  movl $0, %eax" << endl;
-    cout << "  leave" << endl;
-    cout << "  ret" << endl;
-    cout << ".section .note.GNU-stack,\"\",@progbits" << endl;
-    */
 }
 
 
@@ -159,16 +141,33 @@ ImpType GenCodeVisitor::visit(BinaryExp* e) {
                 << " movzbq %al, %rax" << endl;
             break;
         case GT_OP:
+            out << " cmpq %rcx, %rax" << endl
+                << " movl $0, %eax" << endl
+                << " setg %al" << endl
+                << " movzbq %al, %rax" << endl;
             break;
         case GE_OP:
+            out << " cmpq %rcx, %rax" << endl
+                << " movl $0, %eax" << endl
+                << " setge %al" << endl
+                << " movzbq %al, %rax" << endl;
             break;
         case NEQ_OP:
+            out << " cmpq %rcx, %rax" << endl
+                << " movl $0, %eax" << endl
+                << " setne %al" << endl
+                << " movzbq %al, %rax" << endl;
             break;
         case MOD_OP:
+            // TODO
             break;
         case AND_OP:
+            out << " and %cl, %al" << endl
+                << " movzbq %al, %rax" << endl;
             break;
         case OR_OP:
+            out << " or %cl, %al" << endl
+                << " movzbq %al, %rax" << endl;
             break;
         default:
             errorHandler.error("Not binaryOp supported");
@@ -176,6 +175,7 @@ ImpType GenCodeVisitor::visit(BinaryExp* e) {
     return ImpType();
 }
 
+// check?
 ImpType GenCodeVisitor::visit(UnaryExp* e) {
     e->exp->accept(this);
     switch (e->op) {
@@ -183,7 +183,7 @@ ImpType GenCodeVisitor::visit(UnaryExp* e) {
             out << " neg %rax" << endl; 
             break;
         case U_NOT_OP:
-            // TODO 
+            out << " subq $1, %rax" << endl; 
             break;
         default:
             errorHandler.error("Not unaryOp supported");
@@ -242,6 +242,7 @@ void GenCodeVisitor::visit(AssignStatement* s) {
     assert(env.check(s->name));
     s->right->accept(this);
     out << " movq %rax, " << get<1>(env.lookup(s->name)) << "(%rbp)" << endl;
+    // TODO
     /*
     ImpType val = s->rhs->accept(this); 
     cout << "  movq %rax, " << stack_offsets[s->id] << "(%rbp)" << endl;
@@ -253,9 +254,14 @@ void GenCodeVisitor::visit(AssignStatement* s) {
 void GenCodeVisitor::visit(PrintStatement* s) {
     s->exp->accept(this);
     out <<
-        " movq %rax, %rsi" << endl
-        << " leaq print_fmt(%rip), %rdi" << endl
-        << " movl $0, %eax" << endl
+        " movq %rax, %rsi" << endl;
+    if(s->ln){
+        out << " leaq print_fmt_ln(%rip), %rdi" << endl;
+    }
+    else {
+        out << " leaq print_fmt(%rip), %rdi" << endl;
+    }
+    out << " movl $0, %eax" << endl
         << " call printf@PLT" << endl;
 }
 
@@ -274,6 +280,8 @@ void GenCodeVisitor::visit(IfStatement* s) {
 
 void GenCodeVisitor::visit(WhileStatement* s) {
     int lbl = label_counter++;
+    
+    nombreLoop.push("while_" + to_string(lbl));
     out << "while_" << lbl << ":" << endl;
     s->condition->accept(this);
     out << "  testq %rax, %rax" << endl; 
@@ -281,8 +289,15 @@ void GenCodeVisitor::visit(WhileStatement* s) {
     s->body->accept(this);
     out << "  jmp while_" << lbl << endl;
     out << "endwhile_" << lbl << ":" << endl;
-}
 
+    nombreLoop.pop();
+}
+/* Los loops se llaman
+while_10
+endwhile_10
+for_5
+endfor_5
+*/
 void GenCodeVisitor::visit(ForStatement* s) {
     int lbl = label_counter++;
     string var = s->name;
@@ -322,12 +337,16 @@ void GenCodeVisitor::visit(ReturnStatement* s) {
     out << "jmp .end_" << nombreFuncion << endl;
 }
 
+// check!
 void GenCodeVisitor::visit(BreakStatement* s) {
-    
+    assert(!nombreLoop.empty());
+    out << "jmp end" << nombreLoop.top() << endl;
 }
 
+// check!
 void GenCodeVisitor::visit(ContinueStatement* s) {
-    
+    assert(!nombreLoop.empty());
+    out << "jmp " << nombreLoop.top() << endl;
 }
 
 // seems check!
@@ -336,6 +355,10 @@ void GenCodeVisitor::visit(VarDec* vd) {
     type.set_basic_type(vd->type);
     env.add_var(vd->name, {type, offset});
     offset -= 8;
+    if(vd->exp != nullptr){
+        vd->exp->accept(this);
+        out << " movq %rax, " << get<1>(env.lookup(vd->name)) << "(%rbp)" << endl;
+    }
 }
 
 void GenCodeVisitor::visit(FunctionCallStatement* stm) {
@@ -380,7 +403,6 @@ void GenCodeVisitor::visit(FunDec* f) {
         (*it)->accept(this);
         ++i;
     }
-    
     f->body->accept(this);
 
     out << ".end_" << nombreFuncion << ":" << endl;
@@ -399,18 +421,6 @@ void GenCodeVisitor::visit(Body* b) {
     env.add_level();
     b->stmList->accept(this);
     env.remove_level();
-    /*
-    env.add_level();
-    long old_offset = offset;
-    b->vardecs->accept(this);
-    long locals_size = -current_offset;
-    if (locals_size > 0)
-        cout << "  subq $" << locals_size << ", %rsp" << endl;
-
-    b->slist->accept(this);
-    current_offset = old_offset;
-    env.remove_level();
-    */
 }
 
 ////////////////////////////////////////////////////

@@ -52,6 +52,8 @@ public:
     bool entornoFuncion = false;
     string nombreFuncion;
 
+    stack<string> nombreLoop;
+
     void gencode(Program* p);
     ImpType visit(BinaryExp* exp) override;
     ImpType visit(UnaryExp* exp) override;

@@ -285,9 +285,36 @@ void GenCodeVisitor::visit(WhileStatement* s) {
 
 void GenCodeVisitor::visit(ForStatement* s) {
     int lbl = label_counter++;
+    string var = s->name;
+
+    ImpType type;
+    type.set_basic_type("i32");
+    env.add_var(var, {type, offset});
+    int var_offset = offset;
+    offset -= 8;
+
+    s->start->accept(this);
+    out << "movq %rax, " << offset << "(%rbp)" << endl;
+    int current_offset = offset;
+    offset -= 8;
+    s->end->accept(this);
+    out << "movq %rax, " << offset << "(%rbp)" << endl;
+    int end_offset = offset;
+    offset -= 8;
+    
     out << "for_" << lbl << ":" << endl;
+    out << "movq " << current_offset << "(%rbp), %rax" << endl;
+    out << "movq " << end_offset << "(%rbp), %rcx" << endl;
+    out << "cmpq %rcx, %rax" << endl;
+    out << "jge endfor_" << lbl << endl;
+    out << "movq %rax, " << var_offset << "(%rbp)" << endl;
+    out << "addq $1, %rax" << endl;
+    out << "movq %rax, " << current_offset << "(%rbp)" << endl;
 
+    s->body->accept(this);
 
+    out << "jmp for_" << lbl << endl;
+    out << "endfor_" << lbl << ":" << endl;
 }
 
 void GenCodeVisitor::visit(ReturnStatement* s) {
@@ -369,7 +396,9 @@ void GenCodeVisitor::visit(StatementList* s) {
 }
 
 void GenCodeVisitor::visit(Body* b) {
+    env.add_level();
     b->stmList->accept(this);
+    env.remove_level();
     /*
     env.add_level();
     long old_offset = offset;

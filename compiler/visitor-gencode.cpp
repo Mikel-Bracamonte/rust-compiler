@@ -97,25 +97,6 @@ void GenCodeVisitor::gencode(Program* p) {
     }
 
     out << ".section .note.GNU-stack,\"\",@progbits"<<endl;
-
-    /*
-    env.clear();
-    label_counter = 0;
-    offset = 0;
-
-    cout << ".data" << endl;
-    cout << "print_fmt: .string \"%ld\\n\"" << endl;
-    cout << ".text" << endl;
-    cout << ".globl main" << endl;
-    cout << "main:" << endl;
-    cout << "  pushq %rbp" << endl;
-    cout << "  movq %rsp, %rbp" << endl;
-    p->accept(this);  
-    cout << "  movl $0, %eax" << endl;
-    cout << "  leave" << endl;
-    cout << "  ret" << endl;
-    cout << ".section .note.GNU-stack,\"\",@progbits" << endl;
-    */
 }
 
 
@@ -164,17 +145,29 @@ ImpType GenCodeVisitor::visit(BinaryExp* e) {
                 << " movl $0, %eax" << endl
                 << " setg %al" << endl
                 << " movzbq %al, %rax" << endl;
-        
             break;
         case GE_OP:
+            out << " cmpq %rcx, %rax" << endl
+                << " movl $0, %eax" << endl
+                << " setge %al" << endl
+                << " movzbq %al, %rax" << endl;
             break;
         case NEQ_OP:
+            out << " cmpq %rcx, %rax" << endl
+                << " movl $0, %eax" << endl
+                << " setne %al" << endl
+                << " movzbq %al, %rax" << endl;
             break;
         case MOD_OP:
+            // TODO
             break;
         case AND_OP:
+            out << " and %cl, %al" << endl
+                << " movzbq %al, %rax" << endl;
             break;
         case OR_OP:
+            out << " or %cl, %al" << endl
+                << " movzbq %al, %rax" << endl;
             break;
         default:
             errorHandler.error("Not binaryOp supported");
@@ -182,6 +175,7 @@ ImpType GenCodeVisitor::visit(BinaryExp* e) {
     return ImpType();
 }
 
+// check?
 ImpType GenCodeVisitor::visit(UnaryExp* e) {
     e->exp->accept(this);
     switch (e->op) {
@@ -189,7 +183,7 @@ ImpType GenCodeVisitor::visit(UnaryExp* e) {
             out << " neg %rax" << endl; 
             break;
         case U_NOT_OP:
-            out << " not %rax" << endl; 
+            out << " subq $1, %rax" << endl; 
             break;
         default:
             errorHandler.error("Not unaryOp supported");
@@ -248,6 +242,7 @@ void GenCodeVisitor::visit(AssignStatement* s) {
     assert(env.check(s->name));
     s->right->accept(this);
     out << " movq %rax, " << get<1>(env.lookup(s->name)) << "(%rbp)" << endl;
+    // TODO
     /*
     ImpType val = s->rhs->accept(this); 
     cout << "  movq %rax, " << stack_offsets[s->id] << "(%rbp)" << endl;
@@ -393,18 +388,6 @@ void GenCodeVisitor::visit(StatementList* s) {
 
 void GenCodeVisitor::visit(Body* b) {
     b->stmList->accept(this);
-    /*
-    env.add_level();
-    long old_offset = offset;
-    b->vardecs->accept(this);
-    long locals_size = -current_offset;
-    if (locals_size > 0)
-        cout << "  subq $" << locals_size << ", %rsp" << endl;
-
-    b->slist->accept(this);
-    current_offset = old_offset;
-    env.remove_level();
-    */
 }
 
 ////////////////////////////////////////////////////

@@ -328,6 +328,10 @@ void GenCodeVisitor::visit(VarDec* vd) {
     type.set_basic_type(vd->type);
     env.add_var(vd->name, {type, offset});
     offset -= 8;
+    if(vd->exp != nullptr){
+        vd->exp->accept(this);
+        out << " movq %rax, " << get<1>(env.lookup(vd->name)) << "(%rbp)" << endl;
+    }
 }
 
 void GenCodeVisitor::visit(FunctionCallStatement* stm) {

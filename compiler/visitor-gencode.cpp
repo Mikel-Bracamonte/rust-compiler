@@ -98,7 +98,7 @@ void GenCodeVisitor::gencode(Program* p) {
 
     out << ".section .note.GNU-stack,\"\",@progbits"<<endl;
 }
-
+//parser aumentar structs
 
 
 ImpType GenCodeVisitor::visit(BinaryExp* e) {
@@ -241,13 +241,33 @@ ImpType GenCodeVisitor::visit(FunctionCallExp* e) {
 void GenCodeVisitor::visit(AssignStatement* s) {
     assert(env.check(s->name));
     s->right->accept(this);
-    out << " movq %rax, " << get<1>(env.lookup(s->name)) << "(%rbp)" << endl;
     // TODO
-    /*
-    ImpType val = s->rhs->accept(this); 
-    cout << "  movq %rax, " << stack_offsets[s->id] << "(%rbp)" << endl;
-    env.update(s->id, val);  
-    */
+    int offset_assign = get<1>(env.lookup(s->name));
+    switch (s->op) {
+        case AS_ASSIGN_OP:
+            out << " movq %rax, " << offset_assign << "(%rbp)" << endl;
+            break;
+        case AS_PLUS_OP:
+            out << " addq %rax, " << offset_assign << "(%rbp)" << endl;
+            break;
+        case AS_MINUS_OP:
+            out << " subq %rax, " << offset_assign << "(%rbp)" << endl;
+            break;
+        case AS_MUL_OP: // not checked yet
+            out << " movq %rax, %rcx" << endl;
+            out << " movq " << offset_assign << "(%rbp), %rax" << endl;
+            out << " imulq %rcx, %rax" << endl;
+            out << " movq %rax, " << offset_assign << "(%rbp)" << endl;
+            break;
+        case AS_DIV_OP:
+            out << " idivq %rax, " << offset_assign << "(%rbp)" << endl;
+            break;
+        case AS_MOD_OP:
+            // TODO
+            break;
+        default:
+            errorHandler.error("Not assignOp supported");
+    }
 }
 
 // check!

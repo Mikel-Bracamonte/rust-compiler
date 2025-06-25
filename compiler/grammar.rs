@@ -42,8 +42,13 @@ Exp ::= Term ((+ | -) Term)*
 
 Term ::= Factor ((*|/|%) Factor)*
 
-Factor ::= [-] (id | Num | Bool | ( AExp ) | if AExp {AExp} else {AExp} | id ( [ArgList] ))
+Factor ::= [-] (id | Num | Bool | ( AExp ) | if AExp {AExp} else {AExp} | id ( [ArgList] )) | StructExp
+
+StructExp ::= id { id : AExp (, id : AExp)* [,] }
 
 ArgList ::= AExp (, AExp)*
 
 Bool ::= true | false
+
+
+//scanner id es id.id.id....

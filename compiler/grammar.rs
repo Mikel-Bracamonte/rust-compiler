@@ -1,4 +1,12 @@
-Program ::= (fn FunDec)+
+Program ::= StructList | FunDecList
+
+StructList ::= (struct id { AttrDecList }) *
+
+AttrDecList ::= AttrDec (, AttrDec) [,]
+
+AttrDec ::= id : Type
+
+FunDecList ::= (fn FunDec)+ 
 
 FunDec ::= id ([ParamDecList]) [-> Type] { Body }
 

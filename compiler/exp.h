@@ -106,7 +106,7 @@ public:
     int accept(Visitor* visitor);
     ImpType accept(ImpVisitor* v);
     ~StructExp();
-}
+};
 
 //TODO constructors, accepts
 class StructExpAttr {
@@ -116,7 +116,7 @@ class StructExpAttr {
     int accept(Visitor* visitor);
     ImpType accept(ImpVisitor* v);
     ~StructExpAttr();
-}
+};
 
 ///////////////////////////////////////////////////////
 
@@ -264,9 +264,9 @@ public:
     list<AttrDec> attrs;
     StructDec();
     int accept(Visitor* visitor);
-    ImpType accept(ImpVisitor* v);
+    void accept(ImpVisitor* v);
     ~StructDec();
-}
+};
 
 //TODO constructors, accepts
 class AttrDec {
@@ -274,9 +274,9 @@ class AttrDec {
     string type;
     AttrDec(string n, string t);
     int accept(Visitor* visitor);
-    ImpType accept(ImpVisitor* v);
+    void accept(ImpVisitor* v);
     ~AttrDec();
-}
+};
 
 class StatementList {
 public:

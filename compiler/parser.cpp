@@ -66,6 +66,7 @@ Program* Parser::parseProgram() {
 // TODO
 StructDec* Parser::parseStructDec() {
 
+    return new StructDec();
     // TODO AttrDec()
 }
 

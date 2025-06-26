@@ -29,6 +29,14 @@ ImpType FunctionCallExp::accept(ImpVisitor* visitor) {
     return visitor->visit(this);
 }
 
+ImpType StructExp::accept(ImpVisitor* visitor) {
+    return visitor->visit(this);
+}
+
+ImpType StructExpAttr::accept(ImpVisitor* visitor) {
+    return visitor->visit(this);
+}
+
 void AssignStatement::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
@@ -77,9 +85,18 @@ void FunDec::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
 
+void StructDec::accept(ImpVisitor* visitor) {
+    visitor->visit(this);
+}
+
+void AttrDec::accept(ImpVisitor* visitor) {
+    visitor->visit(this);
+}
+
 void StatementList::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
+
 void Body::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
@@ -236,6 +253,16 @@ ImpType GenCodeVisitor::visit(FunctionCallExp* e) {
         ++i;
     }
     out << " call " << e->name << endl;
+
+    return ImpType();
+}
+
+ImpType GenCodeVisitor::visit(StructExp* e) {
+
+    return ImpType();
+}
+
+ImpType GenCodeVisitor::visit(StructExpAttr* a) {
 
     return ImpType();
 }
@@ -435,6 +462,14 @@ void GenCodeVisitor::visit(FunDec* f) {
     out << "leave" << endl;
     out << "ret" << endl;
     entornoFuncion = false;
+}
+
+void GenCodeVisitor::visit(StructDec* s){
+    
+}
+
+void GenCodeVisitor::visit(AttrDec* a){
+
 }
 
 void GenCodeVisitor::visit(StatementList* s) {

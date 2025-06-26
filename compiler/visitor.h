@@ -9,6 +9,9 @@ class BoolExp;
 class IdentifierExp;
 class IfExp;
 class FunctionCallExp;
+class StructExp;
+class StructExpAttr;
+
 class AssignStatement;
 class PrintStatement;
 class IfStatement;
@@ -21,6 +24,9 @@ class VarDec;
 class FunctionCallStatement;
 class ParamDec;
 class FunDec;
+class StructDec;
+class AttrDec;
+
 class StatementList;
 class Body;
 class Program;
@@ -34,6 +40,8 @@ public:
     virtual int visit(IdentifierExp* exp) = 0;
     virtual int visit(IfExp* exp) = 0;
     virtual int visit(FunctionCallExp* exp) = 0;
+    virtual int visit(StructExp* exp) = 0;
+    virtual int visit(StructExpAttr* exp) = 0;
     virtual void visit(AssignStatement* stm) = 0;
     virtual void visit(PrintStatement* stm) = 0;
     virtual void visit(IfStatement* stm) = 0;
@@ -46,6 +54,8 @@ public:
     virtual void visit(FunctionCallStatement* stm) = 0;
     virtual void visit(ParamDec* stm) = 0;
     virtual void visit(FunDec* stm) = 0;
+    virtual void visit(StructDec* stm) = 0;
+    virtual void visit(AttrDec* stm) = 0;
     virtual void visit(StatementList* stm) = 0;
     virtual void visit(Body* b) = 0;
 };
@@ -63,6 +73,8 @@ public:
     int visit(IdentifierExp* exp) override;
     int visit(IfExp* exp) override;
     int visit(FunctionCallExp* exp) override;
+    int visit(StructExp* exp) override;
+    int visit(StructExpAttr* exp) override;
     void visit(AssignStatement* stm) override;
     void visit(PrintStatement* stm) override;
     void visit(IfStatement* stm) override;
@@ -75,6 +87,8 @@ public:
     void visit(VarDec* stm) override;
     void visit(ParamDec* stm) override;
     void visit(FunDec* stm) override;
+    void visit(StructDec* stm) override;
+    void visit(AttrDec* stm) override;
     void visit(StatementList* stm) override;
     void visit(Body* b) override;
 };

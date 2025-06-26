@@ -32,6 +32,14 @@ int FunctionCallExp::accept(Visitor* visitor) {
     return visitor->visit(this);
 }
 
+int StructExp::accept(Visitor* visitor) {
+    return visitor->visit(this);
+}
+
+int StructExpAttr::accept(Visitor* visitor) {
+    return visitor->visit(this);
+}
+
 int AssignStatement::accept(Visitor* visitor) {
     visitor->visit(this);
     return 0;
@@ -88,6 +96,16 @@ int ParamDec::accept(Visitor* visitor) {
 }
 
 int FunDec::accept(Visitor* visitor) {
+    visitor->visit(this);
+    return 0;
+}
+
+int StructDec::accept(Visitor* visitor) {
+    visitor->visit(this);
+    return 0;
+}
+
+int AttrDec::accept(Visitor* visitor) {
     visitor->visit(this);
     return 0;
 }
@@ -156,6 +174,16 @@ int PrintVisitor::visit(IfExp* exp) {
     exp->els->accept(this);
     cout << " }";
     if(exp->hasParenthesis) cout << ")";
+    return 0;
+}
+
+int PrintVisitor::visit(StructExp* exp) {
+    //TODO
+    return 0;
+}
+
+int PrintVisitor::visit(StructExpAttr* attr) {
+    //TODO
     return 0;
 }
 
@@ -290,6 +318,14 @@ void PrintVisitor::visit(FunDec* stm){
     stm->body->accept(this);
     --offset;
     cout << get_spaces() << "}" << endl;
+}
+
+void PrintVisitor::visit(StructDec* stm) {
+    // TODO
+}
+
+void PrintVisitor::visit(AttrDec* attr) {
+    // TODO
 }
 
 void PrintVisitor::visit(StatementList* stm){

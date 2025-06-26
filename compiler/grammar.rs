@@ -1,4 +1,4 @@
-Program ::= StructList | FunDecList
+Program ::= StructList FunDecList
 
 StructList ::= (struct id { AttrDecList }) *
 
@@ -44,7 +44,9 @@ Term ::= Factor ((*|/|%) Factor)*
 
 Factor ::= [-] (id | Num | Bool | ( AExp ) | if AExp {AExp} else {AExp} | id ( [ArgList] )) | StructExp
 
-StructExp ::= id { id : AExp (, id : AExp)* [,] }
+StructExp ::= id { StrcutExpAttr (, StrcutExpAttr)* [,] }
+
+StrcutExpAttr ::= id : AExp
 
 ArgList ::= AExp (, AExp)*
 
@@ -52,3 +54,5 @@ Bool ::= true | false
 
 
 //scanner id es id.id.id....
+
+// Struct, StructAttr, StructExp, StructExpAttr

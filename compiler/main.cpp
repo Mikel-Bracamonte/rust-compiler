@@ -38,8 +38,9 @@ int main(int argc, const char* argv[]) {
     cout << endl;
     cout << "Iniciando parsing:" << endl;
     Parser parser(&scanner); 
+    
     try {
-        Program* program = parser.parseProgram();
+        /*Program* program = parser.parseProgram();
         cout << "Parsing exitoso" << endl << endl;
         cout << "Iniciando Visitor:" << endl;
         PrintVisitor* printVisitor = new PrintVisitor();
@@ -47,8 +48,28 @@ int main(int argc, const char* argv[]) {
         cout << endl;
         cout << "IMPRIMIR:" << endl;
         printVisitor->print(program);
-        //cout  << endl;
+        cout  << endl;
         //cout << endl << "Run program:" << endl;
+        */
+        
+        Program* program = parser.parseProgram();
+        
+        string inputFile(argv[1]);
+        size_t dotPos = inputFile.find_last_of('.');
+        string baseName = (dotPos == string::npos) ? inputFile : inputFile.substr(0, dotPos);
+        string outputFilename = baseName + ".s";
+        ofstream outfile(outputFilename);
+        if (!outfile.is_open()) {
+            cerr << "Error al crear el archivo de salida: " << outputFilename << endl;
+            return 1;
+        }
+        cout << "Generando codigo ensamblador en " << outputFilename << endl;
+        unordered_map<string, int> map;
+        GenCodeVisitor* gencodeVisitor = new GenCodeVisitor(outfile, map);
+        
+        gencodeVisitor->gencode(program);
+        outfile.close();
+
         //interpreter.interpret(program);
         //cout << "End of program execution" << endl;
         delete program;

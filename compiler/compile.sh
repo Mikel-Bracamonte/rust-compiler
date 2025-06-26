@@ -12,5 +12,5 @@ if [ -z "$1" ]; then
     exit 1
 fi
 ./compiler "$1" || exit 1
-gcc output.s -o output
+gcc input.s -o output
 ./output

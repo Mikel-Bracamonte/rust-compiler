@@ -4,5 +4,9 @@
 *.out
 *.iml
 *.xml
+*.s
+*.pdb
 
 MiniProyecto/*
+
+output

@@ -68,7 +68,7 @@ FunDec* Parser::parseFunDec() {
     if(!match(Token::ID)) {
         errorHandler.expect(Token::ID, current->text);
     }
-    e->name = previous->text;
+    e->name = previous->text == "main" ? previous->text : "fn_" + previous->text;
     if(!match(Token::PI)) {
         errorHandler.expect(Token::PI, current->text);
     }
@@ -144,7 +144,7 @@ Stm* Parser::parseStatement() {
         string name = previous->text;
         if(match(Token::PI)) {
             FunctionCallStatement* stmt = new FunctionCallStatement();
-            stmt->name = name;
+            stmt->name = name == "main" ? name : "fn_" + name;
             if(!match(Token::PD)) {
                 do {
                     stmt->add(parseAExp());
@@ -429,7 +429,7 @@ Exp* Parser::parseFactor() {
         string texto = previous->text;
         if(match(Token::PI)) {
             FunctionCallExp* f = new FunctionCallExp();
-            f->name = texto;
+            f->name = texto == "main" ? texto : "fn_" + texto;
             if(match(Token::PD)) {
                 e = f;
             }

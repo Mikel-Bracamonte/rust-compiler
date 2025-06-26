@@ -1,4 +1,12 @@
-Program ::= (fn FunDec)+
+Program ::= StructList FunDecList
+
+StructList ::= (struct id { AttrDecList }) *
+
+AttrDecList ::= AttrDec (, AttrDec) [,]
+
+AttrDec ::= id : Type
+
+FunDecList ::= (fn FunDec)+ 
 
 FunDec ::= id ([ParamDecList]) [-> Type] { Body }
 
@@ -34,8 +42,17 @@ Exp ::= Term ((+ | -) Term)*
 
 Term ::= Factor ((*|/|%) Factor)*
 
-Factor ::= [-] (id | Num | Bool | ( AExp ) | if AExp {AExp} else {AExp} | id ( [ArgList] ))
+Factor ::= [-] (id | Num | Bool | ( AExp ) | if AExp {AExp} else {AExp} | id ( [ArgList] )) | StructExp
+
+StructExp ::= id { StrcutExpAttr (, StrcutExpAttr)* [,] }
+
+StrcutExpAttr ::= id : AExp
 
 ArgList ::= AExp (, AExp)*
 
 Bool ::= true | false
+
+
+//scanner id es id.id.id....
+
+// Struct, StructAttr, StructExp, StructExpAttr

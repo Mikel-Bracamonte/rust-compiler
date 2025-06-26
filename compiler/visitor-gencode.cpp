@@ -159,7 +159,9 @@ ImpType GenCodeVisitor::visit(BinaryExp* e) {
                 << " movzbq %al, %rax" << endl;
             break;
         case MOD_OP:
-            // TODO
+            out << " cqto" << endl
+                << " idivq %rcx" << endl
+                << " movq %rdx, %rax" << endl;
             break;
         case AND_OP:
             out << " and %cl, %al" << endl
@@ -241,7 +243,6 @@ ImpType GenCodeVisitor::visit(FunctionCallExp* e) {
 void GenCodeVisitor::visit(AssignStatement* s) {
     assert(env.check(s->name));
     s->right->accept(this);
-    // TODO
     int offset_assign = get<1>(env.lookup(s->name));
     switch (s->op) {
         case AS_ASSIGN_OP:
@@ -260,10 +261,18 @@ void GenCodeVisitor::visit(AssignStatement* s) {
             out << " movq %rax, " << offset_assign << "(%rbp)" << endl;
             break;
         case AS_DIV_OP:
-            out << " idivq %rax, " << offset_assign << "(%rbp)" << endl;
+            out << " movq %rax, %rcx" << endl;
+            out << " movq " << offset_assign << "(%rbp), %rax" << endl;
+            out << " cqto" << endl;
+            out << " idivq %rcx" << endl;
+            out << " movq %rax, " << offset_assign << "(%rbp)" << endl;
             break;
         case AS_MOD_OP:
-            // TODO
+            out << " movq %rax, %rcx" << endl;
+            out << " movq " << offset_assign << "(%rbp), %rax" << endl;
+            out << " cqto" << endl;
+            out << " idivq %rcx" << endl;
+            out << " movq %rdx, " << offset_assign << "(%rbp)" << endl;
             break;
         default:
             errorHandler.error("Not assignOp supported");
@@ -312,12 +321,7 @@ void GenCodeVisitor::visit(WhileStatement* s) {
 
     nombreLoop.pop();
 }
-/* Los loops se llaman
-while_10
-endwhile_10
-for_5
-endfor_5
-*/
+
 void GenCodeVisitor::visit(ForStatement* s) {
     int lbl = label_counter++;
     string var = s->name;
@@ -353,7 +357,9 @@ void GenCodeVisitor::visit(ForStatement* s) {
 }
 
 void GenCodeVisitor::visit(ReturnStatement* s) {
-    s->exp->accept(this);
+    if(s->exp) {
+        s->exp->accept(this);
+    }
     out << "jmp .end_" << nombreFuncion << endl;
 }
 

@@ -29,7 +29,7 @@ Token* Scanner::nextToken() {
 
     else if (isalpha(c)) {
         current++;
-        while (current < input.length() && isalnum(input[current]))
+        while (current < input.length() && (isalnum(input[current]) || input[current] == '_'))
             current++;
         string word = input.substr(first, current - first);
         if (word == "println") {

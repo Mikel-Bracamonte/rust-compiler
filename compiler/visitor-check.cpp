@@ -1,32 +1,92 @@
 #include "imp_visitor.h"
 
+
 void CheckVisitor::check(Program* p) {
-    /*
-    */
+    env.clear();      
+    env.add_level();
+    for(auto i : p->funs){
+        i->accept(this);
+    }
 }
 
-ImpType CheckVisitor::visit(BinaryExp* e) {
+ImpType CheckVisitor::visit(BinaryExp* exp) {
+    ImpType v1 = exp->left->accept(this);
+    ImpType v2 = exp->right->accept(this);
+    // si es void -> ignorar
+    if(v1.ttype == "void"  || v2.ttype == "void") {
+        errorHandler.error("Operación binaria no puede ser con tipo 'void'.");
+    }
 
+    switch (exp->op) {
+        case PLUS_OP: case MINUS_OP: case MUL_OP: case DIV_OP: // long int
+            if (v1.ttype == "int" && v2.ttype == "int") return ImpType("int");
+            else {
+                errorHandler.error("Operación aritmética requiere enteros (int).");
+            }
+        case LT_OP: case LE_OP: case GT_OP: case GE_OP: // long int
+            if (v1.ttype == "int" && v2.ttype == "int") return ImpType("bool"); 
+            else {
+                errorHandler.error("Operación de comparación requiere enteros (int).");
+            }
+        case EQ_OP: case NEQ_OP:
+            if(v1.ttype ==v2.ttype) return ImpType("bool"); // mismo tipo: bool, int
+            else{
+                errorHandler.error("Operación requiere de igualdad enteros (int) o booleanos (bool).");
+            }
+        case MOD_OP: // long int
+            if (v1.ttype == "int" && v2.ttype == "int") return ImpType("int"); 
+            else{
+                errorHandler.error("Operación de módulo requiere enteros (int).");
+            }           
+        case AND_OP: case OR_OP:
+            if (v1.ttype == "bool" && v2.ttype == "bool") return ImpType("bool");
+            else {
+                errorHandler.error("Operación lógica requiere booleanos (bool).");
+            }
+        default:
+            errorHandler.error("Operador binario no reconocido: " + Exp::binOpToChar(exp->op));
+    }
     return ImpType();
 }
 
-ImpType CheckVisitor::visit(UnaryExp* e) {
+ImpType CheckVisitor::visit(UnaryExp* exp) {
+    ImpType e = exp->exp->accept(this);
+    ImpType result;
+    // int, longint
+    if(e.ttype == "void") {
+        errorHandler.error("Operación unaria no puede ser con tipo 'void'.");
+    }
 
+    switch(exp->op) {
+        case U_NEG_OP:
+            if(e.ttype=="int") return ImpType("int");
+
+        case U_NOT_OP:
+            if(e.ttype=="bool") return ImpType("bool");
+        default:
+        errorHandler.error("Operador unario no reconocido: " + Exp::unaryOpToChar(exp->op));        
+    }
     return ImpType();
 }
 
 ImpType CheckVisitor::visit(NumberExp* e) {
-
-    return ImpType();
+    return ImpType("int"); // long int
 }
 
 ImpType CheckVisitor::visit(BoolExp* e) {
-
-    return ImpType();
+    return ImpType("bool");
 }
 
 ImpType CheckVisitor::visit(IdentifierExp* e) {
+    // chequear variable en entorno
+    auto tipo= env.lookup(e->name);
+    cout<<tipo.ttype<<endl;
+    // FALTA CHEQUEAR ACAAA
+    //e->accept(this);
+    if(tipo.ttype == "i32") return ImpType("int");
+    if(tipo.ttype == "bool") return ImpType("bool");
 
+    errorHandler.error("Variable '" + e->name + "' no declarada o tipo no reconocido.");
     return ImpType();
 }
 
@@ -40,40 +100,98 @@ ImpType CheckVisitor::visit(FunctionCallExp* e) {
     return ImpType();
 }
 
-void CheckVisitor::visit(AssignStatement* s) {
-
+void CheckVisitor::visit(AssignStatement* s) { 
+    if(!env.check(s->name)) {
+        errorHandler.error("varible '" + s->name + "' no declarada.");
+    }
+    ImpType target = env.lookup(s->name);
+    ImpType src = s->right->accept(this);
+    
+    if (!target.match(src)) {
+        errorHandler.error("Tipo incompatible en asignación a '" + s->name + "'.");
+    }
 }
 
 void CheckVisitor::visit(PrintStatement* s) {
-
+    s->exp->accept(this); 
 }
 
 void CheckVisitor::visit(IfStatement* s) {
-
+    if (s->condition->accept(this).ttype == "bool") {
+        s->then->accept(this);
+        if (s->els) s->els->accept(this);
+    } else{
+        errorHandler.error("La condición del if debe ser bool.");
+    }
 }
 
-void CheckVisitor::visit(WhileStatement* s) {
-
+void CheckVisitor::visit(WhileStatement* stm) {
+    if(stm->condition->accept(this).ttype == "bool") {
+        stm->body->accept(this);
+    }
+    else {
+        errorHandler.error("La condición del while debe ser bool.");
+    }
 }
 
 void CheckVisitor::visit(ForStatement* s) {
-    
+    // tiene que ser mut, int    
+    if(!s->mut){
+        errorHandler.error("Error: el for debe ser mut.");
+    }
+
+    ImpType startT = s->start->accept(this);
+    if (startT.ttype != "int") {
+        errorHandler.error("El inicio del for debe ser un entero.");
+    }
+    ImpType endT = s->end->accept(this);
+    if (endT.ttype != "int") {
+        errorHandler.error("El final del for debe ser un entero.");
+    }
+
 }
 
 void CheckVisitor::visit(ReturnStatement* s) {
-    
+
 }
 
 void CheckVisitor::visit(BreakStatement* s) {
+    // No hay chequeo necesario, solo se asegura que el break no esté fuera de un loop
+    // crear el env in loop
+    /*
+    if (!env.in_loop()) {
+        errorHandler.error("Error: 'break' fuera de un bucle.");
+    }
+    */
     
 }
 
 void CheckVisitor::visit(ContinueStatement* s) {
+    // No hay chequeo necesario, solo se asegura que el continue no esté fuera de un loop
+    // crear el env in loop
+    /*
+    if (!env.in_loop()) {
+        errorHandler.error("Error: 'continue' fuera de un bucle.");
+    }
+    */
     
 }
 
 void CheckVisitor::visit(VarDec* vd) {
-
+    if (env.check(vd->name)) {
+        errorHandler.error("Variable '" + vd->name + "' ya declarada.");
+    }
+    // long int?
+    // mut?
+    // mapa con variables mutables
+    cout<<"vd type"<<vd->type<<endl;
+    if (vd->type == "i32") {
+        env.add_var(vd->name,vd->type);
+    } else if (vd->type == "bool") {
+        env.add_var(vd->name, vd->type);
+    } else {
+        errorHandler.error("Tipo de variable no reconocido: '" + vd->type + "'.");
+    }
 }
 
 void CheckVisitor::visit(FunctionCallStatement* stm) {
@@ -81,17 +199,40 @@ void CheckVisitor::visit(FunctionCallStatement* stm) {
 }
 
 void CheckVisitor::visit(ParamDec* vd) {
-
+    ImpType t;
+    
+    if (vd->type == "i32" || vd->type == "i64" || vd->type == "bool") {
+        env.add_var(vd->name, vd->type);
+    } else {
+        errorHandler.error("Tipo de parámetro no reconocido: '" + vd->type + "'.");
+    }
 }
 
 void CheckVisitor::visit(FunDec* vd) {
+    ImpType ftype;
+    list<string> argTypes;
+    env.add_level();
+    
+    for (auto p : vd->params)
+        argTypes.push_back(p->type);
+    ftype.set_fun_type(argTypes, vd->type);
+    env.add_var(vd->name, ftype);
 
+    for (auto p : vd->params)
+        p->accept(this);
+    
+    vd->body->accept(this); 
+    env.remove_level();
 }
 
 void CheckVisitor::visit(StatementList* s) {
-
+     for (auto stmt : s->stms) {
+        stmt->accept(this); 
+    }
 }
 
 void CheckVisitor::visit(Body* b) {
-
+    env.add_level();
+    b->stmList->accept(this);
+    env.remove_level();
 }

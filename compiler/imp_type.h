@@ -13,7 +13,7 @@ using namespace std;
 class ImpType {
 public:
     string ttype;
-    // ttypes: "int", "bool", "void"
+    // ttypes: "int", "bool", ""
     
     vector<string> types;
     ImpType(string s);

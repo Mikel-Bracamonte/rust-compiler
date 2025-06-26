@@ -2,8 +2,6 @@
 
 
 void CheckVisitor::check(Program* p) {
-    env.clear();      
-    env.add_level();
     for(auto i : p->funs){
         i->accept(this);
     }
@@ -13,32 +11,37 @@ ImpType CheckVisitor::visit(BinaryExp* exp) {
     ImpType v1 = exp->left->accept(this);
     ImpType v2 = exp->right->accept(this);
     // si es void -> ignorar
-    if(v1.ttype == "void"  || v2.ttype == "void") {
-        errorHandler.error("Operación binaria no puede ser con tipo 'void'.");
+    if(v1.ttype != v2.ttype) {
+        errorHandler.error("Operación binaria debe ser entre el mismo tipo");
     }
+    /*
+    if(v1.ttype == "void"  || v2.ttype == "void") {
+        errorHandler.error("Operación binaria debe ser entre 'bool' o 'int'.");
+    }
+    */
 
     switch (exp->op) {
-        case PLUS_OP: case MINUS_OP: case MUL_OP: case DIV_OP: // long int
+        case PLUS_OP: case MINUS_OP: case MUL_OP: case DIV_OP: // long int // check!
             if (v1.ttype == "int" && v2.ttype == "int") return ImpType("int");
             else {
                 errorHandler.error("Operación aritmética requiere enteros (int).");
             }
-        case LT_OP: case LE_OP: case GT_OP: case GE_OP: // long int
+        case LT_OP: case LE_OP: case GT_OP: case GE_OP: // long int // check!
             if (v1.ttype == "int" && v2.ttype == "int") return ImpType("bool"); 
             else {
                 errorHandler.error("Operación de comparación requiere enteros (int).");
             }
-        case EQ_OP: case NEQ_OP:
+        case EQ_OP: case NEQ_OP: // structs?
             if(v1.ttype ==v2.ttype) return ImpType("bool"); // mismo tipo: bool, int
             else{
                 errorHandler.error("Operación requiere de igualdad enteros (int) o booleanos (bool).");
             }
-        case MOD_OP: // long int
+        case MOD_OP: // long int // check!
             if (v1.ttype == "int" && v2.ttype == "int") return ImpType("int"); 
             else{
                 errorHandler.error("Operación de módulo requiere enteros (int).");
             }           
-        case AND_OP: case OR_OP:
+        case AND_OP: case OR_OP: // check!
             if (v1.ttype == "bool" && v2.ttype == "bool") return ImpType("bool");
             else {
                 errorHandler.error("Operación lógica requiere booleanos (bool).");
@@ -49,12 +52,13 @@ ImpType CheckVisitor::visit(BinaryExp* exp) {
     return ImpType();
 }
 
+// check!
 ImpType CheckVisitor::visit(UnaryExp* exp) {
     ImpType e = exp->exp->accept(this);
     ImpType result;
     // int, longint
-    if(e.ttype == "void") {
-        errorHandler.error("Operación unaria no puede ser con tipo 'void'.");
+    if(e.ttype != "int" && e.ttype != "bool") {
+        errorHandler.error("Operación unaria debe ser int or bool");
     }
 
     switch(exp->op) {
@@ -73,6 +77,7 @@ ImpType CheckVisitor::visit(NumberExp* e) {
     return ImpType("int"); // long int
 }
 
+// check!
 ImpType CheckVisitor::visit(BoolExp* e) {
     return ImpType("bool");
 }
@@ -100,10 +105,12 @@ ImpType CheckVisitor::visit(FunctionCallExp* e) {
     return ImpType();
 }
 
+// check!
 void CheckVisitor::visit(AssignStatement* s) { 
     if(!env.check(s->name)) {
         errorHandler.error("varible '" + s->name + "' no declarada.");
     }
+
     ImpType target = env.lookup(s->name);
     ImpType src = s->right->accept(this);
     
@@ -112,10 +119,14 @@ void CheckVisitor::visit(AssignStatement* s) {
     }
 }
 
+// check!
 void CheckVisitor::visit(PrintStatement* s) {
-    s->exp->accept(this); 
+    if(s->exp->accept(this).ttype != "int"){
+        errorHandler.error("La impresión debe ser un int");
+    }
 }
 
+// check!
 void CheckVisitor::visit(IfStatement* s) {
     if (s->condition->accept(this).ttype == "bool") {
         s->then->accept(this);
@@ -125,19 +136,24 @@ void CheckVisitor::visit(IfStatement* s) {
     }
 }
 
+// check!
 void CheckVisitor::visit(WhileStatement* stm) {
+    numberLoop ++;
     if(stm->condition->accept(this).ttype == "bool") {
         stm->body->accept(this);
     }
     else {
         errorHandler.error("La condición del while debe ser bool.");
     }
+    numberLoop --;
 }
 
+// check!
 void CheckVisitor::visit(ForStatement* s) {
     // tiene que ser mut, int    
+    numberLoop ++;
     if(!s->mut){
-        errorHandler.error("Error: el for debe ser mut.");
+        errorHandler.error("El for debe ser mut.");
     }
 
     ImpType startT = s->start->accept(this);
@@ -148,33 +164,37 @@ void CheckVisitor::visit(ForStatement* s) {
     if (endT.ttype != "int") {
         errorHandler.error("El final del for debe ser un entero.");
     }
+    s->body->accept(this);
 
+    numberLoop --;
 }
 
+// seems check
 void CheckVisitor::visit(ReturnStatement* s) {
-
+    if(s->exp == nullptr){
+        if(returnType.ttype != ""){
+            errorHandler.error("Return no coindice con tipo de función");
+        }
+    }
+    else {
+        if(returnType.ttype != s->exp->accept(this).ttype){
+            errorHandler.error("Return no coindice con tipo de función");
+        }
+    }
 }
 
+// check!
 void CheckVisitor::visit(BreakStatement* s) {
-    // No hay chequeo necesario, solo se asegura que el break no esté fuera de un loop
-    // crear el env in loop
-    /*
-    if (!env.in_loop()) {
+    if (numberLoop <= 0) {
         errorHandler.error("Error: 'break' fuera de un bucle.");
     }
-    */
-    
 }
 
+// check!
 void CheckVisitor::visit(ContinueStatement* s) {
-    // No hay chequeo necesario, solo se asegura que el continue no esté fuera de un loop
-    // crear el env in loop
-    /*
-    if (!env.in_loop()) {
-        errorHandler.error("Error: 'continue' fuera de un bucle.");
+    if (numberLoop <= 0) {
+        errorHandler.error("Error: 'break' fuera de un bucle.");
     }
-    */
-    
 }
 
 void CheckVisitor::visit(VarDec* vd) {
@@ -198,10 +218,11 @@ void CheckVisitor::visit(FunctionCallStatement* stm) {
     
 }
 
+// check!
 void CheckVisitor::visit(ParamDec* vd) {
     ImpType t;
     
-    if (vd->type == "i32" || vd->type == "i64" || vd->type == "bool") {
+    if (vd->type == "i32" || vd->type == "i64" || vd->type == "bool" || structs_info.count(vd->type)) {
         env.add_var(vd->name, vd->type);
     } else {
         errorHandler.error("Tipo de parámetro no reconocido: '" + vd->type + "'.");
@@ -211,10 +232,12 @@ void CheckVisitor::visit(ParamDec* vd) {
 void CheckVisitor::visit(FunDec* vd) {
     ImpType ftype;
     list<string> argTypes;
+    returnType = vd->type;
     env.add_level();
     
     for (auto p : vd->params)
         argTypes.push_back(p->type);
+    
     ftype.set_fun_type(argTypes, vd->type);
     env.add_var(vd->name, ftype);
 
@@ -225,12 +248,14 @@ void CheckVisitor::visit(FunDec* vd) {
     env.remove_level();
 }
 
+// check!
 void CheckVisitor::visit(StatementList* s) {
      for (auto stmt : s->stms) {
         stmt->accept(this); 
     }
 }
 
+// check!
 void CheckVisitor::visit(Body* b) {
     env.add_level();
     b->stmList->accept(this);

@@ -10,14 +10,11 @@ ImpType::ImpType() {}
 bool ImpType::match(const ImpType& t) {
   bool ret=true;
   return ret;
-  
 }
 
 bool ImpType::set_basic_type(string s) {
   bool ret=true;
   return ret;
-
- 
 }
 
 

@@ -34,6 +34,11 @@ public:
     virtual void visit(Body* b) = 0;
 };
 
+class StructInfo {
+    int size;
+    map<string, int> offsets;
+}
+
 class GenCodeVisitor : public ImpVisitor {
 private:
     Environment<tuple<ImpType, int>> env;
@@ -45,6 +50,7 @@ public:
         reserva_function = m;
     }
     unordered_map<string, int> reserva_function;
+    unordered_map<string, StructInfo> structs_info;
     ErrorHandler errorHandler;
     unordered_map<string, int> memoria;
     int offset = -8;
@@ -83,6 +89,8 @@ private:
     Environment<ImpType> env;
 public:
     ErrorHandler errorHandler = ErrorHandler("CheckVisitor");
+    int numberLoop = 0;
+    ImpType returnType = ImpType();
     void check(Program* p);
     ImpType visit(BinaryExp* exp) override;
     ImpType visit(UnaryExp* exp) override;

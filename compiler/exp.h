@@ -97,6 +97,27 @@ public:
     ~FunctionCallExp();
 };
 
+//TODO constructors, accepts
+class StructExp : public Exp {
+public:
+    string name;
+    list<StructExpAttr> attrs;
+    StructExp();
+    int accept(Visitor* visitor);
+    ImpType accept(ImpVisitor* v);
+    ~StructExp();
+}
+
+//TODO constructors, accepts
+class StructExpAttr {
+    string name;
+    Exp* exp;
+    StructExpAttr(string n, Exp* e);
+    int accept(Visitor* visitor);
+    ImpType accept(ImpVisitor* v);
+    ~StructExpAttr();
+}
+
 ///////////////////////////////////////////////////////
 
 
@@ -236,6 +257,27 @@ public:
     ~FunDec();
 };
 
+//TODO constructors, accepts
+class StructDec {
+public:
+    string name;
+    list<AttrDec> attrs;
+    StructDec();
+    int accept(Visitor* visitor);
+    ImpType accept(ImpVisitor* v);
+    ~StructDec();
+}
+
+//TODO constructors, accepts
+class AttrDec {
+    string name;
+    string type;
+    AttrDec(string n, string t);
+    int accept(Visitor* visitor);
+    ImpType accept(ImpVisitor* v);
+    ~AttrDec();
+}
+
 class StatementList {
 public:
     list<Stm*> stms;
@@ -260,6 +302,7 @@ public:
 class Program {
 public:
     list<FunDec*> funs;
+    list<StructDec*> structs;
     Program();
     int accept(Visitor* v);
     void accept(ImpVisitor* v);

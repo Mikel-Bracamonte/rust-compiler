@@ -52,6 +52,7 @@ Parser::Parser(Scanner* sc):scanner(sc) {
 // check!
 Program* Parser::parseProgram() {
     Program* p = new Program();
+    // TODO parseStruct
     if(!match(Token::FN)) {
         errorHandler.expect(Token::FN, current->text);
     }
@@ -61,6 +62,13 @@ Program* Parser::parseProgram() {
     }
     return p;
 }
+
+// TODO
+StructDec* Parser::parseStructDec() {
+
+    // TODO AttrDec()
+}
+
 
 // check!
 FunDec* Parser::parseFunDec() {
@@ -122,7 +130,7 @@ Body* Parser::parseBody() {
     return new Body(sl);
 }
 
-// se ve bien
+// check!
 StatementList* Parser::parseStatementList() {
     StatementList* sl = new StatementList();
     Stm* s = parseStatement();
@@ -325,7 +333,7 @@ Stm* Parser::parseStatement() {
     return nullptr;
 }
 
-// make sense: a && b || c && d?
+//check!
 Exp* Parser::parseAExp(){
     Exp* left = parseBExp();
     while (match(Token::AND) || match(Token::OR)) {
@@ -442,7 +450,7 @@ Exp* Parser::parseFactor() {
                 }
                 e = f;
             }
-        }
+        } // else if TODO struct exp
         else e = new IdentifierExp(texto);
     }
     else if (match(Token::NUM)) {

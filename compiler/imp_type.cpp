@@ -7,7 +7,7 @@ ImpType::ImpType(string s) {
 
 ImpType::ImpType() {}
 
-bool ImpType::match(ImpType t) {
+bool ImpType::match(const ImpType& t) {
   if (this->ttype != t.ttype) return false;
   return true;
 }

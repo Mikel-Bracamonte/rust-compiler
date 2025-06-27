@@ -101,9 +101,9 @@ ImpType CheckVisitor::visit(IdentifierExp* e) {
 
 // check!
 ImpType CheckVisitor::visit(IfExp* e) {
-    if (s->condition->accept(this).ttype == "bool") {
-        ImpType thenT = s->then->accept(this);
-        ImpType elseT = s->els->accept(this);
+    if (e->condition->accept(this).ttype == "bool") {
+        ImpType thenT = e->then->accept(this);
+        ImpType elseT = e->els->accept(this);
         if(!thenT.match(elseT)){
             errorHandler.error("Then y Else de una expresión ternaria deben tener el mismo tipo");
         }
@@ -120,13 +120,13 @@ ImpType CheckVisitor::visit(FunctionCallExp* e) {
     }
 
     ImpType ftype = env.lookup(e->name);
-    if(e->argList.size() != ftype->types.size()){
-        errorHandler.error("Llamada a la función '" + e->name + "' no coincide con la cantidad de parámetros definida")
+    if(e->argList.size() != ftype.types.size()){
+        errorHandler.error("Llamada a la función '" + e->name + "' no coincide con la cantidad de parámetros definida");
     }
     int ite = 0;
     for(auto arg : e->argList){
-        if(arg->accept(this).ttype != ftype->types[ite]){
-            errorHandler.error("El tipo del argumento '" + ite + "'-ésimo no coincide con el de la función '" + e->name + "'")
+        if(arg->accept(this).ttype != ftype.types[ite]){
+            errorHandler.error("El tipo del argumento '" + to_string(ite) + "'-ésimo no coincide con el de la función '" + e->name + "'");
         }
     }
     return ftype;
@@ -240,18 +240,18 @@ void CheckVisitor::visit(VarDec* vd) {
 }
 
 void CheckVisitor::visit(FunctionCallStatement* stm) {
-    if(!env.check(e->name)) {
-        errorHandler.error("Función '" + e->name + "' no existe.");
+    if(!env.check(stm->name)) {
+        errorHandler.error("Función '" + stm->name + "' no existe.");
     }
 
-    ImpType ftype = env.lookup(e->name);
-    if(e->argList.size() != ftype->types.size()){
-        errorHandler.error("Llamada a la función '" + e->name + "' no coincide con la cantidad de parámetros definida")
+    ImpType ftype = env.lookup(stm->name);
+    if(stm->argList.size() != ftype.types.size()){
+        errorHandler.error("Llamada a la función '" + stm->name + "' no coincide con la cantidad de parámetros definida");
     }
     int ite = 0;
-    for(auto arg : e->argList){
-        if(arg->accept(this).ttype != ftype->types[ite]){
-            errorHandler.error("El tipo del argumento '" + ite + "'-ésimo no coincide con el de la función '" + e->name + "'")
+    for(auto arg : stm->argList){
+        if(arg->accept(this).ttype != ftype.types[ite]){
+            errorHandler.error("El tipo del argumento '" + to_string(ite) + "'-ésimo no coincide con el de la función '" + stm->name + "'");
         }
     }    
 }
@@ -277,9 +277,9 @@ void CheckVisitor::visit(FunDec* vd) {
         p->accept(this);
 
     for (auto p : vd->params)
-        ftype->types.push_back(p->type);
+        ftype.types.push_back(p->type);
     
-    ftype->type = vd->type;
+    ftype.ttype = vd->type;
 
     env.add_var(vd->name, ftype);
     

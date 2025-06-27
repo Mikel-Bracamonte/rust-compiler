@@ -36,8 +36,8 @@ public:
 
 class StructInfo {
     int size;
-    map<string, int> offsets;
-}
+    unordered_map<string, int> offsets;
+};
 
 class GenCodeVisitor : public ImpVisitor {
 private:
@@ -89,6 +89,7 @@ private:
     Environment<ImpType> env;
 public:
     ErrorHandler errorHandler = ErrorHandler("CheckVisitor");
+    unordered_map<string, StructInfo> structs_info;
     int numberLoop = 0;
     ImpType returnType = ImpType();
     void check(Program* p);

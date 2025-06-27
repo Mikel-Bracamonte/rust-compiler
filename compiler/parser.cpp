@@ -53,14 +53,23 @@ Parser::Parser(Scanner* sc):scanner(sc) {
 Program* Parser::parseProgram() {
     Program* p = new Program();
     // TODO parseStruct
-    if(!match(Token::FN)) {
-        errorHandler.expect(Token::FN, current->text);
+    if(match(Token::STRUCT)) {
+        while(match(Token::STRUCT)) {
+            p->structs.push_back(parseStructDec());
+        }
+        return p;
     }
-    p->funs.push_back(parseFunDec());
-    while(match(Token::FN)) {
+    else if(match(Token::FN)) {
         p->funs.push_back(parseFunDec());
+        while(match(Token::FN)) {
+            p->funs.push_back(parseFunDec());
+        }
+        return p;
+    } else{
+        errorHandler.error("Se esperaba struct o fun");
+        return p;
     }
-    return p;
+
 }
 
 // TODO

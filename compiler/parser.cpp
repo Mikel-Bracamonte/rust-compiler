@@ -74,6 +74,7 @@ StructDec* Parser::parseStructDec() {
 // check!
 FunDec* Parser::parseFunDec() {
     FunDec* e = new FunDec();
+    //e->type = "";
     if(!match(Token::ID)) {
         errorHandler.expect(Token::ID, current->text);
     }

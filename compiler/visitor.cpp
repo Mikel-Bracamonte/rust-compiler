@@ -335,20 +335,18 @@ void PrintVisitor::visit(FunDec* stm){
 }
 
 void PrintVisitor::visit(StructDec* stm) {
-    // TODO
     cout << "struct " << stm->name << " {\n";
     for (auto attr : stm->attrs) {
         cout << "  ";
         attr->accept(this);
         cout << ",\n";
     }
-    cout << "}";
+    cout << "}"<<endl;
 }
 
 void PrintVisitor::visit(AttrDec* attr) {
     // TODO
     cout << attr->name << ": " << attr->type;
-
 }
 
 void PrintVisitor::visit(StatementList* stm){
@@ -364,7 +362,10 @@ void PrintVisitor::visit(Body* stm){
 
 void PrintVisitor::print(Program* program){
     offset = 0;
-    for(auto f : program->funs) {
+    for (auto s : program->structs) {
+        s->accept(this);
+    }
+    for (auto f : program->funs) {
         f->accept(this);
     }
 };

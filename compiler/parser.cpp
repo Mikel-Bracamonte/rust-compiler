@@ -53,39 +53,39 @@ Parser::Parser(Scanner* sc):scanner(sc) {
 Program* Parser::parseProgram() {
     Program* p = new Program();
     // TODO parseStruct
-    if(match(Token::STRUCT)) {
-        while(match(Token::STRUCT)) {
+    while(!isAtEnd()){
+        if(match(Token::STRUCT)){
             p->structs.push_back(parseStructDec());
+            while(match(Token::STRUCT)){
+                p->structs.push_back(parseStructDec());
+            }
         }
-        return p;
-    }
-    else if(match(Token::FN)) {
-        p->funs.push_back(parseFunDec());
-        while(match(Token::FN)) {
+        else if(match(Token::FN)){
             p->funs.push_back(parseFunDec());
+            while(match(Token::FN)){
+                p->funs.push_back(parseFunDec());
+            }
         }
-        return p;
-    } else{
-        errorHandler.error("Se esperaba struct o fun");
-        return p;
+        else{
+            errorHandler.error("Se esperaba struct o fun");
+        }
     }
 
+    return p;
 }
 
 // TODO
 StructDec* Parser::parseStructDec() {
-    if(!match(Token::STRUCT)){
-        errorHandler.expect(Token::STRUCT, current->text);
-    }
     if(!match(Token::ID)){
         errorHandler.expect(Token::ID, current->text);
     }
     StructDec* s = new StructDec();
     s->name = previous->text;
-    if(!match(Token::PI)){
+    cout<<s->name<<endl;
+    if(!match(Token::LI)){
         errorHandler.expect(Token::PI, current->text);
     }
-    do {
+    while(!match(Token::LD)){
         if (!match(Token::ID)) {
             errorHandler.expect(Token::ID, current->text); // nombre del campo
         }
@@ -98,18 +98,13 @@ StructDec* Parser::parseStructDec() {
         }
         string attrType = previous->text;
         s->attrs.push_back(new AttrDec(name, attrType));
-
-    } while (match(Token::COMMA));
-
-    if(!match(Token::LD)){
-        errorHandler.expect(Token::LD, current->text);
+        if(!match(Token::COMMA)){
+            errorHandler.expect(Token::COMMA, current->text);
+        }
     }
     return s;
     // TODO AttrDec()
 }
-
-
-
 
 
 // check!

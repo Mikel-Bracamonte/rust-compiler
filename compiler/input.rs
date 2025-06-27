@@ -3,8 +3,5 @@ struct Persona {
 }
 
 fn main() {
-    let persona = Persona {
-        edad: 19,
-    };
-    println!("{}", persona.edad);
+    println!("{}",2);
 }

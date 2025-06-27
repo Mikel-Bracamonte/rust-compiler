@@ -249,38 +249,38 @@ public:
     ~StructDec();
 };
 
-//TODO constructors, accepts
-class AttrDec {
-public:
-    string name;
-    string type;
-    AttrDec(string n, string t);
-    int accept(Visitor* visitor);
-    void accept(ImpVisitor* v);
-    ~AttrDec();
-};
+    //TODO constructors, accepts
+    class AttrDec {
+    public:
+        string name;
+        string type;
+        AttrDec(string n, string t);
+        int accept(Visitor* visitor);
+        void accept(ImpVisitor* v);
+        ~AttrDec();
+    };
 
-//TODO constructors, accepts
-class StructExp : public Exp {
-public:
-    string name;
-    list<StructExpAttr*> attrs;
-    StructExp();
-    int accept(Visitor* visitor);
-    ImpType accept(ImpVisitor* v);
-    ~StructExp();
-};
+    //TODO constructors, accepts
+    class StructExp : public Exp {
+    public:
+        string name;
+        list<StructExpAttr*> attrs;
+        StructExp();
+        int accept(Visitor* visitor);
+        ImpType accept(ImpVisitor* v);
+        ~StructExp();
+    };
 
-//TODO constructors, accepts
-class StructExpAttr {
-public:
-    string name;
-    Exp* exp;
-    StructExpAttr(string n, Exp* e);
-    int accept(Visitor* visitor);
-    ImpType accept(ImpVisitor* v);
-    ~StructExpAttr();
-};
+    //TODO constructors, accepts
+    class StructExpAttr {
+    public:
+        string name;
+        Exp* exp;
+        StructExpAttr(string n, Exp* e);
+        int accept(Visitor* visitor);
+        ImpType accept(ImpVisitor* v);
+        ~StructExpAttr();
+    };
 
 class StatementList {
 public:

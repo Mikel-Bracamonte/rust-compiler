@@ -109,6 +109,9 @@ StructDec* Parser::parseStructDec() {
 }
 
 
+
+
+
 // check!
 FunDec* Parser::parseFunDec() {
     FunDec* e = new FunDec();
@@ -490,6 +493,29 @@ Exp* Parser::parseFactor() {
                 e = f;
             }
         } // else if TODO struct exp
+        else if (match(Token::LI)) {
+            StructExp* s = new StructExp();
+            s->name = texto;
+
+            if (!check(Token::LD)) {
+                do {
+                    if (!match(Token::ID)) {
+                        errorHandler.expect(Token::ID, current->text);
+                    }
+                    string attrName = previous->text;
+                    if (!match(Token::COLON)) {
+                        errorHandler.expect(Token::COLON, current->text);
+                    }
+                    Exp* value = parseAExp();
+
+                    s->attrs.push_back(new StructExpAttr(attrName, value));
+                } while (match(Token::COMMA));
+            }
+            if (!match(Token::LD)) {
+                errorHandler.expect(Token::LD, current->text);
+            }
+            e = s;
+        }
         else e = new IdentifierExp(texto);
     }
     else if (match(Token::NUM)) {
@@ -539,3 +565,5 @@ Exp* Parser::parseFactor() {
         return e;
     }
 }
+
+

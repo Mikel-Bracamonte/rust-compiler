@@ -17,6 +17,7 @@ public:
     ErrorHandler errorHandler;
     Parser(Scanner* scanner);
     Program* parseProgram();
+    StructDec* parseStructDec();
     FunDec* parseFunDec();
     ParamDec* parseParamDec();
     Body* parseBody();

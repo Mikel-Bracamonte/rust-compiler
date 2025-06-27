@@ -142,6 +142,14 @@ ImpType CheckVisitor::visit(FunctionCallExp* e) {
     return ImpType(getType(ftype.ttype));
 }
 
+ImpType CheckVisitor::visit(StructExp* e) {
+    return ImpType();
+}
+
+ImpType CheckVisitor::visit(StructExpAttr* e) {
+    return ImpType();
+}
+
 // checked!, tested
 void CheckVisitor::visit(AssignStatement* s) { 
     if(!env.check(s->name)) {
@@ -314,6 +322,14 @@ void CheckVisitor::visit(FunDec* vd) {
     functions_info[vd->name] = ftype;
     vd->body->accept(this); 
     env.remove_level();
+}
+
+void CheckVisitor::visit(StructDec* stm) {
+
+}
+
+void CheckVisitor::visit(AttrDec* stm) {
+
 }
 
 // check!, tested!

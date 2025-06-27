@@ -101,7 +101,7 @@ public:
 class StructExp : public Exp {
 public:
     string name;
-    list<StructExpAttr> attrs;
+    list<StructExpAttr*> attrs;
     StructExp();
     int accept(Visitor* visitor);
     ImpType accept(ImpVisitor* v);
@@ -110,6 +110,7 @@ public:
 
 //TODO constructors, accepts
 class StructExpAttr {
+public:
     string name;
     Exp* exp;
     StructExpAttr(string n, Exp* e);
@@ -261,7 +262,7 @@ public:
 class StructDec {
 public:
     string name;
-    list<AttrDec> attrs;
+    list<AttrDec*> attrs;
     StructDec();
     int accept(Visitor* visitor);
     void accept(ImpVisitor* v);
@@ -270,6 +271,7 @@ public:
 
 //TODO constructors, accepts
 class AttrDec {
+public:
     string name;
     string type;
     AttrDec(string n, string t);

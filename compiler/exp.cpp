@@ -131,6 +131,14 @@ FunDec::~FunDec() {
     delete body;
 }
 
+StructDec::StructDec() {}
+StructDec::~StructDec() {
+    for(auto a : attrs){
+        delete a;
+    }
+}
+
+
 StatementList::StatementList(): stms() {}
 void StatementList::add(Stm* s) {
     stms.push_back(s);

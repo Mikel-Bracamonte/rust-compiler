@@ -7,6 +7,7 @@ void CheckVisitor::check(Program* p) {
     }
 }
 
+// tested
 ImpType CheckVisitor::visit(BinaryExp* exp) {
     ImpType v1 = exp->left->accept(this);
     ImpType v2 = exp->right->accept(this);
@@ -52,7 +53,7 @@ ImpType CheckVisitor::visit(BinaryExp* exp) {
     return ImpType();
 }
 
-// check!
+// check!, tested!
 ImpType CheckVisitor::visit(UnaryExp* exp) {
     ImpType e = exp->exp->accept(this);
     ImpType result;
@@ -64,27 +65,30 @@ ImpType CheckVisitor::visit(UnaryExp* exp) {
     switch(exp->op) {
         case U_NEG_OP:
             if(e.ttype=="int") return ImpType("int");
-
+            break;
         case U_NOT_OP:
             if(e.ttype=="bool") return ImpType("bool");
+            break;
         default:
-        errorHandler.error("Operador unario no reconocido: " + Exp::unaryOpToChar(exp->op));        
+            errorHandler.error("Operador unario no reconocido: " + Exp::unaryOpToChar(exp->op));
     }
+    errorHandler.error("Operador unario: " + Exp::unaryOpToChar(exp->op) + 
+                        " no aceptado para el tipo '" + e.ttype + "'");
     return ImpType();
 }
 
-// check!
+// check!, tested!
 ImpType CheckVisitor::visit(NumberExp* e) {
     return ImpType("int"); // long int
 }
 
-// check!
+// check!, tested!
 ImpType CheckVisitor::visit(BoolExp* e) {
     return ImpType("bool");
 }
 
+// check!, tested!
 ImpType CheckVisitor::visit(IdentifierExp* e) {
-    // chequear variable en entorno
     if(!env.check(e->name)) {
         errorHandler.error("Variable '" + e->name + "' no existe.");
     }
@@ -99,7 +103,7 @@ ImpType CheckVisitor::visit(IdentifierExp* e) {
     return ImpType();
 }
 
-// check!
+// check!, tested!
 ImpType CheckVisitor::visit(IfExp* e) {
     if (e->condition->accept(this).ttype == "bool") {
         ImpType thenT = e->then->accept(this);
@@ -132,21 +136,26 @@ ImpType CheckVisitor::visit(FunctionCallExp* e) {
     return ftype;
 }
 
-// check!
+// checked!, tested
 void CheckVisitor::visit(AssignStatement* s) { 
     if(!env.check(s->name)) {
-        errorHandler.error("varible '" + s->name + "' no declarada.");
+        errorHandler.error("Varible '" + s->name + "' no declarada.");
     }
 
     ImpType target = env.lookup(s->name);
     ImpType src = s->right->accept(this);
     
-    if (!target.match(src)) {
+    if (src.ttype != getType(target)) {
         errorHandler.error("Tipo incompatible en asignación a '" + s->name + "'.");
+    }
+    if (s->op != AS_ASSIGN_OP){
+        if(src.ttype != "int") {
+            errorHandler.error("Tipo incompatible con la operación de asignación: " + Exp::assignOpToChar(s->op));
+        }
     }
 }
 
-// check!
+// check!, tested!
 void CheckVisitor::visit(PrintStatement* s) {
     if(s->exp->accept(this).ttype != "int"){
         errorHandler.error("La impresión debe ser un int");
@@ -224,7 +233,7 @@ void CheckVisitor::visit(ContinueStatement* s) {
     }
 }
 
-// check!
+// check!, tested!
 void CheckVisitor::visit(VarDec* vd) {
     if (env.check(vd->name)) {
         errorHandler.error("Variable '" + vd->name + "' ya declarada.");
@@ -237,6 +246,15 @@ void CheckVisitor::visit(VarDec* vd) {
     } else {
         errorHandler.error("Tipo de variable no reconocido: '" + vd->type + "'.");
     }
+
+    if(vd->exp == nullptr) return;
+
+    ImpType src = vd->exp->accept(this);
+    
+    if (src.ttype != getType(vd->type)) {
+        errorHandler.error("Tipo incompatible en asignación a '" + vd->name + "'.");
+    }
+
 }
 
 void CheckVisitor::visit(FunctionCallStatement* stm) {

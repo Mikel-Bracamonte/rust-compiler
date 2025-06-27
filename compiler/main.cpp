@@ -60,6 +60,19 @@ int main(int argc, const char* argv[]) {
         
         Program* program = parser.parseProgram();
         
+        ///////////////////////////////////
+        //           CHECKER
+        ///////////////////////////////////
+
+        CheckVisitor* checkcodeVisitor = new CheckVisitor();
+        checkcodeVisitor->check(program);
+
+        cout << "Todos los checks fueron aceptados" << endl;
+        ///////////////////////////////////
+        //           GENCODE
+        ///////////////////////////////////
+
+        /*
         string inputFile(argv[1]);
         size_t dotPos = inputFile.find_last_of('.');
         string baseName = (dotPos == string::npos) ? inputFile : inputFile.substr(0, dotPos);
@@ -75,6 +88,7 @@ int main(int argc, const char* argv[]) {
         
         gencodeVisitor->gencode(program);
         outfile.close();
+        */
 
         //interpreter.interpret(program);
         //cout << "End of program execution" << endl;

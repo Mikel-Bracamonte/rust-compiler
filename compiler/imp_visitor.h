@@ -88,7 +88,17 @@ class CheckVisitor : public ImpVisitor {
 private:
     Environment<ImpType> env;
 public:
+    CheckVisitor(){}
     ErrorHandler errorHandler = ErrorHandler("CheckVisitor");
+    string getType(ImpType imp){
+        if(imp.ttype == "i32") return "int";
+        return imp.ttype;
+    }
+    string getType(string type){
+        if(type == "i32") return "int";
+        return type;
+    }
+    
     unordered_map<string, StructInfo> structs_info;
     int numberLoop = 0;
     ImpType returnType = ImpType();

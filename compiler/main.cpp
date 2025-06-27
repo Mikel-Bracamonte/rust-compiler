@@ -40,8 +40,8 @@ int main(int argc, const char* argv[]) {
     Parser parser(&scanner); 
     
     try {
-        /*Program* program = parser.parseProgram();
-        cout << "Parsing exitoso" << endl << endl;
+        Program* program = parser.parseProgram();
+        cout << "Parsing exitoso" << endl;
         cout << "Iniciando Visitor:" << endl;
         PrintVisitor* printVisitor = new PrintVisitor();
         //ImpCODE interpreter;
@@ -50,9 +50,9 @@ int main(int argc, const char* argv[]) {
         printVisitor->print(program);
         cout  << endl;
         //cout << endl << "Run program:" << endl;
-        */
+
         
-        Program* program = parser.parseProgram();
+        //Program* program = parser.parseProgram();
         
         string inputFile(argv[1]);
         size_t dotPos = inputFile.find_last_of('.');

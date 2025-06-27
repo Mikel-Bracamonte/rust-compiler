@@ -1,5 +1,10 @@
 struct Persona {
-    nombre: String,
-    edad: u32,
+    edad: i32,
 }
 
+fn main() {
+    let persona = Persona {
+        edad: 19,
+    };
+    println!("{}", persona.edad);
+}

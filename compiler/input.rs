@@ -1,8 +1,8 @@
+fn sum(a : i32, b : i32) {
+    println!("{}", a);
+}
+
 fn main() {
-    for mut i in 1..3 {
-        println!("{}", i);
-        break;
-        continue;
-    }
-    println!("{}", i);
+    println!("{}", sum(2, 3));
+    sum(2, 3);
 }

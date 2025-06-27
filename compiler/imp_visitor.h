@@ -101,6 +101,7 @@ public:
     }
     
     unordered_map<string, StructInfo> structs_info;
+    unordered_map<string, ImpType> functions_info;
     int numberLoop = 0;
     ImpType returnType = ImpType();
     void check(Program* p);

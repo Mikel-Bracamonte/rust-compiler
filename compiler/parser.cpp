@@ -68,12 +68,12 @@ StructDec* Parser::parseStructDec() {
     if(!match(Token::STRUCT)){
         errorHandler.expect(Token::STRUCT, current->text);
     }
-    if(!match(ID)){
+    if(!match(Token::ID)){
         errorHandler.expect(Token::ID, current->text);
     }
     StructDec* s = new StructDec();
     s->name = previous->text;
-    if(!match(PI)){
+    if(!match(Token::PI)){
         errorHandler.expect(Token::PI, current->text);
     }
     do {
@@ -88,7 +88,7 @@ StructDec* Parser::parseStructDec() {
             errorHandler.expect(Token::ID, current->text); // tipo del campo
         }
         string attrType = previous->text;
-        s->attrs.push_back(AttrDec(name, attrType));
+        s->attrs.push_back(new AttrDec(name, attrType));
 
     } while (match(Token::COMMA));
 

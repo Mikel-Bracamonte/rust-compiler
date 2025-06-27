@@ -95,3 +95,19 @@ void CheckVisitor::visit(StatementList* s) {
 void CheckVisitor::visit(Body* b) {
 
 }
+
+ImpType CheckVisitor::visit(StructExp* exp){
+    return ImpType();
+}
+
+void CheckVisitor::visit(StructDec* exp){
+
+}
+
+ImpType CheckVisitor::visit(StructExpAttr* exp){
+    return ImpType();
+}
+
+void CheckVisitor::visit(AttrDec* stm){
+
+}

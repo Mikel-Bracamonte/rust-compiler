@@ -65,8 +65,37 @@ Program* Parser::parseProgram() {
 
 // TODO
 StructDec* Parser::parseStructDec() {
+    if(!match(Token::STRUCT)){
+        errorHandler.expect(Token::STRUCT, current->text);
+    }
+    if(!match(ID)){
+        errorHandler.expect(Token::ID, current->text);
+    }
+    StructDec* s = new StructDec();
+    s->name = previous->text;
+    if(!match(PI)){
+        errorHandler.expect(Token::PI, current->text);
+    }
+    do {
+        if (!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text); // nombre del campo
+        }
+        string name = previous->text;
+        if (!match(Token::COLON)) {
+            errorHandler.expect(Token::COLON, current->text);
+        }
+        if (!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text); // tipo del campo
+        }
+        string attrType = previous->text;
+        s->attrs.push_back(AttrDec(name, attrType));
 
-    return new StructDec();
+    } while (match(Token::COMMA));
+
+    if(!match(Token::LD)){
+        errorHandler.expect(Token::LD, current->text);
+    }
+    return s;
     // TODO AttrDec()
 }
 

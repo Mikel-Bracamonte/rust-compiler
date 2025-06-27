@@ -73,6 +73,7 @@ ImpType CheckVisitor::visit(UnaryExp* exp) {
     return ImpType();
 }
 
+// check!
 ImpType CheckVisitor::visit(NumberExp* e) {
     return ImpType("int"); // long int
 }
@@ -84,25 +85,51 @@ ImpType CheckVisitor::visit(BoolExp* e) {
 
 ImpType CheckVisitor::visit(IdentifierExp* e) {
     // chequear variable en entorno
-    auto tipo= env.lookup(e->name);
-    cout<<tipo.ttype<<endl;
-    // FALTA CHEQUEAR ACAAA
-    //e->accept(this);
+    if(!env.check(e->name)) {
+        errorHandler.error("Variable '" + e->name + "' no existe.");
+    }
+    
+    ImpType tipo= env.lookup(e->name);
+    
     if(tipo.ttype == "i32") return ImpType("int");
     if(tipo.ttype == "bool") return ImpType("bool");
 
+    // struct will change it
     errorHandler.error("Variable '" + e->name + "' no declarada o tipo no reconocido.");
     return ImpType();
 }
 
+// check!
 ImpType CheckVisitor::visit(IfExp* e) {
-
+    if (s->condition->accept(this).ttype == "bool") {
+        ImpType thenT = s->then->accept(this);
+        ImpType elseT = s->els->accept(this);
+        if(!thenT.match(elseT)){
+            errorHandler.error("Then y Else de una expresión ternaria deben tener el mismo tipo");
+        }
+        return thenT;
+    }
+    errorHandler.error("La condición del if debe ser bool.");
     return ImpType();
 }
 
+// seems check!
 ImpType CheckVisitor::visit(FunctionCallExp* e) {
+    if(!env.check(e->name)) {
+        errorHandler.error("Función '" + e->name + "' no existe.");
+    }
 
-    return ImpType();
+    ImpType ftype = env.lookup(e->name);
+    if(e->argList.size() != ftype->types.size()){
+        errorHandler.error("Llamada a la función '" + e->name + "' no coincide con la cantidad de parámetros definida")
+    }
+    int ite = 0;
+    for(auto arg : e->argList){
+        if(arg->accept(this).ttype != ftype->types[ite]){
+            errorHandler.error("El tipo del argumento '" + ite + "'-ésimo no coincide con el de la función '" + e->name + "'")
+        }
+    }
+    return ftype;
 }
 
 // check!
@@ -197,6 +224,7 @@ void CheckVisitor::visit(ContinueStatement* s) {
     }
 }
 
+// check!
 void CheckVisitor::visit(VarDec* vd) {
     if (env.check(vd->name)) {
         errorHandler.error("Variable '" + vd->name + "' ya declarada.");
@@ -204,10 +232,7 @@ void CheckVisitor::visit(VarDec* vd) {
     // long int?
     // mut?
     // mapa con variables mutables
-    cout<<"vd type"<<vd->type<<endl;
-    if (vd->type == "i32") {
-        env.add_var(vd->name,vd->type);
-    } else if (vd->type == "bool") {
+    if (vd->type == "i32" || vd->type == "i64" || vd->type == "bool" || structs_info.count(vd->type)) {
         env.add_var(vd->name, vd->type);
     } else {
         errorHandler.error("Tipo de variable no reconocido: '" + vd->type + "'.");
@@ -215,13 +240,24 @@ void CheckVisitor::visit(VarDec* vd) {
 }
 
 void CheckVisitor::visit(FunctionCallStatement* stm) {
-    
+    if(!env.check(e->name)) {
+        errorHandler.error("Función '" + e->name + "' no existe.");
+    }
+
+    ImpType ftype = env.lookup(e->name);
+    if(e->argList.size() != ftype->types.size()){
+        errorHandler.error("Llamada a la función '" + e->name + "' no coincide con la cantidad de parámetros definida")
+    }
+    int ite = 0;
+    for(auto arg : e->argList){
+        if(arg->accept(this).ttype != ftype->types[ite]){
+            errorHandler.error("El tipo del argumento '" + ite + "'-ésimo no coincide con el de la función '" + e->name + "'")
+        }
+    }    
 }
 
 // check!
 void CheckVisitor::visit(ParamDec* vd) {
-    ImpType t;
-    
     if (vd->type == "i32" || vd->type == "i64" || vd->type == "bool" || structs_info.count(vd->type)) {
         env.add_var(vd->name, vd->type);
     } else {
@@ -229,20 +265,23 @@ void CheckVisitor::visit(ParamDec* vd) {
     }
 }
 
+// check!
 void CheckVisitor::visit(FunDec* vd) {
     ImpType ftype;
     list<string> argTypes;
     returnType = vd->type;
     env.add_level();
     
-    for (auto p : vd->params)
-        argTypes.push_back(p->type);
-    
-    ftype.set_fun_type(argTypes, vd->type);
-    env.add_var(vd->name, ftype);
-
+    // check that types exists
     for (auto p : vd->params)
         p->accept(this);
+
+    for (auto p : vd->params)
+        ftype->types.push_back(p->type);
+    
+    ftype->type = vd->type;
+
+    env.add_var(vd->name, ftype);
     
     vd->body->accept(this); 
     env.remove_level();

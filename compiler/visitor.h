@@ -63,7 +63,7 @@ public:
     int visit(IdentifierExp* exp) override;
     int visit(IfExp* exp) override;
     int visit(FunctionCallExp* exp) override;
-    void visit(AssignStatement* stm) override;
+    void visit(AssignSftypetatement* stm) override;
     void visit(PrintStatement* stm) override;
     void visit(IfStatement* stm) override;
     void visit(WhileStatement* stm) override;

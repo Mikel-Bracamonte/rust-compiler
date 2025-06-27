@@ -7,9 +7,9 @@ ImpType::ImpType(string s) {
 
 ImpType::ImpType() {}
 
-bool ImpType::match(const ImpType& t) {
-  bool ret=true;
-  return ret;
+bool ImpType::match(ImpType t) {
+  if (this->ttype != t.ttype) return false;
+  return true;
 }
 
 bool ImpType::set_basic_type(string s) {

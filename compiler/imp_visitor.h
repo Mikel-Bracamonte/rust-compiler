@@ -87,6 +87,7 @@ public:
 class CheckVisitor : public ImpVisitor {
 private:
     Environment<ImpType> env;
+    // siempre guarda los types como 'i32'
 public:
     CheckVisitor(){}
     ErrorHandler errorHandler = ErrorHandler("CheckVisitor");

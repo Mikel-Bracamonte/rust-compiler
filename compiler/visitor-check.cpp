@@ -162,7 +162,7 @@ void CheckVisitor::visit(PrintStatement* s) {
     }
 }
 
-// check!
+// check!, tested!
 void CheckVisitor::visit(IfStatement* s) {
     if (s->condition->accept(this).ttype == "bool") {
         s->then->accept(this);
@@ -172,7 +172,7 @@ void CheckVisitor::visit(IfStatement* s) {
     }
 }
 
-// check!
+// check!, tested!
 void CheckVisitor::visit(WhileStatement* stm) {
     numberLoop ++;
     if(stm->condition->accept(this).ttype == "bool") {
@@ -184,7 +184,7 @@ void CheckVisitor::visit(WhileStatement* stm) {
     numberLoop --;
 }
 
-// check!
+// check!, tested
 void CheckVisitor::visit(ForStatement* s) {
     // tiene que ser mut, int    
     numberLoop ++;
@@ -200,7 +200,12 @@ void CheckVisitor::visit(ForStatement* s) {
     if (endT.ttype != "int") {
         errorHandler.error("El final del for debe ser un entero.");
     }
-    s->body->accept(this);
+    env.add_level();
+    // add var unicamente al body de for, afuera no puede acceder
+    string int_type = "i32";
+    env.add_var(s->name, int_type);
+    s->body->stmList->accept(this);
+    env.remove_level();
 
     numberLoop --;
 }
@@ -219,17 +224,17 @@ void CheckVisitor::visit(ReturnStatement* s) {
     }
 }
 
-// check!
+// check!, tested!
 void CheckVisitor::visit(BreakStatement* s) {
     if (numberLoop <= 0) {
         errorHandler.error("Error: 'break' fuera de un bucle.");
     }
 }
 
-// check!
+// check!, tested!
 void CheckVisitor::visit(ContinueStatement* s) {
     if (numberLoop <= 0) {
-        errorHandler.error("Error: 'break' fuera de un bucle.");
+        errorHandler.error("Error: 'continue' fuera de un bucle.");
     }
 }
 
@@ -305,14 +310,14 @@ void CheckVisitor::visit(FunDec* vd) {
     env.remove_level();
 }
 
-// check!
+// check!, tested!
 void CheckVisitor::visit(StatementList* s) {
      for (auto stmt : s->stms) {
         stmt->accept(this); 
     }
 }
 
-// check!
+// check!, tested!
 void CheckVisitor::visit(Body* b) {
     env.add_level();
     b->stmList->accept(this);

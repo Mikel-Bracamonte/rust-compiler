@@ -37,6 +37,10 @@ ImpType StructExpAttr::accept(ImpVisitor* visitor) {
     return visitor->visit(this);
 }
 
+ImpType PostfixExp::accept(ImpVisitor* visitor) {
+    return visitor->visit(this);
+}
+
 void AssignStatement::accept(ImpVisitor* visitor) {
     visitor->visit(this);
 }
@@ -257,16 +261,6 @@ ImpType GenCodeVisitor::visit(FunctionCallExp* e) {
     return ImpType();
 }
 
-ImpType GenCodeVisitor::visit(StructExp* e) {
-
-    return ImpType();
-}
-
-ImpType GenCodeVisitor::visit(StructExpAttr* a) {
-
-    return ImpType();
-}
-
 void GenCodeVisitor::visit(AssignStatement* s) {
     assert(env.check(s->name));
     s->right->accept(this);
@@ -407,8 +401,8 @@ void GenCodeVisitor::visit(VarDec* vd) {
     ImpType type;
     type.set_basic_type(vd->type);
     env.add_var(vd->name, {type, offset});
-    offset -= 8;
-    if(vd->exp != nullptr){
+    offset -= 8; // TODO depende del tipo
+    if(vd->exp != nullptr) {
         vd->exp->accept(this);
         out << " movq %rax, " << get<1>(env.lookup(vd->name)) << "(%rbp)" << endl;
     }
@@ -465,11 +459,37 @@ void GenCodeVisitor::visit(FunDec* f) {
 }
 
 void GenCodeVisitor::visit(StructDec* s){
-    
+    StructInfo struct_info;
+    int offset_struct = 0;
+    for(auto i : s->attrs) {
+        struct_info.offsets[i->name] = offset_struct;
+        offset_struct -= 8; // TODO depende del tipo de variable
+    }
+    struct_info.size = -offset_struct; // TODO depende
+    structs_info[s->name] = struct_info;
 }
 
 void GenCodeVisitor::visit(AttrDec* a){
+    // No es necesario creo
+}
 
+ImpType GenCodeVisitor::visit(PostfixExp* e) {
+
+    return ImpType();
+}
+
+ImpType GenCodeVisitor::visit(StructExp* e) {
+    struct_name = e->name;
+    for(auto e : e->attrs) {
+        e->accept(this);
+    }
+    return ImpType();
+}
+
+ImpType GenCodeVisitor::visit(StructExpAttr* a) {
+    a->exp->accept(this);
+    out << " movq %rax, " << structs_info[struct_name].offsets[a->name] << "(%rbp)" << endl;
+    return ImpType();
 }
 
 void GenCodeVisitor::visit(StatementList* s) {

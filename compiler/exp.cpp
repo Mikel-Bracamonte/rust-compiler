@@ -154,6 +154,11 @@ StructExpAttr::~StructExpAttr() {}
 StructExp::StructExp() {}
 StructExp::~StructExp(){}
 
+PostfixExp::PostfixExp(Exp* l, string r) : left(l), right(r) {}
+PostfixExp::~PostfixExp() {
+    delete left;
+}
+
 StatementList::StatementList(): stms() {}
 void StatementList::add(Stm* s) {
     stms.push_back(s);

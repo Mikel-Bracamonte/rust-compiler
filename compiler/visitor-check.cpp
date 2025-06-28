@@ -150,6 +150,12 @@ ImpType CheckVisitor::visit(StructExpAttr* e) {
     return ImpType();
 }
 
+// TODO chequear que left sea un struct y devolver el tipo de variable del atributo
+ImpType CheckVisitor::visit(PostfixExp* e) {
+
+    return ImpType();
+}
+
 // checked!, tested
 void CheckVisitor::visit(AssignStatement* s) { 
     if(!env.check(s->name)) {

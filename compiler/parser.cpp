@@ -192,7 +192,7 @@ Stm* Parser::parseStatement() {
             stmt->name = name == "main" ? name : "fn_" + name;
             if(!match(Token::PD)) {
                 do {
-                    stmt->add(parseAExp());
+                    stmt->add(parseBaseExp());
                 } while (match(Token::COMMA));
                 if(!match(Token::PD)) {
                     errorHandler.expect(Token::PD, current->text);
@@ -226,7 +226,7 @@ Stm* Parser::parseStatement() {
                     op = AS_MOD_OP;
                     break;
             }
-            Exp* exp = parseAExp();
+            Exp* exp = parseBaseExp();
             if(!match(Token::PC)) {
                 errorHandler.expect(Token::PC, current->text);
             }
@@ -260,7 +260,7 @@ Stm* Parser::parseStatement() {
         if(!match(Token::COMMA)) {
             errorHandler.expect(Token::COMMA, current->text);
         }
-        Exp* exp = parseAExp();
+        Exp* exp = parseBaseExp();
         if(!match(Token::PD)) {
             errorHandler.expect(Token::PD, current->text);
         }
@@ -269,7 +269,7 @@ Stm* Parser::parseStatement() {
         }
         return new PrintStatement(exp, ln);
     } else if(match(Token::IF)) {
-        Exp* condition = parseAExp();
+        Exp* condition = parseBaseExp();
         if(!match(Token::LI)) {
             errorHandler.expect(Token::LI, current->text);
         }
@@ -289,7 +289,7 @@ Stm* Parser::parseStatement() {
         }
         return new IfStatement(condition, then, els);
     } else if(match(Token::WHILE)) {
-        Exp* condition = parseAExp();
+        Exp* condition = parseBaseExp();
         if(!match(Token::LI)) {
             errorHandler.expect(Token::LI, current->text);
         }
@@ -310,11 +310,11 @@ Stm* Parser::parseStatement() {
         if(!match(Token::IN)) {
             errorHandler.expect(Token::IN, current->text);
         }
-        Exp* start = parseAExp();
+        Exp* start = parseBaseExp();
         if(!match(Token::DOTS)) {
             errorHandler.expect(Token::DOTS, current->text);
         }
-        Exp* end = parseAExp();
+        Exp* end = parseBaseExp();
         if(!match(Token::LI)) {
             errorHandler.expect(Token::LI, current->text);
         }
@@ -326,7 +326,7 @@ Stm* Parser::parseStatement() {
     } else if(match(Token::RETURN)) {
         Exp* exp = nullptr;
         if(!match(Token::PC)) {
-            exp = parseAExp();
+            exp = parseBaseExp();
             if(!match(Token::PC)) {
                 errorHandler.expect(Token::PC, current->text);
             }
@@ -361,7 +361,7 @@ Stm* Parser::parseStatement() {
         string type = previous->text;
         Exp* exp = nullptr;
         if(match(Token::ASSIGN)) {
-            exp = parseAExp();
+            exp = parseBaseExp();
         }
         if(!match(Token::PC)) {
             errorHandler.expect(Token::PC, current->text);
@@ -369,6 +369,17 @@ Stm* Parser::parseStatement() {
         return new VarDec(name, type, mut, exp);
     }
     return nullptr;
+}
+
+Exp* Parser::parseBaseExp() {
+    Exp* left = parseAExp();
+    while(match(Token::DOT)) {
+        if(!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text);
+        }
+        Exp* left = new PostfixExp(left, previous->text);
+    }
+    return left;
 }
 
 //check!
@@ -481,7 +492,7 @@ Exp* Parser::parseFactor() {
             }
             else {
                 do {
-                    f->add(parseAExp());
+                    f->add(parseBaseExp());
                 } while (match(Token::COMMA));
                 if(!match(Token::PD)) {
                     errorHandler.expect(Token::PD, current->text);
@@ -502,7 +513,7 @@ Exp* Parser::parseFactor() {
                     if (!match(Token::COLON)) {
                         errorHandler.expect(Token::COLON, current->text);
                     }
-                    Exp* value = parseAExp();
+                    Exp* value = parseBaseExp();
 
                     s->attrs.push_back(new StructExpAttr(attrName, value));
                     if(!match(Token::COMMA)){
@@ -525,18 +536,18 @@ Exp* Parser::parseFactor() {
         e = new BoolExp(0);
     }
     else if (match(Token::PI)) {
-        e = parseAExp();
+        e = parseBaseExp();
         e->hasParenthesis = true;
         if (!match(Token::PD)) {
             errorHandler.expect(Token::PD, current->text);
         }
     }
     else if (match(Token::IF)) {
-        Exp* e1 = parseAExp();
+        Exp* e1 = parseBaseExp();
         if (!match(Token::LI)) {
             errorHandler.expect(Token::LI, current->text);
         }
-        Exp* e2 = parseAExp();
+        Exp* e2 = parseBaseExp();
         if (!match(Token::LD)) {
             errorHandler.expect(Token::LD, current->text);
         }
@@ -546,7 +557,7 @@ Exp* Parser::parseFactor() {
         if (!match(Token::LI)) {
             errorHandler.expect(Token::LI, Token::ELSE, current->text);
         }
-        Exp* e3 = parseAExp();
+        Exp* e3 = parseBaseExp();
         if (!match(Token::LD)) {
             errorHandler.expect(Token::LD, current->text);
         }

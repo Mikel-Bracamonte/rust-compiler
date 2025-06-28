@@ -40,6 +40,10 @@ int StructExpAttr::accept(Visitor* visitor) {
     return visitor->visit(this);
 }
 
+int PostfixExp::accept(Visitor* visitor) {
+    return visitor->visit(this);
+}
+
 int AssignStatement::accept(Visitor* visitor) {
     visitor->visit(this);
     return 0;
@@ -198,6 +202,11 @@ int PrintVisitor::visit(StructExpAttr* attr) {
     cout << attr->name << ": ";
     attr->exp->accept(this);
     return 0;
+}
+
+int PrintVisitor::visit(PostfixExp* exp) {
+    exp->left->accept(this);
+    cout << "." << exp->right;
 }
 
 int PrintVisitor::visit(FunctionCallExp* exp) {

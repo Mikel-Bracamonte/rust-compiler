@@ -20,6 +20,7 @@ public:
     virtual ImpType visit(FunctionCallExp* exp) = 0;
     virtual ImpType visit(StructExp* exp) = 0;
     virtual ImpType visit(StructExpAttr* exp) = 0;
+    virtual ImpType visit(PostfixExp* exp) = 0;
     virtual void visit(AssignStatement* stm) = 0;
     virtual void visit(PrintStatement* stm) = 0;
     virtual void visit(IfStatement* stm) = 0;
@@ -38,7 +39,7 @@ public:
     virtual void visit(Body* b) = 0;
 };
 
-class StructInfo {
+struct StructInfo {
     int size;
     unordered_map<string, int> offsets;
 };
@@ -61,6 +62,7 @@ public:
     int label_counter = 0;
     bool entornoFuncion = false;
     string nombreFuncion;
+    string struct_name;
 
     stack<string> nombreLoop;
 
@@ -74,6 +76,7 @@ public:
     ImpType visit(FunctionCallExp* exp) override;
     ImpType visit(StructExp* exp) override;
     ImpType visit(StructExpAttr* exp) override;
+    ImpType visit(PostfixExp* exp) override;
     void visit(AssignStatement* stm) override;
     void visit(PrintStatement* stm) override;
     void visit(IfStatement* stm) override;
@@ -122,6 +125,7 @@ public:
     ImpType visit(FunctionCallExp* exp) override;
     ImpType visit(StructExp* exp) override;
     ImpType visit(StructExpAttr* exp) override;
+    ImpType visit(PostfixExp* exp) override;
     void visit(AssignStatement* stm) override;
     void visit(PrintStatement* stm) override;
     void visit(IfStatement* stm) override;

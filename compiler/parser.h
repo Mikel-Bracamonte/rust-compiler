@@ -23,6 +23,7 @@ public:
     Body* parseBody();
     StatementList* parseStatementList();
     Stm* parseStatement();
+    Exp* parseBaseExp();
     Exp* parseAExp();
     Exp* parseBExp();
     Exp* parseCExp();

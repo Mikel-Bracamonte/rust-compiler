@@ -27,6 +27,16 @@ public:
     static string unaryOpToChar(UnaryOp o);
 };
 
+class PostfixExp : public Exp {
+public:
+    Exp* left;
+    string right;
+    PostfixExp(Exp* l, string r);
+    int accept(Visitor* visitor);
+    ImpType accept(ImpVisitor* v);
+    ~PostfixExp();
+};
+
 class BinaryExp : public Exp {
 public:
     Exp* left;

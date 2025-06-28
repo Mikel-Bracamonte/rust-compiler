@@ -29,8 +29,7 @@ Token* Scanner::nextToken() {
 
     else if (isalpha(c)) {
         current++;
-        // scanner add dot por id's
-        while (current < input.length() && (isalnum(input[current]) || input[current] == '_' || input[current] == '.' ))
+        while (current < input.length() && (isalnum(input[current]) || input[current] == '_'))
             current++;
         string word = input.substr(first, current - first);
         if (word == "println") {

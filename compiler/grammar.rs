@@ -32,6 +32,8 @@ Stmt ::= id (= | += | -= | *= | /= | %=) AExp ; |
     break ; |
     continue ; 
 
+BaseExp ::= Aexp (. id)*
+
 AExp ::= BExp ((&& | ||) BExp)*
 
 BExp ::= CExp | !CExp

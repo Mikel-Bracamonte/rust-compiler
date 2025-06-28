@@ -179,25 +179,24 @@ int PrintVisitor::visit(IfExp* exp) {
 
 int PrintVisitor::visit(StructExp* exp) {
     //TODO
-    cout << exp->name << " { ";
+
+    cout << exp->name << " { "<<endl;
     bool first = true;
+    offset++;
     for (auto attr : exp->attrs) {
-        if (!first) std::cout << ", ";
-        first = false;
+        cout << get_spaces();
         attr->accept(this);
+        cout << ",\n";
     }
-    cout << " }";
+    offset--;
+    cout << get_spaces()<<"}";
     return 0;
 }
 
 int PrintVisitor::visit(StructExpAttr* attr) {
     //TODO
     cout << attr->name << ": ";
-    if (attr->exp) {
-        attr->exp->accept(this);  // imprime el valor de la expresión
-    } else {
-        cout << "null";
-    }
+    attr->exp->accept(this);
     return 0;
 }
 
@@ -337,7 +336,7 @@ void PrintVisitor::visit(FunDec* stm){
 void PrintVisitor::visit(StructDec* stm) {
     cout << "struct " << stm->name << " {\n";
     for (auto attr : stm->attrs) {
-        cout << "  ";
+        cout <<"    ";
         attr->accept(this);
         cout << ",\n";
     }

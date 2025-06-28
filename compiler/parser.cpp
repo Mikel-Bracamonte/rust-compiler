@@ -81,7 +81,6 @@ StructDec* Parser::parseStructDec() {
     }
     StructDec* s = new StructDec();
     s->name = previous->text;
-    cout<<s->name<<endl;
     if(!match(Token::LI)){
         errorHandler.expect(Token::PI, current->text);
     }
@@ -351,10 +350,11 @@ Stm* Parser::parseStatement() {
             errorHandler.expect(Token::ID, current->text);
         }
         string name = previous->text;
+
         if(!match(Token::COLON)) {
             errorHandler.expect(Token::COLON, current->text);
         }
-        if(!match(Token::ID)) {
+        if(!match(Token::ID) ) {
             errorHandler.expect(Token::ID, current->text);
         }
         string type = previous->text;
@@ -366,7 +366,7 @@ Stm* Parser::parseStatement() {
             errorHandler.expect(Token::PC, current->text);
         }
         return new VarDec(name, type, mut, exp);
-    } 
+    }
     return nullptr;
 }
 
@@ -492,7 +492,7 @@ Exp* Parser::parseFactor() {
             StructExp* s = new StructExp();
             s->name = texto;
 
-            if (!check(Token::LD)) {
+            if (!match(Token::LD)) {
                 do {
                     if (!match(Token::ID)) {
                         errorHandler.expect(Token::ID, current->text);
@@ -504,11 +504,12 @@ Exp* Parser::parseFactor() {
                     Exp* value = parseAExp();
 
                     s->attrs.push_back(new StructExpAttr(attrName, value));
-                } while (match(Token::COMMA));
+                    if(!match(Token::COMMA)){
+                        errorHandler.expect(Token::COMMA, current->text);
+                    }
+                } while (!match(Token::LD));
             }
-            if (!match(Token::LD)) {
-                errorHandler.expect(Token::LD, current->text);
-            }
+
             e = s;
         }
         else e = new IdentifierExp(texto);

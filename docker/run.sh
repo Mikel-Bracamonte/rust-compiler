@@ -1,0 +1,1 @@
+docker run --rm -d -i --name gcc-container gcc-image

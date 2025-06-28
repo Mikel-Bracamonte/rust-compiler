@@ -40,7 +40,8 @@ int main(int argc, const char* argv[]) {
     Parser parser(&scanner); 
     
     try {
-        /*Program* program = parser.parseProgram();
+        /*
+        Program* program = parser.parseProgram();
         cout << "Parsing exitoso" << endl << endl;
         cout<<"Iniciando checker:"<<endl;
         CheckVisitor checkVisitor;
@@ -57,8 +58,8 @@ int main(int argc, const char* argv[]) {
         cout  << endl;
         //cout << endl << "Run program:" << endl;
 
-        
-        //Program* program = parser.parseProgram();
+        */
+        Program* program = parser.parseProgram();
         
         ///////////////////////////////////
         //           CHECKER
@@ -72,7 +73,7 @@ int main(int argc, const char* argv[]) {
         //           GENCODE
         ///////////////////////////////////
 
-        /*
+        
         string inputFile(argv[1]);
         size_t dotPos = inputFile.find_last_of('.');
         string baseName = (dotPos == string::npos) ? inputFile : inputFile.substr(0, dotPos);
@@ -88,7 +89,7 @@ int main(int argc, const char* argv[]) {
         
         gencodeVisitor->gencode(program);
         outfile.close();
-        */
+        
 
         //interpreter.interpret(program);
         //cout << "End of program execution" << endl;

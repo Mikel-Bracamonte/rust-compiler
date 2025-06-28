@@ -345,19 +345,3 @@ void CheckVisitor::visit(Body* b) {
     b->stmList->accept(this);
     env.remove_level();
 }
-
-ImpType CheckVisitor::visit(StructExp* exp){
-    return ImpType();
-}
-
-void CheckVisitor::visit(StructDec* exp){
-
-}
-
-ImpType CheckVisitor::visit(StructExpAttr* exp){
-    return ImpType();
-}
-
-void CheckVisitor::visit(AttrDec* stm){
-
-}

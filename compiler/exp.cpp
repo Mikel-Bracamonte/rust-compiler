@@ -138,6 +138,21 @@ StructDec::~StructDec() {
     }
 }
 
+AttrDec::AttrDec(string n, string t) {
+    name = n;
+    type = t;
+
+}
+AttrDec::~AttrDec() {}
+
+StructExpAttr::StructExpAttr(string n, Exp* e) {
+    name=n;
+    exp=e;
+}
+StructExpAttr::~StructExpAttr() {}
+
+StructExp::StructExp() {}
+StructExp::~StructExp(){}
 
 StatementList::StatementList(): stms() {}
 void StatementList::add(Stm* s) {
@@ -205,5 +220,4 @@ string Exp::unaryOpToChar(UnaryOp op) {
     }
     return c;
 }
-
 

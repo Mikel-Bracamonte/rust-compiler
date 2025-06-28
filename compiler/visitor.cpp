@@ -179,11 +179,24 @@ int PrintVisitor::visit(IfExp* exp) {
 
 int PrintVisitor::visit(StructExp* exp) {
     //TODO
+
+    cout << exp->name << " { "<<endl;
+    bool first = true;
+    offset++;
+    for (auto attr : exp->attrs) {
+        cout << get_spaces();
+        attr->accept(this);
+        cout << ",\n";
+    }
+    offset--;
+    cout << get_spaces()<<"}";
     return 0;
 }
 
 int PrintVisitor::visit(StructExpAttr* attr) {
     //TODO
+    cout << attr->name << ": ";
+    attr->exp->accept(this);
     return 0;
 }
 
@@ -321,11 +334,18 @@ void PrintVisitor::visit(FunDec* stm){
 }
 
 void PrintVisitor::visit(StructDec* stm) {
-    // TODO
+    cout << "struct " << stm->name << " {\n";
+    for (auto attr : stm->attrs) {
+        cout <<"    ";
+        attr->accept(this);
+        cout << ",\n";
+    }
+    cout << "}"<<endl;
 }
 
 void PrintVisitor::visit(AttrDec* attr) {
     // TODO
+    cout << attr->name << ": " << attr->type;
 }
 
 void PrintVisitor::visit(StatementList* stm){
@@ -341,7 +361,10 @@ void PrintVisitor::visit(Body* stm){
 
 void PrintVisitor::print(Program* program){
     offset = 0;
-    for(auto f : program->funs) {
+    for (auto s : program->structs) {
+        s->accept(this);
+    }
+    for (auto f : program->funs) {
         f->accept(this);
     }
 };

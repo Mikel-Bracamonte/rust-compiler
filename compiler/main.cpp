@@ -56,9 +56,9 @@ int main(int argc, const char* argv[]) {
         printVisitor->print(program);
         cout  << endl;
         //cout << endl << "Run program:" << endl;
-        */
+
         
-        Program* program = parser.parseProgram();
+        //Program* program = parser.parseProgram();
         
         ///////////////////////////////////
         //           CHECKER

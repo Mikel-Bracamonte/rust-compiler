@@ -29,7 +29,7 @@ public:
 
 class BinaryExp : public Exp {
 public:
-    Exp* left; 
+    Exp* left;
     Exp* right;
     BinaryOp op;
     BinaryExp(Exp* l, Exp* r, BinaryOp o);
@@ -78,7 +78,7 @@ public:
 class IfExp : public Exp {
 public:
     Exp* condition;
-    Exp* then; 
+    Exp* then;
     Exp* els;
     IfExp(Exp *c, Exp* t, Exp* e);
     int accept(Visitor* visitor);
@@ -87,7 +87,7 @@ public:
 };
 
 class FunctionCallExp : public Exp {
-public: 
+public:
     string name;
     list<Exp*> argList;
     FunctionCallExp();
@@ -97,30 +97,7 @@ public:
     ~FunctionCallExp();
 };
 
-//TODO constructors, accepts
-class StructExp : public Exp {
-public:
-    string name;
-    list<StructExpAttr*> attrs;
-    StructExp();
-    int accept(Visitor* visitor);
-    ImpType accept(ImpVisitor* v);
-    ~StructExp();
-};
-
-//TODO constructors, accepts
-class StructExpAttr {
-public:
-    string name;
-    Exp* exp;
-    StructExpAttr(string n, Exp* e);
-    int accept(Visitor* visitor);
-    ImpType accept(ImpVisitor* v);
-    ~StructExpAttr();
-};
-
 ///////////////////////////////////////////////////////
-
 
 class Stm {
 public:
@@ -236,7 +213,7 @@ public:
 /////////////////////////////////////////
 
 class ParamDec {
-public: 
+public:
     string name;
     string type;
     bool isMut;
@@ -269,7 +246,7 @@ public:
     ~StructDec();
 };
 
-//TODO constructors, accepts
+    //TODO constructors, accepts
 class AttrDec {
 public:
     string name;
@@ -278,6 +255,28 @@ public:
     int accept(Visitor* visitor);
     void accept(ImpVisitor* v);
     ~AttrDec();
+};
+
+//TODO constructors, accepts
+class StructExp : public Exp {
+public:
+    string name;
+    list<StructExpAttr*> attrs;
+    StructExp();
+    int accept(Visitor* visitor);
+    ImpType accept(ImpVisitor* v);
+    ~StructExp();
+};
+
+//TODO constructors, accepts
+class StructExpAttr {
+public:
+    string name;
+    Exp* exp;
+    StructExpAttr(string n, Exp* e);
+    int accept(Visitor* visitor);
+    ImpType accept(ImpVisitor* v);
+    ~StructExpAttr();
 };
 
 class StatementList {

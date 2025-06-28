@@ -53,20 +53,55 @@ Parser::Parser(Scanner* sc):scanner(sc) {
 Program* Parser::parseProgram() {
     Program* p = new Program();
     // TODO parseStruct
-    if(!match(Token::FN)) {
-        errorHandler.expect(Token::FN, current->text);
+    while(!isAtEnd()){
+        if(match(Token::STRUCT)){
+            p->structs.push_back(parseStructDec());
+            while(match(Token::STRUCT)){
+                p->structs.push_back(parseStructDec());
+            }
+        }
+        else if(match(Token::FN)){
+            p->funs.push_back(parseFunDec());
+            while(match(Token::FN)){
+                p->funs.push_back(parseFunDec());
+            }
+        }
+        else{
+            errorHandler.error("Se esperaba struct o fun");
+        }
     }
-    p->funs.push_back(parseFunDec());
-    while(match(Token::FN)) {
-        p->funs.push_back(parseFunDec());
-    }
+
     return p;
 }
 
 // TODO
 StructDec* Parser::parseStructDec() {
-
-    return new StructDec();
+    if(!match(Token::ID)){
+        errorHandler.expect(Token::ID, current->text);
+    }
+    StructDec* s = new StructDec();
+    s->name = previous->text;
+    if(!match(Token::LI)){
+        errorHandler.expect(Token::PI, current->text);
+    }
+    while(!match(Token::LD)){
+        if (!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text); // nombre del campo
+        }
+        string name = previous->text;
+        if (!match(Token::COLON)) {
+            errorHandler.expect(Token::COLON, current->text);
+        }
+        if (!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text); // tipo del campo
+        }
+        string attrType = previous->text;
+        s->attrs.push_back(new AttrDec(name, attrType));
+        if(!match(Token::COMMA)){
+            errorHandler.expect(Token::COMMA, current->text);
+        }
+    }
+    return s;
     // TODO AttrDec()
 }
 
@@ -316,10 +351,11 @@ Stm* Parser::parseStatement() {
             errorHandler.expect(Token::ID, current->text);
         }
         string name = previous->text;
+
         if(!match(Token::COLON)) {
             errorHandler.expect(Token::COLON, current->text);
         }
-        if(!match(Token::ID)) {
+        if(!match(Token::ID) ) {
             errorHandler.expect(Token::ID, current->text);
         }
         string type = previous->text;
@@ -331,7 +367,7 @@ Stm* Parser::parseStatement() {
             errorHandler.expect(Token::PC, current->text);
         }
         return new VarDec(name, type, mut, exp);
-    } 
+    }
     return nullptr;
 }
 
@@ -453,6 +489,30 @@ Exp* Parser::parseFactor() {
                 e = f;
             }
         } // else if TODO struct exp
+        else if (match(Token::LI)) {
+            StructExp* s = new StructExp();
+            s->name = texto;
+
+            if (!match(Token::LD)) {
+                do {
+                    if (!match(Token::ID)) {
+                        errorHandler.expect(Token::ID, current->text);
+                    }
+                    string attrName = previous->text;
+                    if (!match(Token::COLON)) {
+                        errorHandler.expect(Token::COLON, current->text);
+                    }
+                    Exp* value = parseAExp();
+
+                    s->attrs.push_back(new StructExpAttr(attrName, value));
+                    if(!match(Token::COMMA)){
+                        errorHandler.expect(Token::COMMA, current->text);
+                    }
+                } while (!match(Token::LD));
+            }
+
+            e = s;
+        }
         else e = new IdentifierExp(texto);
     }
     else if (match(Token::NUM)) {
@@ -502,3 +562,5 @@ Exp* Parser::parseFactor() {
         return e;
     }
 }
+
+

@@ -235,7 +235,6 @@ public:
     ~FunDec();
 };
 
-//TODO constructors, accepts
 class StructDec {
 public:
     string name;
@@ -246,7 +245,6 @@ public:
     ~StructDec();
 };
 
-    //TODO constructors, accepts
 class AttrDec {
 public:
     string name;
@@ -257,7 +255,6 @@ public:
     ~AttrDec();
 };
 
-//TODO constructors, accepts
 class StructExp : public Exp {
 public:
     string name;
@@ -268,7 +265,6 @@ public:
     ~StructExp();
 };
 
-//TODO constructors, accepts
 class StructExpAttr {
 public:
     string name;

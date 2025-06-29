@@ -52,7 +52,6 @@ Parser::Parser(Scanner* sc):scanner(sc) {
 // check!
 Program* Parser::parseProgram() {
     Program* p = new Program();
-    // TODO parseStruct
     while(!isAtEnd()){
         if(match(Token::STRUCT)){
             p->structs.push_back(parseStructDec());
@@ -74,7 +73,6 @@ Program* Parser::parseProgram() {
     return p;
 }
 
-// TODO
 StructDec* Parser::parseStructDec() {
     if(!match(Token::ID)){
         errorHandler.expect(Token::ID, current->text);
@@ -102,7 +100,6 @@ StructDec* Parser::parseStructDec() {
         }
     }
     return s;
-    // TODO AttrDec()
 }
 
 

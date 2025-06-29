@@ -178,8 +178,6 @@ int PrintVisitor::visit(IfExp* exp) {
 }
 
 int PrintVisitor::visit(StructExp* exp) {
-    //TODO
-
     cout << exp->name << " { "<<endl;
     bool first = true;
     offset++;
@@ -194,7 +192,6 @@ int PrintVisitor::visit(StructExp* exp) {
 }
 
 int PrintVisitor::visit(StructExpAttr* attr) {
-    //TODO
     cout << attr->name << ": ";
     attr->exp->accept(this);
     return 0;
@@ -344,7 +341,6 @@ void PrintVisitor::visit(StructDec* stm) {
 }
 
 void PrintVisitor::visit(AttrDec* attr) {
-    // TODO
     cout << attr->name << ": " << attr->type;
 }
 

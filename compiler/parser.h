@@ -23,12 +23,12 @@ public:
     Body* parseBody();
     StatementList* parseStatementList();
     Stm* parseStatement();
-    Exp* parseBaseExp();
     Exp* parseAExp();
     Exp* parseBExp();
     Exp* parseCExp();
     Exp* parseExpression();
     Exp* parseTerm();
+    Exp* parsePostfixExp();
     Exp* parseFactor();
 };
 

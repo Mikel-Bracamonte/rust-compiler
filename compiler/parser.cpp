@@ -148,8 +148,12 @@ ParamDec* Parser::parseParamDec() {
     }
     string name = previous->text;
     bool mut = false;
+    bool borrow = false;
     if(!match(Token::COLON)) {
         errorHandler.expect(Token::COLON, current->text);
+    }
+    if(match(Token::BORROW)) {
+        borrow = true;
     }
     if(match(Token::MUT)) {
         mut = true;
@@ -158,7 +162,7 @@ ParamDec* Parser::parseParamDec() {
         errorHandler.expect(Token::ID, current->text);
     }
     string type = previous->text;
-    return new ParamDec(name, type, mut);
+    return new ParamDec(name, type, mut, borrow);
 }
 
 // check!
@@ -192,7 +196,7 @@ Stm* Parser::parseStatement() {
             stmt->name = name == "main" ? name : "fn_" + name;
             if(!match(Token::PD)) {
                 do {
-                    stmt->add(parseBaseExp());
+                    stmt->add(parseAExp());
                 } while (match(Token::COMMA));
                 if(!match(Token::PD)) {
                     errorHandler.expect(Token::PD, current->text);
@@ -226,7 +230,7 @@ Stm* Parser::parseStatement() {
                     op = AS_MOD_OP;
                     break;
             }
-            Exp* exp = parseBaseExp();
+            Exp* exp = parseAExp();
             if(!match(Token::PC)) {
                 errorHandler.expect(Token::PC, current->text);
             }
@@ -260,7 +264,7 @@ Stm* Parser::parseStatement() {
         if(!match(Token::COMMA)) {
             errorHandler.expect(Token::COMMA, current->text);
         }
-        Exp* exp = parseBaseExp();
+        Exp* exp = parseAExp();
         if(!match(Token::PD)) {
             errorHandler.expect(Token::PD, current->text);
         }
@@ -269,7 +273,7 @@ Stm* Parser::parseStatement() {
         }
         return new PrintStatement(exp, ln);
     } else if(match(Token::IF)) {
-        Exp* condition = parseBaseExp();
+        Exp* condition = parseAExp();
         if(!match(Token::LI)) {
             errorHandler.expect(Token::LI, current->text);
         }
@@ -289,7 +293,7 @@ Stm* Parser::parseStatement() {
         }
         return new IfStatement(condition, then, els);
     } else if(match(Token::WHILE)) {
-        Exp* condition = parseBaseExp();
+        Exp* condition = parseAExp();
         if(!match(Token::LI)) {
             errorHandler.expect(Token::LI, current->text);
         }
@@ -310,11 +314,11 @@ Stm* Parser::parseStatement() {
         if(!match(Token::IN)) {
             errorHandler.expect(Token::IN, current->text);
         }
-        Exp* start = parseBaseExp();
+        Exp* start = parseAExp();
         if(!match(Token::DOTS)) {
             errorHandler.expect(Token::DOTS, current->text);
         }
-        Exp* end = parseBaseExp();
+        Exp* end = parseAExp();
         if(!match(Token::LI)) {
             errorHandler.expect(Token::LI, current->text);
         }
@@ -326,7 +330,7 @@ Stm* Parser::parseStatement() {
     } else if(match(Token::RETURN)) {
         Exp* exp = nullptr;
         if(!match(Token::PC)) {
-            exp = parseBaseExp();
+            exp = parseAExp();
             if(!match(Token::PC)) {
                 errorHandler.expect(Token::PC, current->text);
             }
@@ -361,7 +365,7 @@ Stm* Parser::parseStatement() {
         string type = previous->text;
         Exp* exp = nullptr;
         if(match(Token::ASSIGN)) {
-            exp = parseBaseExp();
+            exp = parseAExp();
         }
         if(!match(Token::PC)) {
             errorHandler.expect(Token::PC, current->text);
@@ -369,17 +373,6 @@ Stm* Parser::parseStatement() {
         return new VarDec(name, type, mut, exp);
     }
     return nullptr;
-}
-
-Exp* Parser::parseBaseExp() {
-    Exp* left = parseAExp();
-    while(match(Token::DOT)) {
-        if(!match(Token::ID)) {
-            errorHandler.expect(Token::ID, current->text);
-        }
-        Exp* left = new PostfixExp(left, previous->text);
-    }
-    return left;
 }
 
 //check!
@@ -455,7 +448,7 @@ Exp* Parser::parseExpression() {
 
 //check!
 Exp* Parser::parseTerm() {
-    Exp* left = parseFactor();
+    Exp* left = parsePostfixExp();
     while (match(Token::MUL) || match(Token::DIV) || match(Token::MOD)) {
         BinaryOp op;
         if (previous->type == Token::MUL){
@@ -467,8 +460,19 @@ Exp* Parser::parseTerm() {
         else if (previous->type == Token::MOD){
             op = MOD_OP;
         }
-        Exp* right = parseFactor();
+        Exp* right = parsePostfixExp();
         left = new BinaryExp(left, right, op);
+    }
+    return left;
+}
+
+Exp* Parser::parsePostfixExp() {
+    Exp* left = parseFactor();
+    while(match(Token::DOT)) {
+        if(!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text);
+        }
+        left = new PostfixExp(left, previous->text);
     }
     return left;
 }
@@ -482,6 +486,12 @@ Exp* Parser::parseFactor() {
         isUnary = true;
         op = U_NEG_OP;
     }
+    if (match(Token::BORROW)) {
+        if(!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text);
+        }
+        return new IdentifierExp(previous->text, true);
+    }
     if (match(Token::ID)) {
         string texto = previous->text;
         if(match(Token::PI)) {
@@ -492,7 +502,7 @@ Exp* Parser::parseFactor() {
             }
             else {
                 do {
-                    f->add(parseBaseExp());
+                    f->add(parseAExp());
                 } while (match(Token::COMMA));
                 if(!match(Token::PD)) {
                     errorHandler.expect(Token::PD, current->text);
@@ -513,7 +523,7 @@ Exp* Parser::parseFactor() {
                     if (!match(Token::COLON)) {
                         errorHandler.expect(Token::COLON, current->text);
                     }
-                    Exp* value = parseBaseExp();
+                    Exp* value = parseAExp();
 
                     s->attrs.push_back(new StructExpAttr(attrName, value));
                     if(!match(Token::COMMA)){
@@ -524,7 +534,7 @@ Exp* Parser::parseFactor() {
 
             e = s;
         }
-        else e = new IdentifierExp(texto);
+        else e = new IdentifierExp(texto, false);
     }
     else if (match(Token::NUM)) {
         e = new NumberExp(stoi(previous->text));
@@ -536,18 +546,18 @@ Exp* Parser::parseFactor() {
         e = new BoolExp(0);
     }
     else if (match(Token::PI)) {
-        e = parseBaseExp();
+        e = parseAExp();
         e->hasParenthesis = true;
         if (!match(Token::PD)) {
             errorHandler.expect(Token::PD, current->text);
         }
     }
     else if (match(Token::IF)) {
-        Exp* e1 = parseBaseExp();
+        Exp* e1 = parseAExp();
         if (!match(Token::LI)) {
             errorHandler.expect(Token::LI, current->text);
         }
-        Exp* e2 = parseBaseExp();
+        Exp* e2 = parseAExp();
         if (!match(Token::LD)) {
             errorHandler.expect(Token::LD, current->text);
         }
@@ -557,7 +567,7 @@ Exp* Parser::parseFactor() {
         if (!match(Token::LI)) {
             errorHandler.expect(Token::LI, Token::ELSE, current->text);
         }
-        Exp* e3 = parseBaseExp();
+        Exp* e3 = parseAExp();
         if (!match(Token::LD)) {
             errorHandler.expect(Token::LD, current->text);
         }

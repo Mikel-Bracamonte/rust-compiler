@@ -148,7 +148,7 @@ Token* Scanner::nextToken() {
                     token = new Token(Token::AND, "&&", 0, 2);
                     current++;
                 } else {
-                    token = new Token(Token::ERR, c);
+                    token = new Token(Token::BORROW, c);
                 }
                 break;
             case '=':

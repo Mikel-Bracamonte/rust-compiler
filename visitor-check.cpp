@@ -1,5 +1,16 @@
 #include "imp_visitor.h"
 
+int GenCodeVisitor::getSize(string s) {
+    if(s == "i32") {
+        return 8;
+    } else if(s == "i64") {
+        return 8;
+    } else if(s == "bool") {
+        return 8;
+    } else {
+        return structs_info[s].size;
+    }
+}
 
 void CheckVisitor::check(Program* p) {
     for(auto i : p->structs) {
@@ -273,6 +284,7 @@ void CheckVisitor::visit(VarDec* vd) {
     // mut?
     // mapa con variables mutables
     if (vd->type == "i32" || vd->type == "i64" || vd->type == "bool" || structs_info.count(vd->type)) {
+        function_memory_map[function_name] += getSize(vd->type);
         env.add_var(vd->name, vd->type);
     } else {
         errorHandler.error("Tipo de variable no reconocido: '" + vd->type + "'.");
@@ -310,6 +322,7 @@ void CheckVisitor::visit(FunctionCallStatement* stm) {
 void CheckVisitor::visit(ParamDec* vd) {
     if (vd->type == "i32" || vd->type == "i64" || vd->type == "bool" || structs_info.count(vd->type)) {
         env.add_var(vd->name, vd->type);
+        function_memory_map[function_name] += getSize(vd->type);
     } else {
         errorHandler.error("Tipo de parámetro no reconocido: '" + vd->type + "'.");
     }
@@ -319,6 +332,8 @@ void CheckVisitor::visit(ParamDec* vd) {
 void CheckVisitor::visit(FunDec* vd) {
     ImpType ftype;
     list<string> argTypes;
+    function_name = vd->name;
+    function_memory_map[function_name] = 0;
     
     returnType = vd->type;
     env.clear();
@@ -339,6 +354,12 @@ void CheckVisitor::visit(FunDec* vd) {
 
 void CheckVisitor::visit(StructDec* stm) {
     StructInfo struct_info;
+    int size = 0;
+    for(auto i : stm->attrs) {
+        struct_info.types[i->name] = ImpType(i->type);
+        size += getSize(i->type);
+    }
+    struct_info.size = size;
     structs_info[stm->name] = struct_info;
 }
 

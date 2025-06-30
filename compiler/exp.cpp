@@ -16,7 +16,7 @@ NumberExp::~NumberExp() { }
 BoolExp::BoolExp(bool v):value(v) {}
 BoolExp::~BoolExp() { }
 
-IdentifierExp::IdentifierExp(std::string n):name(n) {}
+IdentifierExp::IdentifierExp(std::string n, bool b):name(n), borrow(b) {}
 IdentifierExp::~IdentifierExp() { }
 
 IfExp::IfExp(Exp *c, Exp *t, Exp *e) {
@@ -119,10 +119,11 @@ FunctionCallStatement::~FunctionCallStatement(){
 
 ////////////////////////////////////////////////////
 
-ParamDec::ParamDec(std::string n, std::string t, bool m) {
+ParamDec::ParamDec(std::string n, std::string t, bool m, bool b) {
     name = n;
     type = t;
     isMut = m;
+    borrow = b;
 }
 ParamDec::~ParamDec() {}
 

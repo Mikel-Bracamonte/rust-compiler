@@ -207,6 +207,7 @@ int PrintVisitor::visit(StructExpAttr* attr) {
 int PrintVisitor::visit(PostfixExp* exp) {
     exp->left->accept(this);
     cout << "." << exp->right;
+    return 0;
 }
 
 int PrintVisitor::visit(FunctionCallExp* exp) {

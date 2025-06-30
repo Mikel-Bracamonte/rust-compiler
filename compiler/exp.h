@@ -79,7 +79,8 @@ public:
 class IdentifierExp : public Exp {
 public:
     string name;
-    IdentifierExp(string n);
+    bool borrow;
+    IdentifierExp(string n, bool b);
     int accept(Visitor* visitor);
     ImpType accept(ImpVisitor* v);
     ~IdentifierExp();
@@ -227,7 +228,8 @@ public:
     string name;
     string type;
     bool isMut;
-    ParamDec(string n, string t, bool m);
+    bool borrow;
+    ParamDec(string n, string t, bool m, bool b);
     int accept(Visitor* visitor);
     void accept(ImpVisitor* v);
     ~ParamDec();

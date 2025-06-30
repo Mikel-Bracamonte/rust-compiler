@@ -42,6 +42,7 @@ public:
 struct StructInfo {
     int size;
     unordered_map<string, int> offsets;
+    unordered_map<string, ImpType> types;
 };
 
 class GenCodeVisitor : public ImpVisitor {
@@ -56,6 +57,7 @@ public:
     }
     unordered_map<string, int> reserva_function;
     unordered_map<string, StructInfo> structs_info;
+    unordered_map<string, ImpType> functions_info;
     ErrorHandler errorHandler;
     unordered_map<string, int> memoria;
     int offset = -8;
@@ -63,6 +65,9 @@ public:
     bool entornoFuncion = false;
     string nombreFuncion;
     string struct_name;
+    int struct_offset;
+    int temp_offset;
+    int temp_offset_base;
 
     stack<string> nombreLoop;
 
@@ -103,11 +108,11 @@ public:
     CheckVisitor(){}
     ErrorHandler errorHandler = ErrorHandler("CheckVisitor");
     string getType(ImpType imp){
-        if(imp.ttype == "i32") return "int";
+        if(imp.ttype == "i32") return "i32";
         return imp.ttype;
     }
     string getType(string type){
-        if(type == "i32") return "int";
+        if(type == "i32") return "i32";
         return type;
     }
     

@@ -1,19 +1,25 @@
 struct Persona {
     a: i32,
     b: i32,
-    c: i32,
-    d: i32,
-    e: i32,
-    f: i32
+}
+
+fn test() -> i32 {
+    let test: Persona = Persona {
+        a: 2,
+        b: 3,
+    };
+    let test2: Persona = Persona {
+        a: 10,
+        b: test.b + 10,
+    };
+
+    return test.a + test2.b;
 }
 
 fn main() {
-    println!("{}", Persona {
-        a: 1,
-        b: 2,
-        c: 3,
-        d: 4,
-        e: 5,
-        f: 6
-    }.b);
+    let a: i32 = 10;
+    let b: i32 = 20;
+    println!("{}", test());
+    println!("{}", a);
+    println!("{}", b);
 }

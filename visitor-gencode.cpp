@@ -582,8 +582,7 @@ void GenCodeVisitor::visit(FunDec* f) {
     out << f->name << ":" << endl;
     out << " pushq %rbp" << endl;
     out << " movq %rsp, %rbp" << endl;
-    // int reserva = reserva_function[f->name];
-    int reserva = 800; // deberia ser calculado con las variables
+    int reserva = reserva_function[f->name];
     temp_offset_base = -reserva;
     temp_offset = temp_offset_base;
     out << " subq $" << reserva << ", %rsp" << endl;

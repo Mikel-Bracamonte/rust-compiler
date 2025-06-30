@@ -1,6 +1,6 @@
 #include "imp_visitor.h"
 
-int GenCodeVisitor::getSize(string s) {
+int CheckVisitor::getSize(string s) {
     if(s == "i32") {
         return 8;
     } else if(s == "i64") {
@@ -223,10 +223,7 @@ void CheckVisitor::visit(WhileStatement* stm) {
 // check!, tested
 void CheckVisitor::visit(ForStatement* s) {
     // tiene que ser mut, int    
-    numberLoop ++;
-    if(!s->mut){
-        errorHandler.error("El for debe ser mut.");
-    }
+    numberLoop++;
 
     ImpType startT = s->start->accept(this);
     if (startT.ttype != "i32") {
@@ -240,6 +237,7 @@ void CheckVisitor::visit(ForStatement* s) {
     // add var unicamente al body de for, afuera no puede acceder
     string int_type = "i32";
     env.add_var(s->name, int_type);
+    function_memory_map[function_name] += 24;
     s->body->stmList->accept(this);
     env.remove_level();
 
@@ -333,7 +331,7 @@ void CheckVisitor::visit(FunDec* vd) {
     ImpType ftype;
     list<string> argTypes;
     function_name = vd->name;
-    function_memory_map[function_name] = 0;
+    function_memory_map[function_name] = 8;
     
     returnType = vd->type;
     env.clear();

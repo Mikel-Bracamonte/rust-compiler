@@ -13,6 +13,7 @@ private:
     bool check(Token::Type ttype);
     bool advance();
     bool isAtEnd();
+    bool expect_struct = true;
 public:
     ErrorHandler errorHandler;
     Parser(Scanner* scanner);

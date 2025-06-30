@@ -9,9 +9,13 @@ struct Persona {
 }
 
 fn main() {
-    let a: i32 = 10;
-    let b: i32 = 20;
-    println!("{}", test());
-    println!("{}", a);
-    println!("{}", b);
+    let var1: Test = Test {
+        a: 15,
+        b: 25,
+    };
+    let var2: Persona = Persona {
+        a: 20,
+        b: var1,
+    };
+    println!("{}", var2.b.b);
 }

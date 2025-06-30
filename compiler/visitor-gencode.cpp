@@ -107,6 +107,19 @@ void Body::accept(ImpVisitor* visitor) {
 
 //////////////////////////////////////////////////////////////////////////////////
 
+int GenCodeVisitor::getSize(string s) {
+    if(s == "i32") {
+        return 8;
+    } else if(s == "i64") {
+        return 8;
+    } else if(s == "bool") {
+        return 8;
+    } else {
+        return structs_info[s].size;
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////
 void GenCodeVisitor::gencode(Program* p) {
     out << ".data" << endl;
     out << "print_fmt_ln: .string \"%ld \\n\""<<endl;
@@ -242,6 +255,7 @@ ImpType GenCodeVisitor::visit(IdentifierExp* e) {
     string type = get<0>(env.lookup(e->name)).ttype;
     bool is_struct = type != "i32" && type != "i64" && type != "bool";
     if(is_struct) {
+        struct_name = type;
         struct_offset = get<1>(env.lookup(e->name));
     } else {
         out << " movq " << get<1>(env.lookup(e->name)) << "(%rbp), %rax"<<endl;
@@ -431,7 +445,7 @@ void GenCodeVisitor::visit(VarDec* vd) {
         if(is_struct) {
             for(auto i : structs_info[struct_name].offsets) {
                 out << " movq " << temp_offset + i.second << "(%rbp), %rax" << endl;
-                out << " movq %rax, " << + offset_assign + i.second << "(%rbp)" << endl;
+                out << " movq %rax, " << offset_assign + i.second << "(%rbp)" << endl;
             }
         } else {
             out << " movq %rax, " << offset_assign << "(%rbp)" << endl;
@@ -496,9 +510,9 @@ void GenCodeVisitor::visit(StructDec* s){
     for(auto i : s->attrs) {
         struct_info.offsets[i->name] = offset_struct;
         struct_info.types[i->name] = ImpType(i->type);
-        offset_struct -= 8; // TODO depende del tipo de variable
+        offset_struct -= getSize(i->type);
     }
-    struct_info.size = -offset_struct; // TODO depende
+    struct_info.size = -offset_struct;
     structs_info[s->name] = struct_info;
 }
 
@@ -507,29 +521,48 @@ void GenCodeVisitor::visit(AttrDec* a){
 }
 
 ImpType GenCodeVisitor::visit(PostfixExp* e) {
-    e->left->accept(this);
-    out << " movq " << struct_offset + structs_info[struct_name].offsets[e->right] << "(%rbp), %rax" << endl;
-    return structs_info[struct_name].types[e->right];
+    ImpType imp_type = e->left->accept(this);
+    string type = imp_type.ttype;
+    ImpType return_imp_type = structs_info[type].types[e->right];
+    string return_type = return_imp_type.ttype;
+
+    bool is_struct = return_type != "i32" && return_type != "i64" && return_type != "bool";
+    cout << struct_offset + structs_info[type].offsets[e->right] << " " << struct_name << endl;
+    if(is_struct) {
+        struct_name = return_type;
+        struct_offset = struct_offset + structs_info[type].offsets[e->right];
+    } else {
+        out << " movq " << struct_offset + structs_info[type].offsets[e->right] << "(%rbp), %rax" << endl;
+    }
+    return return_imp_type;
 }
 
 ImpType GenCodeVisitor::visit(StructExp* e) {
     int current_struct_offset = temp_offset;
-    struct_name = e->name; // De repente es necesario guardarse el anterior por si hay structs dentro de structs no lo se
-    struct_offset = current_struct_offset; //
 
-    out << "subq $" << structs_info[struct_name].size << ", %rsp" << endl;
+    out << "subq $" << structs_info[e->name].size << ", %rsp" << endl;
+    cout << e->name << " " << structs_info[e->name].size << endl;
     for(auto a : e->attrs) {
-        a->accept(this);
-        struct_name = e->name;
-        struct_offset = current_struct_offset;
+        ImpType imp_type = a->exp->accept(this);
+        string type = imp_type.ttype;
+        bool is_struct = type != "i32" && type != "i64" && type != "bool";
+        if(is_struct) {
+            for(auto i : structs_info[struct_name].offsets) {
+                out << " movq " << struct_offset + i.second << "(%rbp), %rax" << endl;
+                out << " movq %rax, " << current_struct_offset + structs_info[e->name].offsets[a->name] + i.second << "(%rbp)" << endl;
+            }
+        } else {
+            out << " movq %rax, " << current_struct_offset + structs_info[e->name].offsets[a->name] << "(%rbp)" << endl;
+        }
     }
+    struct_name = e->name;
+    struct_offset = current_struct_offset;
     return ImpType(e->name);
 }
 
 ImpType GenCodeVisitor::visit(StructExpAttr* a) {
-    ImpType imp_type = a->exp->accept(this);
-    out << " movq %rax, " << temp_offset + structs_info[struct_name].offsets[a->name] << "(%rbp)" << endl;
-    return imp_type;
+    // No es necesario creo
+    return ImpType();
 }
 
 void GenCodeVisitor::visit(StatementList* s) {

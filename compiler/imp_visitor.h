@@ -98,6 +98,7 @@ public:
     void visit(AttrDec* stm) override;
     void visit(StatementList* stm) override;
     void visit(Body* b) override;
+    int getSize(string s);
 };
 
 class CheckVisitor : public ImpVisitor {

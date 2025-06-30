@@ -95,6 +95,9 @@ StructDec* Parser::parseStructDec() {
         }
         string attrType = previous->text;
         s->attrs.push_back(new AttrDec(name, attrType));
+        if(match(Token::LD)) {
+            break;
+        }
         if(!match(Token::COMMA)){
             errorHandler.expect(Token::COMMA, current->text);
         }
@@ -559,6 +562,9 @@ Exp* Parser::parseFactor() {
                     Exp* value = parseAExp();
 
                     s->attrs.push_back(new StructExpAttr(attrName, value));
+                    if(match(Token::LD)) {
+                        break;
+                    }
                     if(!match(Token::COMMA)){
                         errorHandler.expect(Token::COMMA, current->text);
                     }

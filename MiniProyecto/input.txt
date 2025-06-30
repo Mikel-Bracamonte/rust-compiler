@@ -1,8 +1,0 @@
-var int a;
-
-a = 5;
-
-while(a < 10) do
-    print(a);
-    a = a + 1
-endwhile

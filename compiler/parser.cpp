@@ -52,7 +52,6 @@ Parser::Parser(Scanner* sc):scanner(sc) {
 // check!
 Program* Parser::parseProgram() {
     Program* p = new Program();
-    // TODO parseStruct
     while(!isAtEnd()){
         if(match(Token::STRUCT)){
             p->structs.push_back(parseStructDec());
@@ -74,7 +73,6 @@ Program* Parser::parseProgram() {
     return p;
 }
 
-// TODO
 StructDec* Parser::parseStructDec() {
     if(!match(Token::ID)){
         errorHandler.expect(Token::ID, current->text);
@@ -102,7 +100,6 @@ StructDec* Parser::parseStructDec() {
         }
     }
     return s;
-    // TODO AttrDec()
 }
 
 
@@ -207,9 +204,26 @@ Stm* Parser::parseStatement() {
             }
             return stmt;
         }
-        else if(match(Token::ASSIGN) || match(Token::PLUSASSIGN) || match(Token::MINUSASSIGN) || match(Token::MULASSIGN)
+        else if(match(Token::DOT) || match(Token::ASSIGN) || match(Token::PLUSASSIGN) || match(Token::MINUSASSIGN) || match(Token::MULASSIGN)
         || match(Token::DIVASSIGN) || match(Token::MODASSIGN)) {
             AssignOp op;
+            vector<string> names = {name};
+            if(previous->type == Token::DOT) {
+                if(!match(Token::ID)) {
+                    errorHandler.expect(Token::ID, current->text);
+                }
+                names.push_back(previous->text);
+                while(match(Token::DOT)) {
+                    if(!match(Token::ID)) {
+                        errorHandler.expect(Token::ID, current->text);
+                    }
+                    names.push_back(previous->text);
+                }
+                if(!(match(Token::ASSIGN) || match(Token::PLUSASSIGN) || match(Token::MINUSASSIGN) || match(Token::MULASSIGN)
+                || match(Token::DIVASSIGN) || match(Token::MODASSIGN))) {
+                    errorHandler.error("expected assign");
+                }
+            }
             switch(previous->type) {
                 case Token::ASSIGN:
                     op = AS_ASSIGN_OP;
@@ -234,7 +248,7 @@ Stm* Parser::parseStatement() {
             if(!match(Token::PC)) {
                 errorHandler.expect(Token::PC, current->text);
             }
-            return new AssignStatement(name, exp, op);
+            return new AssignStatement(names, exp, op);
         } else {
             errorHandler.error("Expected assign");
         }

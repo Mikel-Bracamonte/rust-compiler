@@ -182,8 +182,6 @@ int PrintVisitor::visit(IfExp* exp) {
 }
 
 int PrintVisitor::visit(StructExp* exp) {
-    //TODO
-
     cout << exp->name << " { "<<endl;
     bool first = true;
     offset++;
@@ -198,7 +196,6 @@ int PrintVisitor::visit(StructExp* exp) {
 }
 
 int PrintVisitor::visit(StructExpAttr* attr) {
-    //TODO
     cout << attr->name << ": ";
     attr->exp->accept(this);
     return 0;
@@ -226,7 +223,14 @@ int PrintVisitor::visit(FunctionCallExp* exp) {
 }
 
 void PrintVisitor::visit(AssignStatement* stm) {
-    cout << get_spaces() << stm->name << " " << Exp::assignOpToChar(stm->op) << " ";
+    cout << get_spaces();
+    for(int i = 0; i < stm->names.size(); ++i) {
+        cout << i;
+        if(i != stm->names.size() - 1) {
+            cout << ".";
+        }
+    }
+    cout << " " << Exp::assignOpToChar(stm->op) << " ";
     stm->right->accept(this);
     cout << ";";
 }
@@ -354,7 +358,6 @@ void PrintVisitor::visit(StructDec* stm) {
 }
 
 void PrintVisitor::visit(AttrDec* attr) {
-    // TODO
     cout << attr->name << ": " << attr->type;
 }
 

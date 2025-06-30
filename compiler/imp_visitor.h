@@ -100,7 +100,8 @@ public:
     void visit(Body* b) override;
     int getSize(string s);
     string getRegister(string s, string r);
-    void nose(int s, int d);
+    void nose(int s, int d, bool r);
+    bool isStruct(string t);
 };
 
 class CheckVisitor : public ImpVisitor {

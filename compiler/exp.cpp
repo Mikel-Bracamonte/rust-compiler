@@ -44,8 +44,8 @@ FunctionCallExp::~FunctionCallExp(){
 
 Stm::~Stm() {}
 
-AssignStatement::AssignStatement(std::string n, Exp* r, AssignOp o) {
-    name = n;
+AssignStatement::AssignStatement(std::vector<std::string> n, Exp* r, AssignOp o) {
+    names = n;
     right = r;
     op = o;
 }

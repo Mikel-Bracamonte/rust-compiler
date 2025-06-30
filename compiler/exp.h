@@ -120,10 +120,10 @@ public:
 
 class AssignStatement : public Stm {
 public:
-    string name;
+    vector<string> names;
     Exp* right;
     AssignOp op;
-    AssignStatement(string n, Exp* r, AssignOp o);
+    AssignStatement(vector<string> n, Exp* r, AssignOp o);
     int accept(Visitor* visitor);
     void accept(ImpVisitor* v);
     ~AssignStatement();
@@ -247,7 +247,6 @@ public:
     ~FunDec();
 };
 
-//TODO constructors, accepts
 class StructDec {
 public:
     string name;
@@ -258,7 +257,6 @@ public:
     ~StructDec();
 };
 
-    //TODO constructors, accepts
 class AttrDec {
 public:
     string name;
@@ -269,7 +267,6 @@ public:
     ~AttrDec();
 };
 
-//TODO constructors, accepts
 class StructExp : public Exp {
 public:
     string name;
@@ -280,7 +277,6 @@ public:
     ~StructExp();
 };
 
-//TODO constructors, accepts
 class StructExpAttr {
 public:
     string name;

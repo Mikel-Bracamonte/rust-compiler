@@ -299,10 +299,7 @@ void GenCodeVisitor::visit(AssignStatement* s) {
     switch (s->op) {
         case AS_ASSIGN_OP:
             if(is_struct) {
-                for(auto i : structs_info[struct_name].offsets) {
-                    out << " movq " << temp_offset + i.second << "(%rbp), %rax" << endl;
-                    out << " movq %rax, " << + offset_assign + i.second << "(%rbp)" << endl;
-                }
+                nose(temp_offset, offset_assign);
             } else {
                 out << " movq %rax, " << offset_assign << "(%rbp)" << endl;
             }
@@ -433,6 +430,22 @@ void GenCodeVisitor::visit(ContinueStatement* s) {
     out << "jmp " << nombreLoop.top() << endl;
 }
 
+void GenCodeVisitor::nose(int src_base, int dest_base) {
+    bool is_struct = struct_name != "i32" && struct_name != "i64" && struct_name != "bool";
+    if(!is_struct) {
+        out << " movq " << src_base << "(%rbp), %rax" << endl;
+        out << " movq %rax, " << dest_base << "(%rbp)" << endl;
+        return;
+    }
+
+    string old_struct_name = struct_name;
+    for(auto i : structs_info[struct_name].offsets) {
+        struct_name = structs_info[struct_name].types[i.first].ttype;
+        nose(src_base + i.second, dest_base + i.second);
+        struct_name = old_struct_name;
+    }
+}
+
 // seems check!
 void GenCodeVisitor::visit(VarDec* vd) {
     ImpType type(vd->type);
@@ -443,10 +456,7 @@ void GenCodeVisitor::visit(VarDec* vd) {
     if(vd->exp != nullptr) {
         vd->exp->accept(this);
         if(is_struct) {
-            for(auto i : structs_info[struct_name].offsets) {
-                out << " movq " << temp_offset + i.second << "(%rbp), %rax" << endl;
-                out << " movq %rax, " << offset_assign + i.second << "(%rbp)" << endl;
-            }
+            nose(temp_offset, offset_assign);
         } else {
             out << " movq %rax, " << offset_assign << "(%rbp)" << endl;
         }

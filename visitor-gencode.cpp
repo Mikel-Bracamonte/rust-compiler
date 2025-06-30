@@ -627,7 +627,6 @@ ImpType GenCodeVisitor::visit(PostfixExp* e) {
     string return_type = return_imp_type.ttype;
 
     bool is_struct = isStruct(return_type);
-    cout << struct_offset + structs_info[type].offsets[e->right] << " " << struct_name << endl;
     if(is_struct) {
         struct_name = return_type;
         struct_offset = struct_offset + structs_info[type].offsets[e->right];
@@ -646,7 +645,6 @@ ImpType GenCodeVisitor::visit(StructExp* e) {
 
     out << " subq $" << structs_info[e->name].size << ", %rsp" << endl;
     temp_offset -= structs_info[e->name].size;
-    cout << e->name << " " << structs_info[e->name].size << endl;
     for(auto a : e->attrs) {
         ImpType imp_type = a->exp->accept(this);
         string type = imp_type.ttype;

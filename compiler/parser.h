@@ -28,6 +28,7 @@ public:
     Exp* parseCExp();
     Exp* parseExpression();
     Exp* parseTerm();
+    Exp* parsePostfixExp();
     Exp* parseFactor();
 };
 

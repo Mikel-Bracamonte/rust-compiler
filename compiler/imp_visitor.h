@@ -20,6 +20,7 @@ public:
     virtual ImpType visit(FunctionCallExp* exp) = 0;
     virtual ImpType visit(StructExp* exp) = 0;
     virtual ImpType visit(StructExpAttr* exp) = 0;
+    virtual ImpType visit(PostfixExp* exp) = 0;
     virtual void visit(AssignStatement* stm) = 0;
     virtual void visit(PrintStatement* stm) = 0;
     virtual void visit(IfStatement* stm) = 0;
@@ -38,9 +39,10 @@ public:
     virtual void visit(Body* b) = 0;
 };
 
-class StructInfo {
+struct StructInfo {
     int size;
     unordered_map<string, int> offsets;
+    unordered_map<string, ImpType> types;
 };
 
 class GenCodeVisitor : public ImpVisitor {
@@ -55,12 +57,17 @@ public:
     }
     unordered_map<string, int> reserva_function;
     unordered_map<string, StructInfo> structs_info;
+    unordered_map<string, ImpType> functions_info;
     ErrorHandler errorHandler;
     unordered_map<string, int> memoria;
     int offset = -8;
     int label_counter = 0;
     bool entornoFuncion = false;
     string nombreFuncion;
+    string struct_name;
+    int struct_offset;
+    int temp_offset;
+    int temp_offset_base;
 
     stack<string> nombreLoop;
 
@@ -74,6 +81,7 @@ public:
     ImpType visit(FunctionCallExp* exp) override;
     ImpType visit(StructExp* exp) override;
     ImpType visit(StructExpAttr* exp) override;
+    ImpType visit(PostfixExp* exp) override;
     void visit(AssignStatement* stm) override;
     void visit(PrintStatement* stm) override;
     void visit(IfStatement* stm) override;
@@ -90,6 +98,9 @@ public:
     void visit(AttrDec* stm) override;
     void visit(StatementList* stm) override;
     void visit(Body* b) override;
+    int getSize(string s);
+    void nose(int s, int d, bool r);
+    bool isStruct(string t);
 };
 
 class CheckVisitor : public ImpVisitor {
@@ -100,11 +111,11 @@ public:
     CheckVisitor(){}
     ErrorHandler errorHandler = ErrorHandler("CheckVisitor");
     string getType(ImpType imp){
-        if(imp.ttype == "i32") return "int";
+        if(imp.ttype == "i32") return "i32";
         return imp.ttype;
     }
     string getType(string type){
-        if(type == "i32") return "int";
+        if(type == "i32") return "i32";
         return type;
     }
     
@@ -122,6 +133,7 @@ public:
     ImpType visit(FunctionCallExp* exp) override;
     ImpType visit(StructExp* exp) override;
     ImpType visit(StructExpAttr* exp) override;
+    ImpType visit(PostfixExp* exp) override;
     void visit(AssignStatement* stm) override;
     void visit(PrintStatement* stm) override;
     void visit(IfStatement* stm) override;

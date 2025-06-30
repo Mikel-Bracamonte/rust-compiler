@@ -2,6 +2,9 @@
 
 
 void CheckVisitor::check(Program* p) {
+    for(auto i : p->structs) {
+        i->accept(this);
+    }
     for(auto i : p->funs){
         i->accept(this);
     }
@@ -23,14 +26,14 @@ ImpType CheckVisitor::visit(BinaryExp* exp) {
 
     switch (exp->op) {
         case PLUS_OP: case MINUS_OP: case MUL_OP: case DIV_OP: // long int // check!
-            if (v1.ttype == "int" && v2.ttype == "int") return ImpType("int");
+            if (v1.ttype == "i32" && v2.ttype == "i32") return ImpType("i32");
             else {
-                errorHandler.error("Operación aritmética requiere enteros (int).");
+                errorHandler.error("Operación aritmética requiere enteros (i32).");
             }
         case LT_OP: case LE_OP: case GT_OP: case GE_OP: // long int // check!
-            if (v1.ttype == "int" && v2.ttype == "int") return ImpType("bool"); 
+            if (v1.ttype == "i32" && v2.ttype == "i32") return ImpType("bool"); 
             else {
-                errorHandler.error("Operación de comparación requiere enteros (int).");
+                errorHandler.error("Operación de comparación requiere enteros (i32).");
             }
         case EQ_OP: case NEQ_OP: // structs?
             if(v1.ttype ==v2.ttype) return ImpType("bool"); // mismo tipo: bool, int
@@ -38,7 +41,7 @@ ImpType CheckVisitor::visit(BinaryExp* exp) {
                 errorHandler.error("Operación requiere de igualdad enteros (int) o booleanos (bool).");
             }
         case MOD_OP: // long int // check!
-            if (v1.ttype == "int" && v2.ttype == "int") return ImpType("int"); 
+            if (v1.ttype == "i32" && v2.ttype == "i32") return ImpType("i32"); 
             else{
                 errorHandler.error("Operación de módulo requiere enteros (int).");
             }           
@@ -58,13 +61,13 @@ ImpType CheckVisitor::visit(UnaryExp* exp) {
     ImpType e = exp->exp->accept(this);
     ImpType result;
     // int, longint
-    if(e.ttype != "int" && e.ttype != "bool") {
-        errorHandler.error("Operación unaria debe ser int or bool");
+    if(e.ttype != "i32" && e.ttype != "bool") {
+        errorHandler.error("Operación unaria debe ser i32 or bool");
     }
 
     switch(exp->op) {
         case U_NEG_OP:
-            if(e.ttype=="int") return ImpType("int");
+            if(e.ttype=="i32") return ImpType("i32");
             break;
         case U_NOT_OP:
             if(e.ttype=="bool") return ImpType("bool");
@@ -79,7 +82,7 @@ ImpType CheckVisitor::visit(UnaryExp* exp) {
 
 // check!, tested!
 ImpType CheckVisitor::visit(NumberExp* e) {
-    return ImpType("int"); // long int
+    return ImpType("i32"); // long int
 }
 
 // check!, tested!
@@ -95,8 +98,7 @@ ImpType CheckVisitor::visit(IdentifierExp* e) {
     
     ImpType tipo= env.lookup(e->name);
     
-    if(tipo.ttype == "i32") return ImpType("int");
-    if(tipo.ttype == "bool") return ImpType("bool");
+    return tipo;
 
     // struct will change it
     errorHandler.error("Variable '" + e->name + "' no declarada o tipo no reconocido.");
@@ -143,27 +145,35 @@ ImpType CheckVisitor::visit(FunctionCallExp* e) {
 }
 
 ImpType CheckVisitor::visit(StructExp* e) {
-    return ImpType();
+    return ImpType(e->name);
 }
 
 ImpType CheckVisitor::visit(StructExpAttr* e) {
     return ImpType();
 }
 
+// TODO chequear que left sea un struct y devolver el tipo de variable del atributo
+ImpType CheckVisitor::visit(PostfixExp* e) {
+    ImpType left_type = e->left->accept(this);
+    return ImpType("i32");
+}
+
 // checked!, tested
-void CheckVisitor::visit(AssignStatement* s) { 
-    if(!env.check(s->name)) {
-        errorHandler.error("Varible '" + s->name + "' no declarada.");
+// TODO ahora el id es un vector. por ahora hago names[0] para probar
+void CheckVisitor::visit(AssignStatement* s) {
+    return;
+    if(!env.check(s->names[0])) {
+        errorHandler.error("Varible '" + s->names[0] + "' no declarada.");
     }
 
-    ImpType target = env.lookup(s->name);
+    ImpType target = env.lookup(s->names[0]);
     ImpType src = s->right->accept(this);
     
     if (src.ttype != getType(target)) {
-        errorHandler.error("Tipo incompatible en asignación a '" + s->name + "'.");
+        errorHandler.error("Tipo incompatible en asignación a '" + s->names[0] + "'.");
     }
     if (s->op != AS_ASSIGN_OP){
-        if(src.ttype != "int") {
+        if(src.ttype != "i32") {
             errorHandler.error("Tipo incompatible con la operación de asignación: " + Exp::assignOpToChar(s->op));
         }
     }
@@ -171,8 +181,9 @@ void CheckVisitor::visit(AssignStatement* s) {
 
 // check!, tested!
 void CheckVisitor::visit(PrintStatement* s) {
-    if(s->exp->accept(this).ttype != "int"){
-        errorHandler.error("La impresión debe ser un int");
+    return; // TODO quitar
+    if(s->exp->accept(this).ttype != "i32"){
+        errorHandler.error("La impresión debe ser un i32");
     }
 }
 
@@ -207,11 +218,11 @@ void CheckVisitor::visit(ForStatement* s) {
     }
 
     ImpType startT = s->start->accept(this);
-    if (startT.ttype != "int") {
+    if (startT.ttype != "i32") {
         errorHandler.error("El inicio del for debe ser un entero.");
     }
     ImpType endT = s->end->accept(this);
-    if (endT.ttype != "int") {
+    if (endT.ttype != "i32") {
         errorHandler.error("El final del for debe ser un entero.");
     }
     env.add_level();
@@ -232,6 +243,7 @@ void CheckVisitor::visit(ReturnStatement* s) {
         }
     }
     else {
+        return; // TODO structs dentro de structs no se maneja
         if(s->exp->accept(this).ttype != getType(returnType.ttype)){
             errorHandler.error("Return no coindice con tipo de función");
         }
@@ -309,6 +321,7 @@ void CheckVisitor::visit(FunDec* vd) {
     list<string> argTypes;
     
     returnType = vd->type;
+    env.clear();
     env.add_level();
 
     for (auto p : vd->params)
@@ -325,7 +338,8 @@ void CheckVisitor::visit(FunDec* vd) {
 }
 
 void CheckVisitor::visit(StructDec* stm) {
-
+    StructInfo struct_info;
+    structs_info[stm->name] = struct_info;
 }
 
 void CheckVisitor::visit(AttrDec* stm) {

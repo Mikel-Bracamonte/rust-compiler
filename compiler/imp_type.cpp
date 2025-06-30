@@ -14,6 +14,7 @@ bool ImpType::match(const ImpType& t) {
 
 bool ImpType::set_basic_type(string s) {
   bool ret=true;
+  ttype = s;
   return ret;
 }
 

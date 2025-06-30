@@ -12,7 +12,7 @@ FunDec ::= id ([ParamDecList]) [-> Type] { Body }
 
 ParamDecList ::= ParamDec (, ParamDec )*
 
-ParamDec ::= id : [ mut ] Type
+ParamDec ::= id : [&] [ mut ] Type
 
 Type ::= id
 
@@ -20,7 +20,7 @@ Body ::= StmtList
 
 StmtList ::= ( Stmt )*
 
-Stmt ::= id (= | += | -= | *= | /= | %=) AExp ; |
+Stmt ::= id (.id)* (= | += | -= | *= | /= | %=) AExp ; |
     id ( [ArgList] ) ; |
     println!("{}", AExp ) ; |
     print!("{}", AExp ); |
@@ -40,9 +40,11 @@ CExp ::= Exp [(<|<=|>|>=|==|!=) Exp]
 
 Exp ::= Term ((+ | -) Term)*
 
-Term ::= Factor ((*|/|%) Factor)*
+Term ::= PostfixExp ((*|/|%) PostfixExp)*
 
-Factor ::= [-] (id | Num | Bool | ( AExp ) | if AExp {AExp} else {AExp} | id ( [ArgList] ) | StructExp )
+PostfixExp ::= Factor (. id)*
+
+Factor ::= [-] ([&] id | Num | Bool | ( AExp ) | if AExp {AExp} else {AExp} | id ( [ArgList] ) | StructExp )
 
 StructExp ::= id { StructExpAttr (, StructExpAttr)* [,] }
 

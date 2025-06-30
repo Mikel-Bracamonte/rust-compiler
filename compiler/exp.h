@@ -27,6 +27,16 @@ public:
     static string unaryOpToChar(UnaryOp o);
 };
 
+class PostfixExp : public Exp {
+public:
+    Exp* left;
+    string right;
+    PostfixExp(Exp* l, string r);
+    int accept(Visitor* visitor);
+    ImpType accept(ImpVisitor* v);
+    ~PostfixExp();
+};
+
 class BinaryExp : public Exp {
 public:
     Exp* left;
@@ -69,7 +79,8 @@ public:
 class IdentifierExp : public Exp {
 public:
     string name;
-    IdentifierExp(string n);
+    bool borrow;
+    IdentifierExp(string n, bool b);
     int accept(Visitor* visitor);
     ImpType accept(ImpVisitor* v);
     ~IdentifierExp();
@@ -109,10 +120,10 @@ public:
 
 class AssignStatement : public Stm {
 public:
-    string name;
+    vector<string> names;
     Exp* right;
     AssignOp op;
-    AssignStatement(string n, Exp* r, AssignOp o);
+    AssignStatement(vector<string> n, Exp* r, AssignOp o);
     int accept(Visitor* visitor);
     void accept(ImpVisitor* v);
     ~AssignStatement();
@@ -217,7 +228,8 @@ public:
     string name;
     string type;
     bool isMut;
-    ParamDec(string n, string t, bool m);
+    bool borrow;
+    ParamDec(string n, string t, bool m, bool b);
     int accept(Visitor* visitor);
     void accept(ImpVisitor* v);
     ~ParamDec();

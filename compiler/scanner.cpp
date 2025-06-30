@@ -16,10 +16,44 @@ bool is_white_space(char c) {
 
 Token* Scanner::nextToken() {
     Token* token;
-    while (current < input.length() &&  is_white_space(input[current]) ) current++;
+    while (current < input.length() && is_white_space(input[current]) ) current++;
     if (current >= input.length()) return new Token(Token::END);
     char c  = input[current];
     first = current;
+    
+    int comment_depth = 0;
+    if(input[current] == '/') {
+        if(current + 1 < input.length() && input[current + 1] == '/') {
+            while(input[current] != '\n') {
+                if(current >= input.length()) {
+                    return new Token(Token::END);
+                }
+                current++;
+            }
+        } else if(current + 1 < input.length() && input[current + 1] == '*') {
+            comment_depth++;
+            current += 2;
+            while(comment_depth > 0) {
+                if(current >= input.length()) {
+                    return new Token(Token::END);
+                }
+                if(input[current] == '/' && current + 1 < input.length() && input[current + 1] == '*') {
+                    comment_depth++;
+                    current++;
+                } else if(input[current] == '*' && current + 1 < input.length() && input[current + 1] == '/') {
+                    comment_depth--;
+                    current++;
+                }
+                current++;
+            }
+        }
+    }
+
+    while (current < input.length() && is_white_space(input[current]) ) current++;
+    first = current;
+
+    c = input[current];
+
     if (isdigit(c)) {
         current++;
         while (current < input.length() && isdigit(input[current]))
@@ -29,8 +63,7 @@ Token* Scanner::nextToken() {
 
     else if (isalpha(c)) {
         current++;
-        // scanner add dot por id's
-        while (current < input.length() && (isalnum(input[current]) || input[current] == '_' || input[current] == '.' ))
+        while (current < input.length() && (isalnum(input[current]) || input[current] == '_'))
             current++;
         string word = input.substr(first, current - first);
         if (word == "println") {
@@ -149,7 +182,7 @@ Token* Scanner::nextToken() {
                     token = new Token(Token::AND, "&&", 0, 2);
                     current++;
                 } else {
-                    token = new Token(Token::ERR, c);
+                    token = new Token(Token::BORROW, c);
                 }
                 break;
             case '=':

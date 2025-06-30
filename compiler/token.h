@@ -56,7 +56,8 @@ public:
         MINUSASSIGN, // -=
         MULASSIGN, // *=
         DIVASSIGN, // /=
-        MODASSIGN // %=
+        MODASSIGN, // %=
+        BORROW // &
     };
 
     Type type;

@@ -40,6 +40,10 @@ int StructExpAttr::accept(Visitor* visitor) {
     return visitor->visit(this);
 }
 
+int PostfixExp::accept(Visitor* visitor) {
+    return visitor->visit(this);
+}
+
 int AssignStatement::accept(Visitor* visitor) {
     visitor->visit(this);
     return 0;
@@ -197,6 +201,12 @@ int PrintVisitor::visit(StructExpAttr* attr) {
     return 0;
 }
 
+int PrintVisitor::visit(PostfixExp* exp) {
+    exp->left->accept(this);
+    cout << "." << exp->right;
+    return 0;
+}
+
 int PrintVisitor::visit(FunctionCallExp* exp) {
     if(exp->hasParenthesis) cout << "(";
     cout << exp->name;
@@ -213,7 +223,14 @@ int PrintVisitor::visit(FunctionCallExp* exp) {
 }
 
 void PrintVisitor::visit(AssignStatement* stm) {
-    cout << get_spaces() << stm->name << " " << Exp::assignOpToChar(stm->op) << " ";
+    cout << get_spaces();
+    for(int i = 0; i < stm->names.size(); ++i) {
+        cout << i;
+        if(i != stm->names.size() - 1) {
+            cout << ".";
+        }
+    }
+    cout << " " << Exp::assignOpToChar(stm->op) << " ";
     stm->right->accept(this);
     cout << ";";
 }

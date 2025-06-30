@@ -145,8 +145,12 @@ ParamDec* Parser::parseParamDec() {
     }
     string name = previous->text;
     bool mut = false;
+    bool borrow = false;
     if(!match(Token::COLON)) {
         errorHandler.expect(Token::COLON, current->text);
+    }
+    if(match(Token::BORROW)) {
+        borrow = true;
     }
     if(match(Token::MUT)) {
         mut = true;
@@ -155,7 +159,7 @@ ParamDec* Parser::parseParamDec() {
         errorHandler.expect(Token::ID, current->text);
     }
     string type = previous->text;
-    return new ParamDec(name, type, mut);
+    return new ParamDec(name, type, mut, borrow);
 }
 
 // check!
@@ -200,9 +204,26 @@ Stm* Parser::parseStatement() {
             }
             return stmt;
         }
-        else if(match(Token::ASSIGN) || match(Token::PLUSASSIGN) || match(Token::MINUSASSIGN) || match(Token::MULASSIGN)
+        else if(match(Token::DOT) || match(Token::ASSIGN) || match(Token::PLUSASSIGN) || match(Token::MINUSASSIGN) || match(Token::MULASSIGN)
         || match(Token::DIVASSIGN) || match(Token::MODASSIGN)) {
             AssignOp op;
+            vector<string> names = {name};
+            if(previous->type == Token::DOT) {
+                if(!match(Token::ID)) {
+                    errorHandler.expect(Token::ID, current->text);
+                }
+                names.push_back(previous->text);
+                while(match(Token::DOT)) {
+                    if(!match(Token::ID)) {
+                        errorHandler.expect(Token::ID, current->text);
+                    }
+                    names.push_back(previous->text);
+                }
+                if(!(match(Token::ASSIGN) || match(Token::PLUSASSIGN) || match(Token::MINUSASSIGN) || match(Token::MULASSIGN)
+                || match(Token::DIVASSIGN) || match(Token::MODASSIGN))) {
+                    errorHandler.error("expected assign");
+                }
+            }
             switch(previous->type) {
                 case Token::ASSIGN:
                     op = AS_ASSIGN_OP;
@@ -227,7 +248,7 @@ Stm* Parser::parseStatement() {
             if(!match(Token::PC)) {
                 errorHandler.expect(Token::PC, current->text);
             }
-            return new AssignStatement(name, exp, op);
+            return new AssignStatement(names, exp, op);
         } else {
             errorHandler.error("Expected assign");
         }
@@ -441,7 +462,7 @@ Exp* Parser::parseExpression() {
 
 //check!
 Exp* Parser::parseTerm() {
-    Exp* left = parseFactor();
+    Exp* left = parsePostfixExp();
     while (match(Token::MUL) || match(Token::DIV) || match(Token::MOD)) {
         BinaryOp op;
         if (previous->type == Token::MUL){
@@ -453,8 +474,19 @@ Exp* Parser::parseTerm() {
         else if (previous->type == Token::MOD){
             op = MOD_OP;
         }
-        Exp* right = parseFactor();
+        Exp* right = parsePostfixExp();
         left = new BinaryExp(left, right, op);
+    }
+    return left;
+}
+
+Exp* Parser::parsePostfixExp() {
+    Exp* left = parseFactor();
+    while(match(Token::DOT)) {
+        if(!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text);
+        }
+        left = new PostfixExp(left, previous->text);
     }
     return left;
 }
@@ -467,6 +499,12 @@ Exp* Parser::parseFactor() {
     if (match(Token::MINUS)) {
         isUnary = true;
         op = U_NEG_OP;
+    }
+    if (match(Token::BORROW)) {
+        if(!match(Token::ID)) {
+            errorHandler.expect(Token::ID, current->text);
+        }
+        return new IdentifierExp(previous->text, true);
     }
     if (match(Token::ID)) {
         string texto = previous->text;
@@ -510,7 +548,7 @@ Exp* Parser::parseFactor() {
 
             e = s;
         }
-        else e = new IdentifierExp(texto);
+        else e = new IdentifierExp(texto, false);
     }
     else if (match(Token::NUM)) {
         e = new NumberExp(stoi(previous->text));

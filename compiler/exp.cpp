@@ -16,7 +16,7 @@ NumberExp::~NumberExp() { }
 BoolExp::BoolExp(bool v):value(v) {}
 BoolExp::~BoolExp() { }
 
-IdentifierExp::IdentifierExp(std::string n):name(n) {}
+IdentifierExp::IdentifierExp(std::string n, bool b):name(n), borrow(b) {}
 IdentifierExp::~IdentifierExp() { }
 
 IfExp::IfExp(Exp *c, Exp *t, Exp *e) {
@@ -44,8 +44,8 @@ FunctionCallExp::~FunctionCallExp(){
 
 Stm::~Stm() {}
 
-AssignStatement::AssignStatement(std::string n, Exp* r, AssignOp o) {
-    name = n;
+AssignStatement::AssignStatement(std::vector<std::string> n, Exp* r, AssignOp o) {
+    names = n;
     right = r;
     op = o;
 }
@@ -119,10 +119,11 @@ FunctionCallStatement::~FunctionCallStatement(){
 
 ////////////////////////////////////////////////////
 
-ParamDec::ParamDec(std::string n, std::string t, bool m) {
+ParamDec::ParamDec(std::string n, std::string t, bool m, bool b) {
     name = n;
     type = t;
     isMut = m;
+    borrow = b;
 }
 ParamDec::~ParamDec() {}
 
@@ -153,6 +154,11 @@ StructExpAttr::~StructExpAttr() {}
 
 StructExp::StructExp() {}
 StructExp::~StructExp(){}
+
+PostfixExp::PostfixExp(Exp* l, string r) : left(l), right(r) {}
+PostfixExp::~PostfixExp() {
+    delete left;
+}
 
 StatementList::StatementList(): stms() {}
 void StatementList::add(Stm* s) {

@@ -11,6 +11,7 @@ class IfExp;
 class FunctionCallExp;
 class StructExp;
 class StructExpAttr;
+class PostfixExp;
 
 class AssignStatement;
 class PrintStatement;
@@ -42,6 +43,7 @@ public:
     virtual int visit(FunctionCallExp* exp) = 0;
     virtual int visit(StructExp* exp) = 0;
     virtual int visit(StructExpAttr* exp) = 0;
+    virtual int visit(PostfixExp* exp) = 0;
     virtual void visit(AssignStatement* stm) = 0;
     virtual void visit(PrintStatement* stm) = 0;
     virtual void visit(IfStatement* stm) = 0;
@@ -75,6 +77,7 @@ public:
     int visit(FunctionCallExp* exp) override;
     int visit(StructExp* exp) override;
     int visit(StructExpAttr* exp) override;
+    int visit(PostfixExp* exp) override;
     void visit(AssignStatement* stm) override;
     void visit(PrintStatement* stm) override;
     void visit(IfStatement* stm) override;

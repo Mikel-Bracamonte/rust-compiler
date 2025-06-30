@@ -65,6 +65,7 @@ std::ostream& operator << ( std::ostream& outs, const Token & tok )
         case Token::MULASSIGN : outs << "TOKEN(MULASSIGN)"; break;
         case Token::DIVASSIGN : outs << "TOKEN(DIVASSIGN)"; break;
         case Token::MODASSIGN : outs << "TOKEN(MODASSIGN)"; break;
+        case Token::BORROW : outs << "TOKEN(BORROW)"; break;
         default: outs << "TOKEN(UNKNOWN)"; break;
     }
     return outs;

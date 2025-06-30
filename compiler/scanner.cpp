@@ -16,10 +16,44 @@ bool is_white_space(char c) {
 
 Token* Scanner::nextToken() {
     Token* token;
-    while (current < input.length() &&  is_white_space(input[current]) ) current++;
+    while (current < input.length() && is_white_space(input[current]) ) current++;
     if (current >= input.length()) return new Token(Token::END);
     char c  = input[current];
     first = current;
+    
+    int comment_depth = 0;
+    if(input[current] == '/') {
+        if(current + 1 < input.length() && input[current + 1] == '/') {
+            while(input[current] != '\n') {
+                if(current >= input.length()) {
+                    return new Token(Token::END);
+                }
+                current++;
+            }
+        } else if(current + 1 < input.length() && input[current + 1] == '*') {
+            comment_depth++;
+            current += 2;
+            while(comment_depth > 0) {
+                if(current >= input.length()) {
+                    return new Token(Token::END);
+                }
+                if(input[current] == '/' && current + 1 < input.length() && input[current + 1] == '*') {
+                    comment_depth++;
+                    current++;
+                } else if(input[current] == '*' && current + 1 < input.length() && input[current + 1] == '/') {
+                    comment_depth--;
+                    current++;
+                }
+                current++;
+            }
+        }
+    }
+
+    while (current < input.length() && is_white_space(input[current]) ) current++;
+    first = current;
+
+    c = input[current];
+
     if (isdigit(c)) {
         current++;
         while (current < input.length() && isdigit(input[current]))

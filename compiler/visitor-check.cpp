@@ -243,6 +243,7 @@ void CheckVisitor::visit(ReturnStatement* s) {
         }
     }
     else {
+        return; // TODO structs dentro de structs no se maneja
         if(s->exp->accept(this).ttype != getType(returnType.ttype)){
             errorHandler.error("Return no coindice con tipo de función");
         }
@@ -320,6 +321,7 @@ void CheckVisitor::visit(FunDec* vd) {
     list<string> argTypes;
     
     returnType = vd->type;
+    env.clear();
     env.add_level();
 
     for (auto p : vd->params)

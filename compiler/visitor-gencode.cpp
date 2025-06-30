@@ -143,6 +143,7 @@ void GenCodeVisitor::nose(int src_base, int dest_base, bool reference) {
         struct_name = old_struct_name;
     }
 }
+
 //////////////////////////////////////////////////////////////////////////////////
 void GenCodeVisitor::gencode(Program* p) {
     out << ".data" << endl;
@@ -296,10 +297,10 @@ ImpType GenCodeVisitor::visit(IdentifierExp* e) {
 ImpType GenCodeVisitor::visit(IfExp* e) {
     int lbl = label_counter++;
     e->condition->accept(this);
-    out << "  cmpq $0, %rax" << endl;
-    out << "  je else_" << lbl << endl;
+    out << " cmpq $0, %rax" << endl;
+    out << " je else_" << lbl << endl;
     ImpType imp_type = e->then->accept(this);
-    out << "  jmp endif_" << lbl << endl;
+    out << " jmp endif_" << lbl << endl;
     out << "else_" << lbl << ":" << endl;
     e->els->accept(this);
     out << "endif_" << lbl << ":" << endl;
@@ -320,6 +321,12 @@ ImpType GenCodeVisitor::visit(FunctionCallExp* e) {
             out << " movq %rax, " << argRegs[i] << endl;
         }
         ++i;
+    }
+    string ret_type = functions_info[e->name].ttype;
+    if(isStruct(ret_type)) {
+        out << " subq $" << structs_info[ret_type].size << ", %rsp" << endl;
+        struct_offset = temp_offset;
+        temp_offset -= structs_info[ret_type].size;
     }
     out << " call " << e->name << endl;
 
@@ -345,7 +352,7 @@ void GenCodeVisitor::visit(AssignStatement* s) {
         case AS_ASSIGN_OP:
             if(is_struct) {
                 out << " movq " << var_offset << "(%rbp), %rcx" << endl;
-                nose(temp_offset, offset_assign, reference);
+                nose(struct_offset, offset_assign, reference);
             } else {
                 if(reference) {
                     out << " movq " << var_offset << "(%rbp), %rcx" << endl;
@@ -475,22 +482,22 @@ void GenCodeVisitor::visit(ForStatement* s) {
     offset -= 8;
 
     s->start->accept(this);
-    out << "movq %rax, " << offset << "(%rbp)" << endl;
+    out << " movq %rax, " << offset << "(%rbp)" << endl;
     int current_offset = offset;
     offset -= 8;
     s->end->accept(this);
-    out << "movq %rax, " << offset << "(%rbp)" << endl;
+    out << " movq %rax, " << offset << "(%rbp)" << endl;
     int end_offset = offset;
     offset -= 8;
     
     out << "for_" << lbl << ":" << endl;
-    out << "movq " << current_offset << "(%rbp), %rax" << endl;
-    out << "movq " << end_offset << "(%rbp), %rcx" << endl;
-    out << "cmpq %rcx, %rax" << endl;
+    out << " movq " << current_offset << "(%rbp), %rax" << endl;
+    out << " movq " << end_offset << "(%rbp), %rcx" << endl;
+    out << " cmpq %rcx, %rax" << endl;
     out << "jge endfor_" << lbl << endl;
-    out << "movq %rax, " << var_offset << "(%rbp)" << endl;
-    out << "addq $1, %rax" << endl;
-    out << "movq %rax, " << current_offset << "(%rbp)" << endl;
+    out << " movq %rax, " << var_offset << "(%rbp)" << endl;
+    out << " addq $1, %rax" << endl;
+    out << " movq %rax, " << current_offset << "(%rbp)" << endl;
 
     s->body->accept(this);
 
@@ -500,7 +507,10 @@ void GenCodeVisitor::visit(ForStatement* s) {
 
 void GenCodeVisitor::visit(ReturnStatement* s) {
     if(s->exp) {
-        s->exp->accept(this);
+        ImpType imp_type = s->exp->accept(this);
+        if(isStruct(imp_type.ttype)) {
+            nose(struct_offset, structs_info[imp_type.ttype].size + 16, imp_type.reference);
+        }
     }
     out << "jmp .end_" << nombreFuncion << endl;
 }
@@ -527,7 +537,7 @@ void GenCodeVisitor::visit(VarDec* vd) {
     if(vd->exp != nullptr) {
         vd->exp->accept(this);
         if(is_struct) {
-            nose(temp_offset, offset_assign, false);
+            nose(struct_offset, offset_assign, false);
         } else {
             out << " movq %rax, " << offset_assign << "(%rbp)" << endl;
         }
@@ -574,7 +584,8 @@ void GenCodeVisitor::visit(FunDec* f) {
     out << " movq %rsp, %rbp" << endl;
     // int reserva = reserva_function[f->name];
     int reserva = 800; // deberia ser calculado con las variables
-    temp_offset = -reserva;
+    temp_offset_base = -reserva;
+    temp_offset = temp_offset_base;
     out << " subq $" << reserva << ", %rsp" << endl;
 
     int size = f->params.size();
@@ -633,7 +644,8 @@ ImpType GenCodeVisitor::visit(PostfixExp* e) {
 ImpType GenCodeVisitor::visit(StructExp* e) {
     int current_struct_offset = temp_offset;
 
-    out << "subq $" << structs_info[e->name].size << ", %rsp" << endl;
+    out << " subq $" << structs_info[e->name].size << ", %rsp" << endl;
+    temp_offset -= structs_info[e->name].size;
     cout << e->name << " " << structs_info[e->name].size << endl;
     for(auto a : e->attrs) {
         ImpType imp_type = a->exp->accept(this);

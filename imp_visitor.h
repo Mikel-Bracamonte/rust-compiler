@@ -121,7 +121,10 @@ public:
     
     unordered_map<string, StructInfo> structs_info;
     unordered_map<string, ImpType> functions_info;
+    unordered_map<string, int> function_memory_map;
+    string function_name;
     int numberLoop = 0;
+    stack<string> struct_name;
     ImpType returnType = ImpType();
     void check(Program* p);
     ImpType visit(BinaryExp* exp) override;
@@ -150,6 +153,7 @@ public:
     void visit(AttrDec* stm) override;
     void visit(StatementList* stm) override;
     void visit(Body* b) override;
+    int getSize(string s);
 };
 
 

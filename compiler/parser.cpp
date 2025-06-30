@@ -537,7 +537,7 @@ Exp* Parser::parseFactor() {
         else e = new IdentifierExp(texto, false);
     }
     else if (match(Token::NUM)) {
-        e = new NumberExp(stoi(previous->text));
+        e = new NumberExp(stoll(previous->text));
     }
     else if (match(Token::TRUE)) {
         e = new BoolExp(1);

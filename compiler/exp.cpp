@@ -10,7 +10,7 @@ BinaryExp::~BinaryExp() { delete left; delete right; }
 UnaryExp::UnaryExp(Exp* e, UnaryOp o):exp(e),op(o) {}
 UnaryExp::~UnaryExp() { delete exp; }
 
-NumberExp::NumberExp(int v):value(v) {}
+NumberExp::NumberExp(long long v):value(v) {}
 NumberExp::~NumberExp() { }
 
 BoolExp::BoolExp(bool v):value(v) {}

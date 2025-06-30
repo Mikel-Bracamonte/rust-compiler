@@ -109,13 +109,39 @@ void Body::accept(ImpVisitor* visitor) {
 
 int GenCodeVisitor::getSize(string s) {
     if(s == "i32") {
-        return 8;
-    } else if(s == "i64") {
+        return 4;
+    } else if(s == "i64" || s == "0num") {
         return 8;
     } else if(s == "bool") {
-        return 8;
+        return 1;
     } else {
         return structs_info[s].size;
+    }
+}
+
+string GenCodeVisitor::getRegister(string s, string reg){
+    bool flag = false;
+    if (reg == "a" || reg == "b" || reg == "c" || reg == "d"){
+        flag = true;
+    }
+    else if(reg == "si" || reg == "di" || reg == "bp" || reg == "sp"){
+        flag = false;
+    }
+    else {
+        cout << "Registro falso" << endl;
+        exit(0);
+    }
+    if(s == "i32") {
+        if(flag) return "%e" + reg + "x";
+        else return "%e" + reg;
+    } else if(s == "i64" || s == "0num") {
+        if(flag) return "%r" + reg + "x";
+        else return "%r" + reg;
+    } else if(s == "bool") {
+        return "%" + reg + "l";
+    } else {
+        cout << "Tipo no aceptado" << endl;
+        exit(0);
     }
 }
 
@@ -141,27 +167,30 @@ void GenCodeVisitor::gencode(Program* p) {
 
 ImpType GenCodeVisitor::visit(BinaryExp* e) {
     ImpType imp_type = e->left->accept(this);
-    out << " pushq %rax" << endl;
-    e->right->accept(this);
-    out << " movq %rax, %rcx" << endl;
-    out << " popq %rax" << endl;
+    string reg = getRegister(imp_type.ttype, "a");
+    out << " push " + reg << endl;
+    ImpType imp_type2 = e->right->accept(this);
+    string reg2 = getRegister(imp_type2.ttype, "c");
+    string opReg = reg + ", " + reg2;
+    out << " mov " + opReg << endl;
+    out << " pop " + reg << endl;
 
     switch (e->op) {
         case PLUS_OP:
-            out << " addq %rcx, %rax" << endl; 
+            out << " add " + opReg << endl; 
             break;
         case MINUS_OP:
-            out << " subq %rcx, %rax" << endl;
+            out << " sub " + opReg << endl;
             break;
         case MUL_OP:
-            out << " imulq %rcx, %rax" << endl;
+            out << " imul " + opReg << endl;
             break;
         case DIV_OP:
             out << " cqto" << endl
-                << " idivq %rcx" << endl;
+                << " idiv " + reg2 << endl;
             break;
         case LT_OP:
-            out << " cmpq %rcx, %rax" << endl
+            out << " cmp %rcx, %rax" << endl
                 << " movl $0, %eax" << endl
                 << " setl %al" << endl
                 << " movzbq %al, %rax" << endl;
@@ -205,7 +234,7 @@ ImpType GenCodeVisitor::visit(BinaryExp* e) {
         case MOD_OP:
             out << " cqto" << endl
                 << " idivq %rcx" << endl
-                << " movq %rdx, %rax" << endl;
+                << " mov %rdx, %rax" << endl;
             break;
         case AND_OP:
             out << " and %cl, %al" << endl
@@ -229,7 +258,7 @@ ImpType GenCodeVisitor::visit(UnaryExp* e) {
             out << " neg %rax" << endl; 
             break;
         case U_NOT_OP:
-            out << " subq $1, %rax" << endl; 
+            out << " sub $1, %rax" << endl; 
             break;
         default:
             errorHandler.error("Not unaryOp supported");
@@ -239,13 +268,13 @@ ImpType GenCodeVisitor::visit(UnaryExp* e) {
 
 // check!
 ImpType GenCodeVisitor::visit(NumberExp* e) {
-    out << " movq $" << e->value << ", %rax"<<endl;
-    return ImpType("i32");
+    out << " mov $" << e->value << ", %rax"<<endl;
+    return ImpType("0num");
 }
 
 // check!
 ImpType GenCodeVisitor::visit(BoolExp* e) {
-    out << " movq $" << (e->value ? 1 : 0) << ", %rax" << endl;
+    out << " mov $" << (e->value ? 1 : 0) << ", %rax" << endl;
     return ImpType("bool");
 }
 
@@ -253,12 +282,12 @@ ImpType GenCodeVisitor::visit(BoolExp* e) {
 ImpType GenCodeVisitor::visit(IdentifierExp* e) {
     assert(env.check(e->name));
     string type = get<0>(env.lookup(e->name)).ttype;
-    bool is_struct = type != "i32" && type != "i64" && type != "bool";
+    bool is_struct = type != "i32" && type != "i64" && type != "bool" && type != "0num";
     if(is_struct) {
         struct_name = type;
         struct_offset = get<1>(env.lookup(e->name));
     } else {
-        out << " movq " << get<1>(env.lookup(e->name)) << "(%rbp), %rax"<<endl;
+        out << " mov " << get<1>(env.lookup(e->name)) << "(%rbp), %rax"<<endl;
     }
     return get<0>(env.lookup(e->name));
 }
@@ -294,14 +323,14 @@ ImpType GenCodeVisitor::visit(FunctionCallExp* e) {
 void GenCodeVisitor::visit(AssignStatement* s) {
     assert(env.check(s->name));
     ImpType imp_type = s->right->accept(this);
-    bool is_struct = imp_type.ttype != "i32" && imp_type.ttype != "i64" && imp_type.ttype != "bool";
+    bool is_struct = imp_type.ttype != "i32" && imp_type.ttype != "i64" && imp_type.ttype != "bool" && imp_type.ttype != "0num";
     int offset_assign = get<1>(env.lookup(s->name));
     switch (s->op) {
         case AS_ASSIGN_OP:
             if(is_struct) {
                 nose(temp_offset, offset_assign);
             } else {
-                out << " movq %rax, " << offset_assign << "(%rbp)" << endl;
+                out << " mov %rax, " << offset_assign << "(%rbp)" << endl;
             }
             break;
         case AS_PLUS_OP:
@@ -311,24 +340,24 @@ void GenCodeVisitor::visit(AssignStatement* s) {
             out << " subq %rax, " << offset_assign << "(%rbp)" << endl;
             break;
         case AS_MUL_OP: // not checked yet
-            out << " movq %rax, %rcx" << endl;
-            out << " movq " << offset_assign << "(%rbp), %rax" << endl;
+            out << " mov %rax, %rcx" << endl;
+            out << " mov " << offset_assign << "(%rbp), %rax" << endl;
             out << " imulq %rcx, %rax" << endl;
-            out << " movq %rax, " << offset_assign << "(%rbp)" << endl;
+            out << " mov %rax, " << offset_assign << "(%rbp)" << endl;
             break;
         case AS_DIV_OP:
-            out << " movq %rax, %rcx" << endl;
-            out << " movq " << offset_assign << "(%rbp), %rax" << endl;
+            out << " mov %rax, %rcx" << endl;
+            out << " mov " << offset_assign << "(%rbp), %rax" << endl;
             out << " cqto" << endl;
             out << " idivq %rcx" << endl;
-            out << " movq %rax, " << offset_assign << "(%rbp)" << endl;
+            out << " mov %rax, " << offset_assign << "(%rbp)" << endl;
             break;
         case AS_MOD_OP:
-            out << " movq %rax, %rcx" << endl;
-            out << " movq " << offset_assign << "(%rbp), %rax" << endl;
+            out << " mov %rax, %rcx" << endl;
+            out << " mov " << offset_assign << "(%rbp), %rax" << endl;
             out << " cqto" << endl;
             out << " idivq %rcx" << endl;
-            out << " movq %rdx, " << offset_assign << "(%rbp)" << endl;
+            out << " mov %rdx, " << offset_assign << "(%rbp)" << endl;
             break;
         default:
             errorHandler.error("Not assignOp supported");
@@ -339,7 +368,7 @@ void GenCodeVisitor::visit(AssignStatement* s) {
 void GenCodeVisitor::visit(PrintStatement* s) {
     s->exp->accept(this);
     out <<
-        " movq %rax, %rsi" << endl;
+        " mov %rax, %rsi" << endl;
     if(s->ln){
         out << " leaq print_fmt_ln(%rip), %rdi" << endl;
     }
@@ -388,22 +417,22 @@ void GenCodeVisitor::visit(ForStatement* s) {
     offset -= 8;
 
     s->start->accept(this);
-    out << "movq %rax, " << offset << "(%rbp)" << endl;
+    out << "mov %rax, " << offset << "(%rbp)" << endl;
     int current_offset = offset;
     offset -= 8;
     s->end->accept(this);
-    out << "movq %rax, " << offset << "(%rbp)" << endl;
+    out << "mov %rax, " << offset << "(%rbp)" << endl;
     int end_offset = offset;
     offset -= 8;
     
     out << "for_" << lbl << ":" << endl;
-    out << "movq " << current_offset << "(%rbp), %rax" << endl;
-    out << "movq " << end_offset << "(%rbp), %rcx" << endl;
+    out << "mov " << current_offset << "(%rbp), %rax" << endl;
+    out << "mov " << end_offset << "(%rbp), %rcx" << endl;
     out << "cmpq %rcx, %rax" << endl;
     out << "jge endfor_" << lbl << endl;
-    out << "movq %rax, " << var_offset << "(%rbp)" << endl;
+    out << "mov %rax, " << var_offset << "(%rbp)" << endl;
     out << "addq $1, %rax" << endl;
-    out << "movq %rax, " << current_offset << "(%rbp)" << endl;
+    out << "mov %rax, " << current_offset << "(%rbp)" << endl;
 
     s->body->accept(this);
 
@@ -433,8 +462,8 @@ void GenCodeVisitor::visit(ContinueStatement* s) {
 void GenCodeVisitor::nose(int src_base, int dest_base) {
     bool is_struct = struct_name != "i32" && struct_name != "i64" && struct_name != "bool";
     if(!is_struct) {
-        out << " movq " << src_base << "(%rbp), %rax" << endl;
-        out << " movq %rax, " << dest_base << "(%rbp)" << endl;
+        out << " mov " << src_base << "(%rbp), %rax" << endl;
+        out << " mov %rax, " << dest_base << "(%rbp)" << endl;
         return;
     }
 
@@ -451,14 +480,14 @@ void GenCodeVisitor::visit(VarDec* vd) {
     ImpType type(vd->type);
     env.add_var(vd->name, {type, offset});
     int offset_assign = offset;
-    bool is_struct = vd->type != "i32" && vd->type != "i64" && vd->type != "bool";
-    offset -=  is_struct ? structs_info[vd->type].size : 8; // TODO depende del tipo
+    bool is_struct = vd->type != "i32" && vd->type != "i64" && vd->type != "bool" && vd->type != "0num";
+    offset -=  is_struct ? structs_info[vd->type].size : getSize(vd->type); // TODO depende del tipo
     if(vd->exp != nullptr) {
         vd->exp->accept(this);
         if(is_struct) {
             nose(temp_offset, offset_assign);
         } else {
-            out << " movq %rax, " << offset_assign << "(%rbp)" << endl;
+            out << " mov %rax, " << offset_assign << "(%rbp)" << endl;
         }
     }
 }
@@ -492,10 +521,10 @@ void GenCodeVisitor::visit(FunDec* f) {
     
     out << ".globl " << f->name << endl;
     out << f->name << ":" << endl;
-    out << " pushq %rbp" << endl;
-    out << " movq %rsp, %rbp" << endl;
+    out << " push %rbp" << endl;
+    out << " mov %rsp, %rbp" << endl;
     
-    int reserva = 80; // deberia ser calculado con las variables
+    int reserva = 200; // deberia ser calculado con las variables
     temp_offset = -reserva;
     out << " subq $" << reserva << ", %rsp" << endl;
 
@@ -536,13 +565,13 @@ ImpType GenCodeVisitor::visit(PostfixExp* e) {
     ImpType return_imp_type = structs_info[type].types[e->right];
     string return_type = return_imp_type.ttype;
 
-    bool is_struct = return_type != "i32" && return_type != "i64" && return_type != "bool";
+    bool is_struct = return_type != "i32" && return_type != "i64" && return_type != "bool" && return_type != "0num";
     cout << struct_offset + structs_info[type].offsets[e->right] << " " << struct_name << endl;
     if(is_struct) {
         struct_name = return_type;
         struct_offset = struct_offset + structs_info[type].offsets[e->right];
     } else {
-        out << " movq " << struct_offset + structs_info[type].offsets[e->right] << "(%rbp), %rax" << endl;
+        out << " mov " << struct_offset + structs_info[type].offsets[e->right] << "(%rbp), %rax" << endl;
     }
     return return_imp_type;
 }
@@ -558,11 +587,11 @@ ImpType GenCodeVisitor::visit(StructExp* e) {
         bool is_struct = type != "i32" && type != "i64" && type != "bool";
         if(is_struct) {
             for(auto i : structs_info[struct_name].offsets) {
-                out << " movq " << struct_offset + i.second << "(%rbp), %rax" << endl;
-                out << " movq %rax, " << current_struct_offset + structs_info[e->name].offsets[a->name] + i.second << "(%rbp)" << endl;
+                out << " mov " << struct_offset + i.second << "(%rbp), %rax" << endl;
+                out << " mov %rax, " << current_struct_offset + structs_info[e->name].offsets[a->name] + i.second << "(%rbp)" << endl;
             }
         } else {
-            out << " movq %rax, " << current_struct_offset + structs_info[e->name].offsets[a->name] << "(%rbp)" << endl;
+            out << " mov %rax, " << current_struct_offset + structs_info[e->name].offsets[a->name] << "(%rbp)" << endl;
         }
     }
     struct_name = e->name;

@@ -60,8 +60,8 @@ public:
 
 class NumberExp : public Exp {
 public:
-    int value;
-    NumberExp(int v);
+    long long value;
+    NumberExp(long long v);
     int accept(Visitor* visitor);
     ImpType accept(ImpVisitor* v);
     ~NumberExp();

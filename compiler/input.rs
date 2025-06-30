@@ -1,23 +1,27 @@
-struct Test {
+struct Test1 {
     a: i32,
     b: i32,
-    c: i32,
 }
 
-struct Persona {
+struct Test2 {
     a: i32,
-    b: Test,
+    b: Test1,
+}
+
+fn test(t2: Test2) {
+    t2.b.a %= 3;
 }
 
 fn main() {
-    let var1: Test = Test {
-        a: 15,
+    let var1: Test1 = Test1 {
+        a: 50,
         b: 25,
-        c: 35,
     };
-    let var2: Persona = Persona {
+    let var2: Test2 = Test2 {
         a: 20,
         b: var1,
     };
-    println!("{}", var2.b.c);
+    println!("{}", var2.b.a);
+    test(var2);
+    println!("{}", var2.b.a);
 }

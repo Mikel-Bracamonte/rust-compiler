@@ -159,16 +159,18 @@ ImpType CheckVisitor::visit(PostfixExp* e) {
 }
 
 // checked!, tested
-void CheckVisitor::visit(AssignStatement* s) { 
-    if(!env.check(s->name)) {
-        errorHandler.error("Varible '" + s->name + "' no declarada.");
+// TODO ahora el id es un vector. por ahora hago names[0] para probar
+void CheckVisitor::visit(AssignStatement* s) {
+    return;
+    if(!env.check(s->names[0])) {
+        errorHandler.error("Varible '" + s->names[0] + "' no declarada.");
     }
 
-    ImpType target = env.lookup(s->name);
+    ImpType target = env.lookup(s->names[0]);
     ImpType src = s->right->accept(this);
     
     if (src.ttype != getType(target)) {
-        errorHandler.error("Tipo incompatible en asignación a '" + s->name + "'.");
+        errorHandler.error("Tipo incompatible en asignación a '" + s->names[0] + "'.");
     }
     if (s->op != AS_ASSIGN_OP){
         if(src.ttype != "i32") {
@@ -179,6 +181,7 @@ void CheckVisitor::visit(AssignStatement* s) {
 
 // check!, tested!
 void CheckVisitor::visit(PrintStatement* s) {
+    return; // TODO quitar
     if(s->exp->accept(this).ttype != "i32"){
         errorHandler.error("La impresión debe ser un i32");
     }

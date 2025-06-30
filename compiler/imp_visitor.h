@@ -99,7 +99,8 @@ public:
     void visit(StatementList* stm) override;
     void visit(Body* b) override;
     int getSize(string s);
-    void nose(int s, int d);
+    void nose(int s, int d, bool r);
+    bool isStruct(string t);
 };
 
 class CheckVisitor : public ImpVisitor {

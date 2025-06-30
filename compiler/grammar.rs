@@ -20,7 +20,7 @@ Body ::= StmtList
 
 StmtList ::= ( Stmt )*
 
-Stmt ::= id (= | += | -= | *= | /= | %=) AExp ; |
+Stmt ::= id (.id)* (= | += | -= | *= | /= | %=) AExp ; |
     id ( [ArgList] ) ; |
     println!("{}", AExp ) ; |
     print!("{}", AExp ); |

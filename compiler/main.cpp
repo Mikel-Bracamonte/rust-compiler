@@ -67,6 +67,7 @@ int main(int argc, const char* argv[]) {
 
         CheckVisitor* checkcodeVisitor = new CheckVisitor();
         checkcodeVisitor->check(program);
+        // unordered_map<string, int> map = checkcodeVisitor.getMap();
 
         cout << "Todos los checks fueron aceptados" << endl;
         ///////////////////////////////////

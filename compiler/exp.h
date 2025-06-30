@@ -120,10 +120,10 @@ public:
 
 class AssignStatement : public Stm {
 public:
-    string name;
+    vector<string> names;
     Exp* right;
     AssignOp op;
-    AssignStatement(string n, Exp* r, AssignOp o);
+    AssignStatement(vector<string> n, Exp* r, AssignOp o);
     int accept(Visitor* visitor);
     void accept(ImpVisitor* v);
     ~AssignStatement();

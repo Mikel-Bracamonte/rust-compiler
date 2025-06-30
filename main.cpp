@@ -32,11 +32,11 @@ int main(int argc, const char* argv[]) {
 
     string input_copy = input;
     Scanner scanner_test(input_copy.c_str());
-    test_scanner(&scanner_test);
-    cout << "Scanner exitoso" << endl;
+    // test_scanner(&scanner_test);
+    // cout << "Scanner exitoso" << endl;
     
-    cout << endl;
-    cout << "Iniciando parsing:" << endl;
+    // cout << endl;
+    // cout << "Iniciando parsing:" << endl;
     Parser parser(&scanner); 
     
     try {
@@ -68,7 +68,8 @@ int main(int argc, const char* argv[]) {
         CheckVisitor* checkcodeVisitor = new CheckVisitor();
         checkcodeVisitor->check(program);
 
-        cout << "Todos los checks fueron aceptados" << endl;
+        // cout << "Todos los checks fueron aceptados" << endl;
+
         ///////////////////////////////////
         //           GENCODE
         ///////////////////////////////////
@@ -82,7 +83,7 @@ int main(int argc, const char* argv[]) {
             cerr << "Error al crear el archivo de salida: " << outputFilename << endl;
             return 1;
         }
-        cout << "Generando codigo ensamblador en " << outputFilename << endl;
+        // cout << "Generando codigo ensamblador en " << outputFilename << endl;
         GenCodeVisitor* gencodeVisitor = new GenCodeVisitor(outfile, checkcodeVisitor->function_memory_map);
         
         gencodeVisitor->gencode(program);

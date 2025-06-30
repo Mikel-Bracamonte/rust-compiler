@@ -1,19 +1,11 @@
-struct Persona {
+struct Test {
     a: i32,
     b: i32,
 }
 
-fn test() -> i32 {
-    let test: Persona = Persona {
-        a: 2,
-        b: 3,
-    };
-    let test2: Persona = Persona {
-        a: 10,
-        b: test.b + 10,
-    };
-
-    return test.a + test2.b;
+struct Persona {
+    a: i32,
+    b: Test,
 }
 
 fn main() {

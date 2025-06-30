@@ -239,7 +239,7 @@ ImpType GenCodeVisitor::visit(BoolExp* e) {
 // seems check!
 ImpType GenCodeVisitor::visit(IdentifierExp* e) {
     assert(env.check(e->name));
-    string type =get<0>(env.lookup(e->name)).ttype;
+    string type = get<0>(env.lookup(e->name)).ttype;
     bool is_struct = type != "i32" && type != "i64" && type != "bool";
     if(is_struct) {
         struct_offset = get<1>(env.lookup(e->name));
@@ -371,8 +371,7 @@ void GenCodeVisitor::visit(ForStatement* s) {
     int lbl = label_counter++;
     string var = s->name;
 
-    ImpType type;
-    type.set_basic_type("i32");
+    ImpType type("i32");
     env.add_var(var, {type, offset});
     int var_offset = offset;
     offset -= 8;
@@ -422,8 +421,7 @@ void GenCodeVisitor::visit(ContinueStatement* s) {
 
 // seems check!
 void GenCodeVisitor::visit(VarDec* vd) {
-    ImpType type;
-    type.set_basic_type(vd->type);
+    ImpType type(vd->type);
     env.add_var(vd->name, {type, offset});
     int offset_assign = offset;
     bool is_struct = vd->type != "i32" && vd->type != "i64" && vd->type != "bool";
@@ -453,8 +451,7 @@ void GenCodeVisitor::visit(FunctionCallStatement* stm) {
 }
 
 void GenCodeVisitor::visit(ParamDec* vd) {
-    ImpType type;
-    type.set_basic_type(vd->type);
+    ImpType type(vd->type);
     env.add_var(vd->name, {type, offset});
     offset -= 8;
 }

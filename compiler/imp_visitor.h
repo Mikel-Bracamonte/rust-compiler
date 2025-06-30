@@ -100,6 +100,7 @@ public:
     void visit(Body* b) override;
     int getSize(string s);
     string getRegister(string s, string r);
+    string getSuffix(string s);
     void nose(int s, int d, bool r);
     bool isStruct(string t);
 };

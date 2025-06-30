@@ -82,7 +82,7 @@ ImpType CheckVisitor::visit(UnaryExp* exp) {
 
 // check!, tested!
 ImpType CheckVisitor::visit(NumberExp* e) {
-    return ImpType("i32"); // long int
+    return ImpType("0num"); // long int
 }
 
 // check!, tested!
@@ -161,7 +161,6 @@ ImpType CheckVisitor::visit(PostfixExp* e) {
 // checked!, tested
 // TODO ahora el id es un vector. por ahora hago names[0] para probar
 void CheckVisitor::visit(AssignStatement* s) {
-    return;
     if(!env.check(s->names[0])) {
         errorHandler.error("Varible '" + s->names[0] + "' no declarada.");
     }
@@ -169,7 +168,7 @@ void CheckVisitor::visit(AssignStatement* s) {
     ImpType target = env.lookup(s->names[0]);
     ImpType src = s->right->accept(this);
     
-    if (src.ttype != getType(target)) {
+    if (!(src.ttype == target.ttype || (src.ttype == "0num" && (target.ttype == "i32" || target.ttype == "i64")))) {
         errorHandler.error("Tipo incompatible en asignación a '" + s->names[0] + "'.");
     }
     if (s->op != AS_ASSIGN_OP){
@@ -282,10 +281,9 @@ void CheckVisitor::visit(VarDec* vd) {
 
     ImpType src = vd->exp->accept(this);
     
-    if (src.ttype != getType(vd->type)) {
+    if (!(src.ttype == vd->type || (src.ttype == "0num" && (vd->type == "i32" || vd->type == "i64")))) {
         errorHandler.error("Tipo incompatible en asignación a '" + vd->name + "'.");
     }
-
 }
 
 void CheckVisitor::visit(FunctionCallStatement* stm) {

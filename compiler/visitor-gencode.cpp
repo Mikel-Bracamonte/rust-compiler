@@ -145,6 +145,20 @@ string GenCodeVisitor::getRegister(string s, string reg) {
     }
 }
 
+string GenCodeVisitor::getSuffix(string s) {
+    if(s == "i32") {
+        return "l";
+    } else if(s == "i64"){
+        return "q";
+    } else if(s == "bool") {
+        return "b";
+    } else if(s == "0num") {
+        return "q";
+    } else {
+        return "";
+    }
+}
+
 bool GenCodeVisitor::isStruct(string type) {
     return type != "i32" && type != "i64" && type != "bool" && type != "0num";
 }
@@ -187,8 +201,6 @@ void GenCodeVisitor::gencode(Program* p) {
 
     out << ".section .note.GNU-stack,\"\",@progbits"<<endl;
 }
-//parser aumentar structs
-
 
 ImpType GenCodeVisitor::visit(BinaryExp* e) {
     ImpType imp_type = e->left->accept(this);
@@ -568,7 +580,7 @@ void GenCodeVisitor::visit(VarDec* vd) {
         if(is_struct) {
             nose(struct_offset, offset_assign, false);
         } else {
-            out << " mov %rax, " << offset_assign << "(%rbp)" << endl;
+            out << " mov " << getRegister(vd->type, "a") << ", " << offset_assign << "(%rbp)" << endl;
         }
     }
 }
@@ -594,7 +606,11 @@ void GenCodeVisitor::visit(ParamDec* vd) {
     ImpType type(vd->type);
     type.reference = isStruct(vd->type);
     env.add_var(vd->name, {type, offset});
-    offset -= 8;
+    if(type.reference) {
+        offset -= 8;
+    } else {
+        offset -= getSize(vd->type);
+    }
 }
 
 void GenCodeVisitor::visit(FunDec* f) {

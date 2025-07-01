@@ -198,23 +198,22 @@ ImpType CheckVisitor::visit(StructExp* e) {
 
     struct_name = e->name;
     for(auto a : e->attrs){
-        a->accept(this);
+        if(!structs_info[struct_name].types.count(a->name)){
+            errorHandler.error("El atributo '" + e->name + "' no existe en el struct '" + a->name + "'.");
+        }
+
+        ImpType imp = a->exp->accept(this);
+        if(structs_info[struct_name].types[a->name].ttype == imp.ttype){
+            return ImpType(e->name);
+        }
+
+        checkTypeOp(structs_info[struct_name].types[a->name], imp);
     }
 
     return ImpType(e->name);
 }
 
 ImpType CheckVisitor::visit(StructExpAttr* e) {    
-    if(!structs_info[struct_name].types.count(e->name)){
-        errorHandler.error("El atributo '" + e->name + "' no existe en el struct '" + e->name + "'.");
-    }
-
-    ImpType imp = e->exp->accept(this);
-    if(structs_info[struct_name].types[e->name].ttype == imp.ttype){
-        return ImpType();
-    }
-
-    checkTypeOp(structs_info[struct_name].types[e->name], imp);
 
     return ImpType();
 }

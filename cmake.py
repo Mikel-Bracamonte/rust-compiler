@@ -8,7 +8,7 @@ if not os.path.isdir(carpeta):
     print(f"La carpeta {carpeta} no existe.")
     exit(1)
 
-#subprocess.run('g++ *.cpp -o compiler', shell=True, check=True)
+#subprocess.run('g++ *.cpp -o compiler.exe', shell=True, check=True)
 
 for archivo in os.listdir(carpeta):
     ruta_archivo = os.path.join(carpeta, archivo)
@@ -17,7 +17,7 @@ for archivo in os.listdir(carpeta):
         print("--------------------------------------------------")
         print(f"Compilando: {ruta_archivo}")
         try:
-            subprocess.run(['./compiler', ruta_archivo])
+            subprocess.run(['./compiler.exe', ruta_archivo])
             subprocess.run(['gcc', f'{ruta_archivo[:-3]}.s', '-o', 'output'])
             subprocess.run(['./output'])
             subprocess.run(['rm', f'{ruta_archivo[:-3]}.s'])

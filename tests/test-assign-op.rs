@@ -2,7 +2,7 @@
 fn main() {
     let mut x:i32 = 5;
     println!("{}", x);
-    let muy y:i32 = 7;
+    let mut y:i32 = 7;
 
     println!("{}", x * y);
     

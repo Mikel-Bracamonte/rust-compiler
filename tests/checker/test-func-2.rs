@@ -7,4 +7,3 @@ fn main() {
     sum(2, 3);
 }
 
-// deberia aceptar esto?

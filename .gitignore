@@ -11,3 +11,32 @@ MiniProyecto/*
 
 output
 comp
+
+# ==== Node dependencies ====
+/node_modules/
+
+# ==== Vite build output ====
+/dist/
+/.vite/
+
+# ==== Environment variables ====
+# Ignora todos los .env, pero mantiene ejemplos si los tienes
+.env*
+!.env.example
+
+# ==== Logs ====
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ==== Editor / IDE ====
+.vscode/
+*.code-workspace
+
+# ==== MacOS / Windows ====
+.DS_Store
+Thumbs.db
+
+# ==== Opcional: pruebas / cobertura ====
+/coverage/
+/nyc_output/

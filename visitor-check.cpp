@@ -1,5 +1,6 @@
 #include "imp_visitor.h"
 #include <set>
+#include <cassert>
 
 int CheckVisitor::getSize(string s) {
     if(s == "i32") {
@@ -172,9 +173,12 @@ ImpType CheckVisitor::visit(FunctionCallExp* e) {
     }
     int ite = 0;
     for(auto arg : e->argList){
-        if(arg->accept(this).ttype != getType(ftype.types[ite])){
-            errorHandler.error("El tipo del argumento '" + to_string(ite) + "'-ésimo no coincide con el de la función '" + e->name + "'");
+        ImpType imp = arg->accept(this);
+        if(imp.ttype == ftype.types[ite]){
+            ite ++;
+            continue;
         }
+        checkTypeOp(imp, ftype.types[ite]);
         ite++;
     }
     
@@ -314,10 +318,13 @@ void CheckVisitor::visit(ReturnStatement* s) {
         }
     }
     else {
-        return; // TODO structs dentro de structs no se maneja
-        if(s->exp->accept(this).ttype != getType(returnType.ttype)){
-            errorHandler.error("Return no coindice con tipo de función");
+        returnInsideFunc = true;
+        ImpType imp = s->exp->accept(this);
+        if(imp.ttype == returnType.ttype){
+            return;
         }
+        assert(returnType.ttype != "0num");
+        checkTypeOp(imp, returnType);
     }
 }
 
@@ -366,9 +373,12 @@ void CheckVisitor::visit(FunctionCallStatement* stm) {
     }
     int ite = 0;
     for(auto arg : stm->argList){
-        if(arg->accept(this).ttype != getType(ftype.types[ite])){
-            errorHandler.error("El tipo del argumento '" + to_string(ite) + "'-ésimo no coincide con el de la función '" + stm->name + "'");
+        ImpType imp = arg->accept(this);
+        if(imp.ttype == ftype.types[ite]){
+            ite ++;
+            continue;
         }
+        checkTypeOp(imp, ftype.types[ite]);
         ite++;
     }
 }
@@ -391,6 +401,7 @@ void CheckVisitor::visit(FunDec* vd) {
     function_memory_map[function_name] = 0;
     
     returnType = vd->type;
+    returnInsideFunc = false;
     env.clear();
     env.add_level();
 
@@ -405,6 +416,10 @@ void CheckVisitor::visit(FunDec* vd) {
     functions_info[vd->name] = ftype;
     vd->body->accept(this); 
     env.remove_level();
+    
+    if(returnInsideFunc != !(vd->type == "")){
+        errorHandler.error("Return es distinto a lo esperado");
+    }
 }
 
 void CheckVisitor::visit(StructDec* stm) {

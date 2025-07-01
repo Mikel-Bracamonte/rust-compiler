@@ -120,7 +120,7 @@ public:
     bool checkTypeOp(ImpType a, ImpType b);
 
     string getTypeOp(ImpType a, ImpType b);
-
+    bool returnInsideFunc = false;
     unordered_map<string, StructInfo> structs_info;
     unordered_map<string, ImpType> functions_info;
     unordered_map<string, int> function_memory_map;

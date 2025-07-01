@@ -7,6 +7,11 @@
 *.s
 *.pdb
 
+x
+program
+a
+compiler
+
 MiniProyecto/*
 
 output

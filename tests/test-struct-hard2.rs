@@ -32,13 +32,12 @@ fn main() {
         b: t3,
         c: t1,
     };
-    
-    println!("{}", t4.a.a);
-    println!("{}", t4.a.b);
-    println!("{}", t4.b.a);
+
+    t1.a = t3;
+    t1.a.a = 5;
+    println!("{}", t1.a.a);
     println!("{}", t4.b.b);
     println!("{}", t4.c.a.a);
     println!("{}", t4.c.a.b);
     println!("{}", t4.c.b);
-
 }

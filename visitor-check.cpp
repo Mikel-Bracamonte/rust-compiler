@@ -219,36 +219,73 @@ ImpType CheckVisitor::visit(StructExpAttr* e) {
     return ImpType();
 }
 
-// TODO chequear que left sea un struct y devolver el tipo de variable del atributo
 ImpType CheckVisitor::visit(PostfixExp* e) {
-    return ImpType("i32");
     ImpType left_type = e->left->accept(this);
-    if(structs_info[left_type.ttype].types[e->right].ttype == left_type.ttype){
-        return left_type;
+    if(!structs_info.count(left_type.ttype)) {
+        errorHandler.error("Struct no reconocido en postfix");
     }
-    checkTypeOp(structs_info[left_type.ttype].types[e->right], left_type);
+    if(!structs_info[left_type.ttype].types.count(e->right)){
+        errorHandler.error("Type de struct no definido en postfix");
+    }
+    return structs_info[left_type.ttype].types[e->right];
 }
 
 // checked!, tested
 // TODO ahora el id es un vector. por ahora hago names[0] para probar
 void CheckVisitor::visit(AssignStatement* s) {
-    if(!env.check(s->names[0])) {
-        errorHandler.error("Varible '" + s->names[0] + "' no declarada.");
-    }
-
-    ImpType target = env.lookup(s->names[0]);
-    ImpType src = s->right->accept(this);
-   
-    if (src.ttype != target.ttype) {
-        if(src.ttype == "0num" && typesNum.count(target.ttype)){
-            return;
+    if(s->names.size() == 1){
+        if(!env.check(s->names[0])) {
+            errorHandler.error("Varible '" + s->names[0] + "' no declarada.");
         }
-        errorHandler.error("Tipo incompatible en asignación a '" + s->names[0] + "'.");
+
+        ImpType target = env.lookup(s->names[0]);
+        ImpType src = s->right->accept(this);
+    
+        if (src.ttype != target.ttype) {
+            if(src.ttype == "0num" && typesNum.count(target.ttype)){
+                return;
+            }
+            errorHandler.error("Tipo incompatible en asignación a '" + s->names[0] + "'.");
+        }
+        if (s->op != AS_ASSIGN_OP){
+            checkTypeOp(src, target);
+            if(getTypeOp(src, target) == "bool") {
+                errorHandler.error("Tipo incompatible con la operación de asignación: " + Exp::assignOpToChar(s->op));
+            }
+        }
     }
-    if (s->op != AS_ASSIGN_OP){
-        checkTypeOp(src, target);
-        if(getTypeOp(src, target) == "bool") {
-            errorHandler.error("Tipo incompatible con la operación de asignación: " + Exp::assignOpToChar(s->op));
+    else {
+        if(!env.check(s->names[0])) {
+            errorHandler.error("Varible '" + s->names[0] + "' no declarada.");
+        }
+        ImpType left_type = env.lookup(s->names[0]);
+        if(!structs_info.count(left_type.ttype)) {
+            errorHandler.error("Struct no reconocido en assign id vector");
+        }
+        
+        for(int i = 1; i < s->names.size(); i++){
+            if(!structs_info.count(left_type.ttype)) {
+                errorHandler.error("Struct no reconocido en assign id vector");
+            }
+            if(!structs_info[left_type.ttype].types.count(s->names[i])){
+                errorHandler.error("Type de struct no definido en assign");
+            }
+            left_type = structs_info[left_type.ttype].types[s->names[i]];
+        }
+        ImpType target = left_type;
+        ImpType src = s->right->accept(this);
+    
+        if (src.ttype != target.ttype) {
+            if(src.ttype == "0num" && typesNum.count(target.ttype)){
+                return;
+            }
+            errorHandler.error("Tipo incompatible en asignación a '" + s->names[0] + "'.");
+        }
+        if (s->op != AS_ASSIGN_OP){
+            checkTypeOp(src, target);
+            if(getTypeOp(src, target) == "bool") {
+                errorHandler.error("Tipo incompatible con la operación de asignación: " + Exp::assignOpToChar(s->op));
+            }
         }
     }
 }

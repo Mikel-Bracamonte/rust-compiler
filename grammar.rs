@@ -12,7 +12,7 @@ FunDec ::= id ([ParamDecList]) [-> Type] { Body }
 
 ParamDecList ::= ParamDec (, ParamDec )*
 
-ParamDec ::= id : [&] [ mut ] Type
+ParamDec ::= [ mut ] id : [&] [ mut ] Type
 
 Type ::= id
 

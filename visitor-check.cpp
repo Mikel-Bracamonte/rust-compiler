@@ -1,5 +1,18 @@
 #include "imp_visitor.h"
+#include <set>
+#include <cassert>
 
+int CheckVisitor::getSize(string s) {
+    if(s == "i32") {
+        return 8;
+    } else if(s == "i64") {
+        return 8;
+    } else if(s == "bool") {
+        return 8;
+    } else {
+        return structs_info[s].size;
+    }
+}
 
 void CheckVisitor::check(Program* p) {
     for(auto i : p->structs) {
@@ -10,43 +23,71 @@ void CheckVisitor::check(Program* p) {
     }
 }
 
+bool checkBasicType(ImpType a){
+    if(a.ttype == "i32" || a.ttype == "i64" || a.ttype == "0num" || a.ttype == "bool"){
+        return true;
+    }
+    return false;
+}
+
+bool CheckVisitor::checkTypeOp(ImpType a, ImpType b) {
+    if(!checkBasicType(a) && !checkBasicType(b)){
+        errorHandler.error("Operaciones no están siendo realizados por tipos básicos");
+    }
+    if(a.ttype == b.ttype){
+        return true;
+    }
+    else {
+        if(a.ttype == "bool" || b.ttype == "bool"){
+            errorHandler.error("Operaciones no aceptadas para algún booleano");
+        }
+        if(a.ttype == "0num" || b.ttype == "0num"){
+            return true;
+        }
+        errorHandler.error("Operaciones realizadas entre i32 y i64");
+    }
+    return false;
+}
+
+string CheckVisitor::getTypeOp(ImpType a, ImpType b) {
+    if(a.ttype == b.ttype){
+        return a.ttype;
+    }
+    if(b.ttype == "0num"){
+        swap(a, b);
+    }
+    return b.ttype;
+}
+
+set<string> typesNum = {"0num", "i32", "i64"};
 // tested
 ImpType CheckVisitor::visit(BinaryExp* exp) {
     ImpType v1 = exp->left->accept(this);
     ImpType v2 = exp->right->accept(this);
     // si es void -> ignorar
-    if(v1.ttype != v2.ttype) {
-        errorHandler.error("Operación binaria debe ser entre el mismo tipo");
-    }
-    /*
-    if(v1.ttype == "void"  || v2.ttype == "void") {
-        errorHandler.error("Operación binaria debe ser entre 'bool' o 'int'.");
-    }
-    */
-
+    checkTypeOp(v1, v2);// checkea si son el mismo tipo, o 0num para numeros
+    string typeResult = getTypeOp(v1, v2);
     switch (exp->op) {
         case PLUS_OP: case MINUS_OP: case MUL_OP: case DIV_OP: // long int // check!
-            if (v1.ttype == "i32" && v2.ttype == "i32") return ImpType("i32");
+            if (typesNum.count(typeResult)) return ImpType(typeResult);
             else {
                 errorHandler.error("Operación aritmética requiere enteros (i32).");
             }
         case LT_OP: case LE_OP: case GT_OP: case GE_OP: // long int // check!
-            if (v1.ttype == "i32" && v2.ttype == "i32") return ImpType("bool"); 
+            if (typesNum.count(typeResult)) return ImpType("bool"); 
             else {
                 errorHandler.error("Operación de comparación requiere enteros (i32).");
             }
         case EQ_OP: case NEQ_OP: // structs?
-            if(v1.ttype ==v2.ttype) return ImpType("bool"); // mismo tipo: bool, int
-            else{
-                errorHandler.error("Operación requiere de igualdad enteros (int) o booleanos (bool).");
-            }
+            return ImpType("bool"); // mismo tipo: bool, int
+            
         case MOD_OP: // long int // check!
-            if (v1.ttype == "i32" && v2.ttype == "i32") return ImpType("i32"); 
+            if (typesNum.count(typeResult)) return ImpType(typeResult); 
             else{
                 errorHandler.error("Operación de módulo requiere enteros (int).");
             }           
         case AND_OP: case OR_OP: // check!
-            if (v1.ttype == "bool" && v2.ttype == "bool") return ImpType("bool");
+            if (typeResult == "bool") return ImpType("bool");
             else {
                 errorHandler.error("Operación lógica requiere booleanos (bool).");
             }
@@ -61,13 +102,13 @@ ImpType CheckVisitor::visit(UnaryExp* exp) {
     ImpType e = exp->exp->accept(this);
     ImpType result;
     // int, longint
-    if(e.ttype != "i32" && e.ttype != "bool") {
-        errorHandler.error("Operación unaria debe ser i32 or bool");
+    if(!checkBasicType(e)) {
+        errorHandler.error("Operación unaria debe ser número or bool");
     }
 
     switch(exp->op) {
         case U_NEG_OP:
-            if(e.ttype=="i32") return ImpType("i32");
+            if(e.ttype!="bool") return ImpType(e.ttype);
             break;
         case U_NOT_OP:
             if(e.ttype=="bool") return ImpType("bool");
@@ -82,7 +123,7 @@ ImpType CheckVisitor::visit(UnaryExp* exp) {
 
 // check!, tested!
 ImpType CheckVisitor::visit(NumberExp* e) {
-    return ImpType("i32"); // long int
+    return ImpType("0num"); // long int
 }
 
 // check!, tested!
@@ -95,9 +136,8 @@ ImpType CheckVisitor::visit(IdentifierExp* e) {
     if(!env.check(e->name)) {
         errorHandler.error("Variable '" + e->name + "' no existe.");
     }
-    
     ImpType tipo= env.lookup(e->name);
-    
+
     return tipo;
 
     // struct will change it
@@ -110,10 +150,9 @@ ImpType CheckVisitor::visit(IfExp* e) {
     if (e->condition->accept(this).ttype == "bool") {
         ImpType thenT = e->then->accept(this);
         ImpType elseT = e->els->accept(this);
-        if(!thenT.match(elseT)){
-            errorHandler.error("Then y Else de una expresión ternaria deben tener el mismo tipo");
-        }
-        return thenT;
+        if(thenT.ttype == elseT.ttype) return getTypeOp(thenT, elseT);
+        checkTypeOp(thenT, elseT);
+        return getTypeOp(thenT, elseT);
     }
     errorHandler.error("La condición del if debe ser bool.");
     return ImpType();
@@ -135,9 +174,12 @@ ImpType CheckVisitor::visit(FunctionCallExp* e) {
     }
     int ite = 0;
     for(auto arg : e->argList){
-        if(arg->accept(this).ttype != getType(ftype.types[ite])){
-            errorHandler.error("El tipo del argumento '" + to_string(ite) + "'-ésimo no coincide con el de la función '" + e->name + "'");
+        ImpType imp = arg->accept(this);
+        if(imp.ttype == ftype.types[ite]){
+            ite ++;
+            continue;
         }
+        checkTypeOp(imp, ftype.types[ite]);
         ite++;
     }
     
@@ -145,45 +187,113 @@ ImpType CheckVisitor::visit(FunctionCallExp* e) {
 }
 
 ImpType CheckVisitor::visit(StructExp* e) {
+    
+    if(!structs_info.count(e->name)){ // el tipo del struct debería estar ya declarado
+        errorHandler.error("El tipo '" + e->name + "' de struct no fue declarado");
+    }
+
+    if(structs_info[e->name].types.size() != e->attrs.size()){
+        errorHandler.error("No coincide el número de atributos con el definido en el struct: " + e->name);
+    }
+
+    struct_name = e->name;
+    for(auto a : e->attrs){
+        a->accept(this);
+    }
+
     return ImpType(e->name);
 }
 
-ImpType CheckVisitor::visit(StructExpAttr* e) {
+ImpType CheckVisitor::visit(StructExpAttr* e) {    
+    if(!structs_info[struct_name].types.count(e->name)){
+        errorHandler.error("El atributo '" + e->name + "' no existe en el struct '" + e->name + "'.");
+    }
+
+    ImpType imp = e->exp->accept(this);
+    if(structs_info[struct_name].types[e->name].ttype == imp.ttype){
+        return ImpType();
+    }
+
+    checkTypeOp(structs_info[struct_name].types[e->name], imp);
+
     return ImpType();
 }
 
-// TODO chequear que left sea un struct y devolver el tipo de variable del atributo
 ImpType CheckVisitor::visit(PostfixExp* e) {
     ImpType left_type = e->left->accept(this);
-    return ImpType("i32");
+    if(!structs_info.count(left_type.ttype)) {
+        errorHandler.error("Struct no reconocido en postfix");
+    }
+    if(!structs_info[left_type.ttype].types.count(e->right)){
+        errorHandler.error("Type de struct no definido en postfix");
+    }
+    return structs_info[left_type.ttype].types[e->right];
 }
 
 // checked!, tested
 // TODO ahora el id es un vector. por ahora hago names[0] para probar
 void CheckVisitor::visit(AssignStatement* s) {
-    return;
-    if(!env.check(s->names[0])) {
-        errorHandler.error("Varible '" + s->names[0] + "' no declarada.");
-    }
+    if(s->names.size() == 1){
+        if(!env.check(s->names[0])) {
+            errorHandler.error("Varible '" + s->names[0] + "' no declarada.");
+        }
 
-    ImpType target = env.lookup(s->names[0]);
-    ImpType src = s->right->accept(this);
+        ImpType target = env.lookup(s->names[0]);
+        ImpType src = s->right->accept(this);
     
-    if (src.ttype != getType(target)) {
-        errorHandler.error("Tipo incompatible en asignación a '" + s->names[0] + "'.");
+        if (src.ttype != target.ttype) {
+            if(src.ttype == "0num" && typesNum.count(target.ttype)){
+                return;
+            }
+            errorHandler.error("Tipo incompatible en asignación a '" + s->names[0] + "'.");
+        }
+        if (s->op != AS_ASSIGN_OP){
+            checkTypeOp(src, target);
+            if(getTypeOp(src, target) == "bool") {
+                errorHandler.error("Tipo incompatible con la operación de asignación: " + Exp::assignOpToChar(s->op));
+            }
+        }
     }
-    if (s->op != AS_ASSIGN_OP){
-        if(src.ttype != "i32") {
-            errorHandler.error("Tipo incompatible con la operación de asignación: " + Exp::assignOpToChar(s->op));
+    else {
+        if(!env.check(s->names[0])) {
+            errorHandler.error("Varible '" + s->names[0] + "' no declarada.");
+        }
+        ImpType left_type = env.lookup(s->names[0]);
+        if(!structs_info.count(left_type.ttype)) {
+            errorHandler.error("Struct no reconocido en assign id vector");
+        }
+        
+        for(int i = 1; i < s->names.size(); i++){
+            if(!structs_info.count(left_type.ttype)) {
+                errorHandler.error("Struct no reconocido en assign id vector");
+            }
+            if(!structs_info[left_type.ttype].types.count(s->names[i])){
+                errorHandler.error("Type de struct no definido en assign");
+            }
+            left_type = structs_info[left_type.ttype].types[s->names[i]];
+        }
+        ImpType target = left_type;
+        ImpType src = s->right->accept(this);
+    
+        if (src.ttype != target.ttype) {
+            if(src.ttype == "0num" && typesNum.count(target.ttype)){
+                return;
+            }
+            errorHandler.error("Tipo incompatible en asignación a '" + s->names[0] + "'.");
+        }
+        if (s->op != AS_ASSIGN_OP){
+            checkTypeOp(src, target);
+            if(getTypeOp(src, target) == "bool") {
+                errorHandler.error("Tipo incompatible con la operación de asignación: " + Exp::assignOpToChar(s->op));
+            }
         }
     }
 }
 
 // check!, tested!
 void CheckVisitor::visit(PrintStatement* s) {
-    return; // TODO quitar
-    if(s->exp->accept(this).ttype != "i32"){
-        errorHandler.error("La impresión debe ser un i32");
+    if(!typesNum.count(s->exp->accept(this).ttype)){
+        errorHandler.error("La impresión debe ser un número");
     }
 }
 
@@ -212,23 +322,26 @@ void CheckVisitor::visit(WhileStatement* stm) {
 // check!, tested
 void CheckVisitor::visit(ForStatement* s) {
     // tiene que ser mut, int    
-    numberLoop ++;
-    if(!s->mut){
-        errorHandler.error("El for debe ser mut.");
-    }
+    numberLoop++;
 
     ImpType startT = s->start->accept(this);
-    if (startT.ttype != "i32") {
+    if (!typesNum.count(startT.ttype)) {
         errorHandler.error("El inicio del for debe ser un entero.");
     }
     ImpType endT = s->end->accept(this);
-    if (endT.ttype != "i32") {
+    if (!typesNum.count(startT.ttype)) {
         errorHandler.error("El final del for debe ser un entero.");
+    }
+    checkTypeOp(startT, endT);
+    ImpType type = getTypeOp(startT, endT);
+    if(type.ttype == "0num") {
+        type.ttype = "i32";
     }
     env.add_level();
     // add var unicamente al body de for, afuera no puede acceder
-    string int_type = "i32";
-    env.add_var(s->name, int_type);
+    function_memory_map[function_name] += 24;
+    env.add_var(s->name, type.ttype);
+    // TODO rust no tiene tipado definido para i.
     s->body->stmList->accept(this);
     env.remove_level();
 
@@ -243,24 +356,27 @@ void CheckVisitor::visit(ReturnStatement* s) {
         }
     }
     else {
-        return; // TODO structs dentro de structs no se maneja
-        if(s->exp->accept(this).ttype != getType(returnType.ttype)){
-            errorHandler.error("Return no coindice con tipo de función");
+        returnInsideFunc = true;
+        ImpType imp = s->exp->accept(this);
+        if(imp.ttype == returnType.ttype){
+            return;
         }
+        assert(returnType.ttype != "0num");
+        checkTypeOp(imp, returnType);
     }
 }
 
 // check!, tested!
 void CheckVisitor::visit(BreakStatement* s) {
     if (numberLoop <= 0) {
-        errorHandler.error("Error: 'break' fuera de un bucle.");
+        errorHandler.error("El 'break' fuera de un bucle.");
     }
 }
 
 // check!, tested!
 void CheckVisitor::visit(ContinueStatement* s) {
     if (numberLoop <= 0) {
-        errorHandler.error("Error: 'continue' fuera de un bucle.");
+        errorHandler.error("El'continue' fuera de un bucle.");
     }
 }
 
@@ -269,10 +385,9 @@ void CheckVisitor::visit(VarDec* vd) {
     if (env.check(vd->name)) {
         errorHandler.error("Variable '" + vd->name + "' ya declarada.");
     }
-    // long int?
-    // mut?
-    // mapa con variables mutables
+
     if (vd->type == "i32" || vd->type == "i64" || vd->type == "bool" || structs_info.count(vd->type)) {
+        function_memory_map[function_name] += getSize(vd->type);
         env.add_var(vd->name, vd->type);
     } else {
         errorHandler.error("Tipo de variable no reconocido: '" + vd->type + "'.");
@@ -281,11 +396,10 @@ void CheckVisitor::visit(VarDec* vd) {
     if(vd->exp == nullptr) return;
 
     ImpType src = vd->exp->accept(this);
-    
-    if (src.ttype != getType(vd->type)) {
-        errorHandler.error("Tipo incompatible en asignación a '" + vd->name + "'.");
+    if(src.ttype == vd->type){
+        return;
     }
-
+    checkTypeOp(src, ImpType(vd->type));
 }
 
 void CheckVisitor::visit(FunctionCallStatement* stm) {
@@ -299,9 +413,12 @@ void CheckVisitor::visit(FunctionCallStatement* stm) {
     }
     int ite = 0;
     for(auto arg : stm->argList){
-        if(arg->accept(this).ttype != getType(ftype.types[ite])){
-            errorHandler.error("El tipo del argumento '" + to_string(ite) + "'-ésimo no coincide con el de la función '" + stm->name + "'");
+        ImpType imp = arg->accept(this);
+        if(imp.ttype == ftype.types[ite]){
+            ite ++;
+            continue;
         }
+        checkTypeOp(imp, ftype.types[ite]);
         ite++;
     }
 }
@@ -310,6 +427,7 @@ void CheckVisitor::visit(FunctionCallStatement* stm) {
 void CheckVisitor::visit(ParamDec* vd) {
     if (vd->type == "i32" || vd->type == "i64" || vd->type == "bool" || structs_info.count(vd->type)) {
         env.add_var(vd->name, vd->type);
+        function_memory_map[function_name] += getSize(vd->type);
     } else {
         errorHandler.error("Tipo de parámetro no reconocido: '" + vd->type + "'.");
     }
@@ -319,8 +437,11 @@ void CheckVisitor::visit(ParamDec* vd) {
 void CheckVisitor::visit(FunDec* vd) {
     ImpType ftype;
     list<string> argTypes;
+    function_name = vd->name;
+    function_memory_map[function_name] = 8;
     
     returnType = vd->type;
+    returnInsideFunc = false;
     env.clear();
     env.add_level();
 
@@ -335,15 +456,38 @@ void CheckVisitor::visit(FunDec* vd) {
     functions_info[vd->name] = ftype;
     vd->body->accept(this); 
     env.remove_level();
+    
+    if(returnInsideFunc != !(vd->type == "")){
+        errorHandler.error("Return es distinto a lo esperado");
+    }
 }
 
 void CheckVisitor::visit(StructDec* stm) {
+
+    if (structs_info.count(stm->name)) {
+        errorHandler.error("Struct '" + stm->name + "' ya definido.");
+    }
+    
+
+    for(auto vd : stm->attrs) {
+        if (!(vd->type == "i32" || vd->type == "i64" || vd->type == "bool" || structs_info.count(vd->type))) {
+            errorHandler.error("Tipo de variable no reconocido: '" + vd->type + "'.");
+        }
+    }
+
+
     StructInfo struct_info;
+    int size = 0;
+    for(auto i : stm->attrs) {
+        struct_info.types[i->name] = ImpType(i->type);
+        size += getSize(i->type);
+    }
+    struct_info.size = size;
     structs_info[stm->name] = struct_info;
 }
 
 void CheckVisitor::visit(AttrDec* stm) {
-
+    // No es necesario
 }
 
 // check!, tested!
@@ -359,3 +503,6 @@ void CheckVisitor::visit(Body* b) {
     b->stmList->accept(this);
     env.remove_level();
 }
+
+
+// TODO por si hay tiempo, agregar mut y assign checker

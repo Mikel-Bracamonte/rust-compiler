@@ -99,14 +99,13 @@ public:
     void visit(StatementList* stm) override;
     void visit(Body* b) override;
     int getSize(string s);
-    void nose(int s, int d, bool r);
+    void copyStruct(int s, int d, bool r);
     bool isStruct(string t);
 };
 
 class CheckVisitor : public ImpVisitor {
 private:
     Environment<ImpType> env;
-    // siempre guarda los types como 'i32'
 public:
     CheckVisitor(){}
     ErrorHandler errorHandler = ErrorHandler("CheckVisitor");
@@ -118,10 +117,16 @@ public:
         if(type == "i32") return "i32";
         return type;
     }
-    
+    bool checkTypeOp(ImpType a, ImpType b);
+
+    string getTypeOp(ImpType a, ImpType b);
+    bool returnInsideFunc = false;
     unordered_map<string, StructInfo> structs_info;
     unordered_map<string, ImpType> functions_info;
+    unordered_map<string, int> function_memory_map;
+    string function_name;
     int numberLoop = 0;
+    string struct_name;
     ImpType returnType = ImpType();
     void check(Program* p);
     ImpType visit(BinaryExp* exp) override;
@@ -150,6 +155,7 @@ public:
     void visit(AttrDec* stm) override;
     void visit(StatementList* stm) override;
     void visit(Body* b) override;
+    int getSize(string s);
 };
 
 

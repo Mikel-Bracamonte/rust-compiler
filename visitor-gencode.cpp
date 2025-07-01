@@ -123,7 +123,7 @@ bool GenCodeVisitor::isStruct(string type) {
     return type != "i32" && type != "i64" && type != "bool";
 }
 
-void GenCodeVisitor::nose(int src_base, int dest_base, bool reference) {
+void GenCodeVisitor::copyStruct(int src_base, int dest_base, bool reference) {
     bool is_struct = isStruct(struct_name);
     if(!is_struct) {
         if(reference) {
@@ -139,7 +139,7 @@ void GenCodeVisitor::nose(int src_base, int dest_base, bool reference) {
     string old_struct_name = struct_name;
     for(auto i : structs_info[struct_name].offsets) {
         struct_name = structs_info[struct_name].types[i.first].ttype;
-        nose(src_base + i.second, dest_base + i.second, reference);
+        copyStruct(src_base + i.second, dest_base + i.second, reference);
         struct_name = old_struct_name;
     }
 }
@@ -352,7 +352,7 @@ void GenCodeVisitor::visit(AssignStatement* s) {
         case AS_ASSIGN_OP:
             if(is_struct) {
                 out << " movq " << var_offset << "(%rbp), %rcx" << endl;
-                nose(struct_offset, offset_assign, reference);
+                copyStruct(struct_offset, offset_assign, reference);
             } else {
                 if(reference) {
                     out << " movq " << var_offset << "(%rbp), %rcx" << endl;
@@ -509,7 +509,7 @@ void GenCodeVisitor::visit(ReturnStatement* s) {
     if(s->exp) {
         ImpType imp_type = s->exp->accept(this);
         if(isStruct(imp_type.ttype)) {
-            nose(struct_offset, structs_info[imp_type.ttype].size + 16, imp_type.reference);
+            copyStruct(struct_offset, structs_info[imp_type.ttype].size + 16, imp_type.reference);
         }
     }
     out << "jmp .end_" << nombreFuncion << endl;
@@ -537,7 +537,7 @@ void GenCodeVisitor::visit(VarDec* vd) {
     if(vd->exp != nullptr) {
         vd->exp->accept(this);
         if(is_struct) {
-            nose(struct_offset, offset_assign, false);
+            copyStruct(struct_offset, offset_assign, false);
         } else {
             out << " movq %rax, " << offset_assign << "(%rbp)" << endl;
         }
@@ -582,8 +582,7 @@ void GenCodeVisitor::visit(FunDec* f) {
     out << f->name << ":" << endl;
     out << " pushq %rbp" << endl;
     out << " movq %rsp, %rbp" << endl;
-    // int reserva = reserva_function[f->name];
-    int reserva = 800; // deberia ser calculado con las variables
+    int reserva = reserva_function[f->name];
     temp_offset_base = -reserva;
     temp_offset = temp_offset_base;
     out << " subq $" << reserva << ", %rsp" << endl;
@@ -650,11 +649,7 @@ ImpType GenCodeVisitor::visit(StructExp* e) {
         string type = imp_type.ttype;
         bool is_struct = isStruct(type);
         if(is_struct) {
-            /*for(auto i : structs_info[struct_name].offsets) {
-                out << " movq " << struct_offset + i.second << "(%rbp), %rax" << endl;
-                out << " movq %rax, " << current_struct_offset + structs_info[e->name].offsets[a->name] + i.second << "(%rbp)" << endl;
-            }*/
-            nose(struct_offset, current_struct_offset + structs_info[e->name].offsets[a->name], false);
+            copyStruct(struct_offset, current_struct_offset + structs_info[e->name].offsets[a->name], false);
         } else {
             out << " movq %rax, " << current_struct_offset + structs_info[e->name].offsets[a->name] << "(%rbp)" << endl;
         }

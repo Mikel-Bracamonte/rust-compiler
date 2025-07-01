@@ -480,7 +480,107 @@ void GenCodeVisitor::visit(AssignStatement* s) {
 
 ### Injections
 
+Puede ocurrir un problema a la hora de definir funciones. Para manejar labels en bucles y condicionales, usamos la nomenclatura de `{nombre del loop}_{numero}:`, por ejemplo: `while_0:`. Para las labels de las funciones, manejamos la nomenclatura `{nombre de la función}:`. Entonces, puede ocurrir un problema si nombramos a una función con un nombre que normalmente tendría el label de un loop. Por ejemplo, el siguiente código:
 
+```rust
+fn while_0() {
+    let mut a: i32 = 0;
+    while a < 10 {
+        a += 1;
+        println!("{}", a);
+    }
+    return;
+}
+
+fn main() {
+    while_0();
+}
+```
+
+Compila al siguiente código ensamblador:
+```x86asm
+.data
+print_fmt_ln: .string "%ld \n"
+print_fmt: .string "%ld "
+.text
+.globl while_0
+while_0:
+ pushq %rbp
+ movq %rsp, %rbp
+ subq $16, %rsp
+ movq $0, %rax
+ movq %rax, -8(%rbp)
+while_0:
+ movq -8(%rbp), %rax
+ pushq %rax
+ movq $10, %rax
+ movq %rax, %rcx
+ popq %rax
+ cmpq %rcx, %rax
+ movl $0, %eax
+ setl %al
+ movzbq %al, %rax
+  testq %rax, %rax
+  je endwhile_0
+ movq $1, %rax
+ addq %rax, -8(%rbp)
+ movq -8(%rbp), %rax
+ movq %rax, %rsi
+ leaq print_fmt_ln(%rip), %rdi
+ movl $0, %eax
+ call printf@PLT
+  jmp while_0
+endwhile_0:
+jmp .end_fn_while_0
+.end_fn_while_0:
+leave
+ret
+.globl main
+main:
+ pushq %rbp
+ movq %rsp, %rbp
+ subq $8, %rsp
+ call while_0
+.end_main:
+leave
+ret
+.section .note.GNU-stack,"",@progbits
+```
+
+Como se observa, hay dos tags `while_0:`, por lo que el código lanza un error.
+
+Para solucionar esto, todas las funciones internamente empiezan con un prefijo `fn_`, de manera que ningún otro label pueda tener el mismo nombre. El mismo código de antes en las partes problemáticas quedaría de la siguiente manera:
+
+```x86asm
+.data
+print_fmt_ln: .string "%ld \n"
+print_fmt: .string "%ld "
+.text
+.globl fn_while_0
+fn_while_0:
+ pushq %rbp
+ movq %rsp, %rbp
+ subq $16, %rsp
+ movq $0, %rax
+ movq %rax, -8(%rbp)
+while_0:
+ movq -8(%rbp), %rax
+ pushq %rax
+ movq $10, %rax
+ movq %rax, %rcx
+
+ ...
+
+ .globl main
+main:
+ pushq %rbp
+ movq %rsp, %rbp
+ subq $8, %rsp
+ call fn_while_0
+.end_main:
+
+ ...
+```
 
 ### Break & Continue
 

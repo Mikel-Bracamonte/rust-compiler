@@ -1,9 +1,12 @@
-struct T1 {
-    a : i32,
-    b : i32,
+fn while_0() {
+    let mut a: i32 = 0;
+    while a < 10 {
+        a += 1;
+        println!("{}", a);
+    }
+    return;
 }
 
 fn main() {
-    let x : T1 = if 1 > 0 {T1 {a : 2, b: 2,}} else {T1 { a: 3, b : 3,}};
-    println!("{}", x.a);
+    while_0();
 }

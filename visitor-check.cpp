@@ -150,6 +150,7 @@ ImpType CheckVisitor::visit(IfExp* e) {
     if (e->condition->accept(this).ttype == "bool") {
         ImpType thenT = e->then->accept(this);
         ImpType elseT = e->els->accept(this);
+        if(thenT.ttype == elseT.ttype) return getTypeOp(thenT, elseT);
         checkTypeOp(thenT, elseT);
         return getTypeOp(thenT, elseT);
     }
@@ -186,8 +187,8 @@ ImpType CheckVisitor::visit(FunctionCallExp* e) {
 }
 
 ImpType CheckVisitor::visit(StructExp* e) {
-    /*
-    if(structs_info.count(e->name)){ // el tipo del struct debería estar ya declarado
+    
+    if(!structs_info.count(e->name)){ // el tipo del struct debería estar ya declarado
         errorHandler.error("El tipo '" + e->name + "' de struct no fue declarado");
     }
 
@@ -199,31 +200,33 @@ ImpType CheckVisitor::visit(StructExp* e) {
     for(auto a : e->attrs){
         a->accept(this);
     }
-*/
+
     return ImpType(e->name);
 }
 
-ImpType CheckVisitor::visit(StructExpAttr* e) {
-    /*
-    if(!struct_name.empty()){
-        errorHandler.error("Atributo definido fuera de un struct");
-    }
-    
+ImpType CheckVisitor::visit(StructExpAttr* e) {    
     if(!structs_info[struct_name].types.count(e->name)){
         errorHandler.error("El atributo '" + e->name + "' no existe en el struct '" + e->name + "'.");
     }
 
-    if(structs_info[struct_name].types[e->name].ttype != e->exp->accept(this).ttype){
-        errorHandler.error("El tipo '" + e->name + "' no existe en el struct '" + e->name + "'.");
+    ImpType imp = e->exp->accept(this);
+    if(structs_info[struct_name].types[e->name].ttype == imp.ttype){
+        return ImpType();
     }
-*/
+
+    checkTypeOp(structs_info[struct_name].types[e->name], imp);
+
     return ImpType();
 }
 
 // TODO chequear que left sea un struct y devolver el tipo de variable del atributo
 ImpType CheckVisitor::visit(PostfixExp* e) {
-    ImpType left_type = e->left->accept(this);
     return ImpType("i32");
+    ImpType left_type = e->left->accept(this);
+    if(structs_info[left_type.ttype].types[e->right].ttype == left_type.ttype){
+        return left_type;
+    }
+    checkTypeOp(structs_info[left_type.ttype].types[e->right], left_type);
 }
 
 // checked!, tested
@@ -356,7 +359,9 @@ void CheckVisitor::visit(VarDec* vd) {
     if(vd->exp == nullptr) return;
 
     ImpType src = vd->exp->accept(this);
-
+    if(src.ttype == vd->type){
+        return;
+    }
     checkTypeOp(src, ImpType(vd->type));
 }
 
@@ -421,6 +426,19 @@ void CheckVisitor::visit(FunDec* vd) {
 }
 
 void CheckVisitor::visit(StructDec* stm) {
+
+    if (structs_info.count(stm->name)) {
+        errorHandler.error("Struct '" + stm->name + "' ya definido.");
+    }
+    
+
+    for(auto vd : stm->attrs) {
+        if (!(vd->type == "i32" || vd->type == "i64" || vd->type == "bool" || structs_info.count(vd->type))) {
+            errorHandler.error("Tipo de variable no reconocido: '" + vd->type + "'.");
+        }
+    }
+
+
     StructInfo struct_info;
     int size = 0;
     for(auto i : stm->attrs) {

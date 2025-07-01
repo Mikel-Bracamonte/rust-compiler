@@ -283,6 +283,7 @@ ImpType GenCodeVisitor::visit(IdentifierExp* e) {
     if(is_struct) {
         struct_name = type;
         if(imp_type.reference) {
+            out << " movq " << get<1>(env.lookup(e->name)) << "(%rbp), %rax"<<endl;
             struct_offset = 0;
         } else {
             struct_offset = get<1>(env.lookup(e->name));

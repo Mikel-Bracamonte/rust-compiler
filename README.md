@@ -120,6 +120,84 @@ Cada atributo de un struct se define por un identificar, y una expresión que se
 StructExpAttr ::= id : AExp
 ```
 
+#### Ambigüedades
+
+Al parsear un StructExp, puede surgir una ambigüedad de la siguiente manera:
+
+```rust
+fn main() {
+    let a: i32 = 1;
+    let b: i32 = 2;
+    if a < b {
+        println!("{}", a);
+    }
+}
+```
+
+Al parsear la condición del IfExp, lo que sucede es que se toma el `b {`, como un StructExp, por lo que el siguiente código: `let a: i32 = 1;`, se parsea como si fuera un atributo de un struct, y falla la gramática.
+
+A continuación se muestra otro ejemplo:
+
+```rust
+struct b {
+    x: i32,
+    y: i32
+}
+
+fn main() {
+    let a: i32 = 1;
+    if a < b { x: 1, y: 2 }.y {
+        println!("{}", a);
+    }
+}
+```
+
+En este caso `b` es un struct, y `b { x: 1, y:2 }` es un StructExp, y en este caso se puede observar cómo a la hora de parsear de izquierda a derecha, no es posible saber si `b` es una variable o se está instanciando un struct.
+
+Para solucionar esto, se usó una variable global `expect_struct`, que es falsa a la hora de parsear la condición en un if, while y for. Entonces, a la hora de parsear una expresión, si `expect_struct` es falsa y nos encontramos este caso ambiguo, se toma como un IdExp, en vez de un StructExp:
+
+```cpp
+else if (match(Token::IF)) {
+    bool old_expect_struct = expect_struct;
+    expect_struct = false;
+    Exp* e1 = parseAExp();
+    expect_struct = old_expect_struct;
+    
+    ...
+
+}
+```
+
+En caso encontremos un paréntesis, esta ambigüedad queda resuelta, por lo que podemos poner `expect_struct` a verdadero:
+
+```cpp
+else if (match(Token::PI)) {
+    bool old_expect_struct = expect_struct;
+    expect_struct = true;
+    e = parseAExp();
+    expect_struct = old_expect_struct;
+    
+    ...
+
+}
+```
+
+De esta forma, se asume que se está refirendo a un IdExp, y en caso se requiera un StructExp, se pueden añadir paréntesis de la sigueinte forma:
+
+```rust
+struct b {
+    x: i32,
+    y: i32
+}
+
+fn main() {
+    let a: i32 = 1;
+    if a < (b { x: 1, y: 2 }.y) {
+        println!("{}", a);
+    }
+}
+```
+
 ### Check Visitor
 
 ### GenCode Visitor

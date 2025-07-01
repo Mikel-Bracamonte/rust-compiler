@@ -95,6 +95,9 @@ StructDec* Parser::parseStructDec() {
         }
         string attrType = previous->text;
         s->attrs.push_back(new AttrDec(name, attrType));
+        if(match(Token::LD)) {
+            break;
+        }
         if(!match(Token::COMMA)){
             errorHandler.expect(Token::COMMA, current->text);
         }
@@ -134,17 +137,21 @@ FunDec* Parser::parseFunDec() {
     }
     e->body = parseBody();
     if(!match(Token::LD)) {
+        cout << "hola";
         errorHandler.expect(Token::LD, current->text);
     }
     return e;
 }
 
 ParamDec* Parser::parseParamDec() {
+    bool mut = false;
+    if(match(Token::MUT)) {
+        mut = true;
+    }
     if(!match(Token::ID)) {
         errorHandler.expect(Token::ID, current->text);
     }
     string name = previous->text;
-    bool mut = false;
     bool borrow = false;
     if(!match(Token::COLON)) {
         errorHandler.expect(Token::COLON, current->text);
@@ -287,7 +294,11 @@ Stm* Parser::parseStatement() {
         }
         return new PrintStatement(exp, ln);
     } else if(match(Token::IF)) {
+        bool old_expect_struct = expect_struct;
+        expect_struct = false;
         Exp* condition = parseAExp();
+        expect_struct = old_expect_struct;
+
         if(!match(Token::LI)) {
             errorHandler.expect(Token::LI, current->text);
         }
@@ -307,7 +318,10 @@ Stm* Parser::parseStatement() {
         }
         return new IfStatement(condition, then, els);
     } else if(match(Token::WHILE)) {
+        bool old_expect_struct = expect_struct;
+        expect_struct = false;
         Exp* condition = parseAExp();
+        expect_struct = old_expect_struct;
         if(!match(Token::LI)) {
             errorHandler.expect(Token::LI, current->text);
         }
@@ -332,7 +346,11 @@ Stm* Parser::parseStatement() {
         if(!match(Token::DOTS)) {
             errorHandler.expect(Token::DOTS, current->text);
         }
+        bool old_expect_struct = expect_struct;
+        expect_struct = false;
         Exp* end = parseAExp();
+        expect_struct = old_expect_struct;
+
         if(!match(Token::LI)) {
             errorHandler.expect(Token::LI, current->text);
         }
@@ -524,7 +542,11 @@ Exp* Parser::parseFactor() {
                 e = f;
             }
         } // else if TODO struct exp
-        else if (match(Token::LI)) {
+        else if (check(Token::LI)) {
+            if(!expect_struct) {
+                return new IdentifierExp(previous->text, false);
+            }
+            match(Token::LI);
             StructExp* s = new StructExp();
             s->name = texto;
 
@@ -540,6 +562,9 @@ Exp* Parser::parseFactor() {
                     Exp* value = parseAExp();
 
                     s->attrs.push_back(new StructExpAttr(attrName, value));
+                    if(match(Token::LD)) {
+                        break;
+                    }
                     if(!match(Token::COMMA)){
                         errorHandler.expect(Token::COMMA, current->text);
                     }
@@ -560,14 +585,20 @@ Exp* Parser::parseFactor() {
         e = new BoolExp(0);
     }
     else if (match(Token::PI)) {
+        bool old_expect_struct = expect_struct;
+        expect_struct = true;
         e = parseAExp();
+        expect_struct = old_expect_struct;
         e->hasParenthesis = true;
         if (!match(Token::PD)) {
             errorHandler.expect(Token::PD, current->text);
         }
     }
     else if (match(Token::IF)) {
+        bool old_expect_struct = expect_struct;
+        expect_struct = false;
         Exp* e1 = parseAExp();
+        expect_struct = old_expect_struct;
         if (!match(Token::LI)) {
             errorHandler.expect(Token::LI, current->text);
         }

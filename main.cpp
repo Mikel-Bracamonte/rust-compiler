@@ -32,11 +32,11 @@ int main(int argc, const char* argv[]) {
 
     string input_copy = input;
     Scanner scanner_test(input_copy.c_str());
-    test_scanner(&scanner_test);
-    cout << "Scanner exitoso" << endl;
+    // test_scanner(&scanner_test);
+    // cout << "Scanner exitoso" << endl;
     
-    cout << endl;
-    cout << "Iniciando parsing:" << endl;
+    // cout << endl;
+    // cout << "Iniciando parsing:" << endl;
     Parser parser(&scanner); 
     
     try {
@@ -67,14 +67,13 @@ int main(int argc, const char* argv[]) {
 
         CheckVisitor* checkcodeVisitor = new CheckVisitor();
         checkcodeVisitor->check(program);
-        // unordered_map<string, int> map = checkcodeVisitor.getMap();
 
-        cout << "Todos los checks fueron aceptados" << endl;
+        // cout << "Todos los checks fueron aceptados" << endl;
+
         ///////////////////////////////////
         //           GENCODE
         ///////////////////////////////////
 
-        
         string inputFile(argv[1]);
         size_t dotPos = inputFile.find_last_of('.');
         string baseName = (dotPos == string::npos) ? inputFile : inputFile.substr(0, dotPos);
@@ -84,16 +83,12 @@ int main(int argc, const char* argv[]) {
             cerr << "Error al crear el archivo de salida: " << outputFilename << endl;
             return 1;
         }
-        cout << "Generando codigo ensamblador en " << outputFilename << endl;
-        unordered_map<string, int> map;
-        GenCodeVisitor* gencodeVisitor = new GenCodeVisitor(outfile, map);
+        // cout << "Generando codigo ensamblador en " << outputFilename << endl;
+        GenCodeVisitor* gencodeVisitor = new GenCodeVisitor(outfile, checkcodeVisitor->function_memory_map);
         
         gencodeVisitor->gencode(program);
         outfile.close();
         
-
-        //interpreter.interpret(program);
-        //cout << "End of program execution" << endl;
         delete program;
     } catch (const exception& e) {
         cout << "Error durante la ejecución: " << e.what() << endl;

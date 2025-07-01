@@ -352,13 +352,37 @@ void GenCodeVisitor::copyStruct(int src_base, int dest_base, bool reference) {
 
 ## Longs
 
-### Scanner
+El manejo de longs ya está hecho por el gencode pues todo los tipos usan el registro %rax que tiene 8 bytes.
 
 ### Parser
 
+Ahora NumExp debe tener value de tipo long para poder guardar longs.
+
+```cpp
+class NumberExp : public Exp {
+public:
+    long long value;
+    NumberExp(long long v);
+    int accept(Visitor* visitor);
+    ImpType accept(ImpVisitor* v);
+    ~NumberExp();
+};
+```
+
 ### Check Visitor
 
+
+
 ### GenCode Visitor
+
+Estuvo planeado cambiar los registros según el tipo de dato:
+
+| Tipo | Assembly |
+|--------|-------|
+| bool | %al |
+| i32 | %eax |
+| i64 | %rax |
+
 
 ## Otras cosas
 
@@ -602,6 +626,8 @@ Stmt ::= break ; |
 ```
 
 #### Check Visitor
+
+No se aceptan breaks ni continues fuera de un loop.
 
 #### GenCode Visitor
 

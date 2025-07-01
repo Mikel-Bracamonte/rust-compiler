@@ -1,11 +1,12 @@
-export async function compileRustCode({ code, optimizationLevel, target }) {
-  const response = await fetch('http://localhost:8000/compile', {
+export async function compileRustCode({ code, optimizationLevel }) {
+  const res = await fetch('http://localhost:8000/compile', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code, optimizationLevel, target })
+    body: JSON.stringify({ code, optimizationLevel }),
   });
-  if (!response.ok) {
-    throw new Error('Error al comunicarse con el backend');
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || res.statusText);
   }
-  return await response.json();
+  return res.json(); // { output: string, assembly: string, error?: string }
 }

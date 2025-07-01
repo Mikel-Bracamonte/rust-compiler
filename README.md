@@ -1,4 +1,5 @@
 # Rust Compiler
+Presentación: https://www.canva.com/design/DAGr5LTo40I/Lrq_WOXgYDGuzzKns2eicQ/edit?utm_content=DAGr5LTo40I&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
 ## Gramática
 ```rust

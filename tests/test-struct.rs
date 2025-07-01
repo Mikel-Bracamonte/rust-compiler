@@ -8,5 +8,5 @@ fn main() {
         edad: 19,
         altura: 1,
     };
-    println!("{}", persona.edad);
+    println!("{}", p.edad);
 }

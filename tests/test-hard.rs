@@ -29,5 +29,4 @@ fn main(){
         }
     }
     print!("{}", func(a, b));
-    return 0;
 }

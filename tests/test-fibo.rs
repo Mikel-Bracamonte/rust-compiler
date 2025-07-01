@@ -1,4 +1,4 @@
-fn fibo(a: i32) {
+fn fibo(a: i32) -> i32 {
     if a < 2 {
         return a;
     } else {

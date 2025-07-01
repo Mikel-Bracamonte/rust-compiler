@@ -1,4 +1,4 @@
-fn function(a: i32, b: i32) {
+fn function(a: i32, b: i32) -> i32 {
     let mut c: i32;
     a = a + 2;
     b = b * 2;

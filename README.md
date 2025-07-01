@@ -60,6 +60,13 @@ ArgList ::= AExp (, AExp)*
 Bool ::= true | false
 ```
 
+## Check Visitor
+
+El gencode necesita saber la cantidad de memoria a reservar para cada Body. Es por ello que es necesario un Check Visitor. Durante este se calculará la memoria pues revisará todas las declaraciones de variables y esta información se la pasa al gencode. 
+
+Además de lo anterior, se realizan la mayor cantidad posible de checks tal que el código mantenga consistencia del tipado y el uso correcto de variables, structs y funciones que debieron ser definidas previamente.
+
+
 ## Structs
 
 ### Scanner
@@ -201,7 +208,17 @@ fn main() {
 
 ### Check Visitor
 
-El check se asegura primero que no existan otros structs declarados. Se asegura que los tipos definidos para cada atributo fueron declarados previamente (en caso de tener)
+#### Declaración de Structs
+
+El check se asegura primero que no existan otros structs declarados. Se asegura que los tipos definidos para cada atributo fueron declarados previamente (en caso de tener structs dentro o si son de tipo básico).
+
+#### StructExp
+
+Se asegura que cada valor asignado coincida con el tipo definido en la declaración. Se considera el las asignaciones de structs dentro de structs.
+
+#### PostFixExp
+
+Se asegura que la variable esté definida. Se asegura que cada acceso al atributo esté declarado en el struct. Además retorna el tipo correspondiente.
 
 ### GenCode Visitor
 
@@ -442,6 +459,8 @@ Stmt ::= id (.id)* (= | += | -= | *= | /= | %=) AExp ;
 ```
 
 #### Check Visitor
+
+Por lo mencionado previamente con el manejo de long long. Para assign statement se verifica que el tipo del lado derecho coincida con el tipo de la variable a la que se le asigna o altera. De la misma forma los tipos num0 pueden afectar tanto a i32 como i64. Esto también se prueba con asignación de Structs.
 
 #### GenCode Visitor
 

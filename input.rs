@@ -1,53 +1,33 @@
-struct Inner {
-    x: i32,
-    y: i32
+fn func2() {
+    for i in 1..5 {
+        println!("{}", i * i);
+    }
 }
 
-struct Middle {
-    m1: i32,
-    m2: Inner,
-    m3: i32
+fn func(c : mut i32, dx : mut i32) -> i32 {
+    println!("{}", c * 2 / 2 % 10);
+    print!("{}", - dx * 9);
+    dx *= 2;
+    dx -= 2;
+    dx += 2;
+    dx %= 10;
+    if(dx > 5){
+        func2();
+        return (dx + c) + 3;
+    }
+    let mut y : i32 = 10;
+    return y;
 }
 
-struct Outer {
-    o1: Middle,
-    o2: i32
-}
-
-fn make_inner(x: i32, y: i32) -> Inner {
-    return Inner { x: x + 1, y: y + 2 };
-}
-
-fn make_middle(a: i32, b: i32) -> Middle {
-    let inner: Inner = make_inner(a, b);
-    return Middle {
-        m1: a * b,
-        m2: inner,
-        m3: inner.x + inner.y
-    };
-}
-
-fn make_outer(p: i32, q: i32) -> Outer {
-    let mid: Middle = make_middle(p + 1, q + 2);
-    return Outer {
-        o1: mid,
-        o2: p - q
-    };
-}
-
-fn main() {
-    let final_struct: Outer = make_outer(10, 20);
-    println!("{}", final_struct.o1.m2.y + final_struct.o1.m3 + final_struct.o2);
-    let test: Outer = Outer {
-        o1: Middle {
-            m1: 1,
-            m2: Inner {
-                x: 1,
-                y: 2
-            },
-            m3: 2
-        },
-        o2: 0
-    };
-    println!("{}", test.o1.m2.y);
+fn main(){
+    let mut a:i32;
+    a = 10;
+    let mut b:i32 = if a % 2 == 0 { a + 2 } else { a - 2 };
+    for i in 3+a..a*a {
+        while b >= 0 {
+            b -= 1;
+        }
+    }
+    print!("{}", func(a, b));
+    return 0;
 }

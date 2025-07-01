@@ -6,7 +6,7 @@ CONTAINER_NAME="gcc-container"
 while [[ "$1" =~ ^- ]]; do
     case $1 in
         -b)
-            g++ *.cpp -o compiler || exit 1
+            g++ *.cpp -o compiler.exe || exit 1
             ;;
         -w)
             USE_DOCKER=true
@@ -24,7 +24,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-./compiler "$1" || exit 1
+./compiler.exe "$1" || exit 1
 
 if $USE_DOCKER; then
     docker cp input.s "$CONTAINER_NAME":/tmp/input.s > /dev/null 2>&1

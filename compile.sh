@@ -31,6 +31,6 @@ if $USE_DOCKER; then
     docker exec "$CONTAINER_NAME" gcc /tmp/input.s -o /tmp/output || exit 1
     docker exec "$CONTAINER_NAME" /tmp/output
 else
-    gcc input.s -o output || exit 1
-    ./output
+    gcc input.s -o output.exe || exit 1
+    ./output.exe
 fi

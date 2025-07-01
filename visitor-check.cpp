@@ -282,10 +282,7 @@ void CheckVisitor::visit(WhileStatement* stm) {
 // check!, tested
 void CheckVisitor::visit(ForStatement* s) {
     // tiene que ser mut, int    
-    numberLoop ++;
-    if(!s->mut){
-        errorHandler.error("El for debe ser mut.");
-    }
+    numberLoop++;
 
     ImpType startT = s->start->accept(this);
     if (!typesNum.count(startT.ttype)) {
@@ -302,6 +299,7 @@ void CheckVisitor::visit(ForStatement* s) {
     }
     env.add_level();
     // add var unicamente al body de for, afuera no puede acceder
+    function_memory_map[function_name] += 24;
     env.add_var(s->name, type.ttype);
     // TODO rust no tiene tipado definido para i.
     s->body->stmList->accept(this);
@@ -398,7 +396,7 @@ void CheckVisitor::visit(FunDec* vd) {
     ImpType ftype;
     list<string> argTypes;
     function_name = vd->name;
-    function_memory_map[function_name] = 0;
+    function_memory_map[function_name] = 8;
     
     returnType = vd->type;
     returnInsideFunc = false;

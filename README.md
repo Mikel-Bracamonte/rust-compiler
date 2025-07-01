@@ -400,6 +400,10 @@ void GenCodeVisitor::visit(AssignStatement* s) {
 }
 ```
 
+### Injections
+
+
+
 ### Break & Continue
 
 #### Scanner
@@ -413,13 +417,69 @@ Se agregaron los siguientes tokens:
 
 #### Parser
 
-
+Se agregaron break y continue como Statements:
+```rust
+Stmt ::= break ; |
+    continue ;
+```
 
 #### Check Visitor
 
 #### GenCode Visitor
 
+Al entrar a un loop, actualizamos un stack `nombreLoop`, de modo que en todo momento guarda el nombre del loop en el que estamos. De ese modo, al querer hacer un break, simplemente saltamos al end de ese nombre, y si queremos hacer continue, saltamos al inicio de se nombre:
+
+```cpp
+void GenCodeVisitor::visit(BreakStatement* s) {
+    assert(!nombreLoop.empty());
+    out << "jmp end" << nombreLoop.top() << endl;
+}
+
+void GenCodeVisitor::visit(ContinueStatement* s) {
+    assert(!nombreLoop.empty());
+    out << "jmp " << nombreLoop.top() << endl;
+}
+```
+
 ### Comentarios
 
 #### Scanner
-Los comentarios se manejan a nivel ede scanner
+Los comentarios se manejan a nivel del scanner. Para los comentarios de una linea, si se lee un `/`seguido de otro `/`, se ignoran todos los caracteres hasta llegar a un salto de línea o hasta que acabe el input. En caso se lea un `/` seguido de un `*`, se suma uno a `comment_depth`, y al leer un `*` seguido de un `/` se resta uno a `comment_depth`. Mientras `comment_depth` sea mayor a 0, se ignoran todos los caracteres:
+
+```cpp
+Token* Scanner::nextToken() {
+    
+    ...
+    
+    int comment_depth = 0;
+    if(input[current] == '/') {
+        if(current + 1 < input.length() && input[current + 1] == '/') {
+            while(input[current] != '\n') {
+                if(current >= input.length()) {
+                    return new Token(Token::END);
+                }
+                current++;
+            }
+        } else if(current + 1 < input.length() && input[current + 1] == '*') {
+            comment_depth++;
+            current += 2;
+            while(comment_depth > 0) {
+                if(current >= input.length()) {
+                    return new Token(Token::END);
+                }
+                if(input[current] == '/' && current + 1 < input.length() && input[current + 1] == '*') {
+                    comment_depth++;
+                    current++;
+                } else if(input[current] == '*' && current + 1 < input.length() && input[current + 1] == '/') {
+                    comment_depth--;
+                    current++;
+                }
+                current++;
+            }
+        }
+    }
+
+    ...
+
+}
+```

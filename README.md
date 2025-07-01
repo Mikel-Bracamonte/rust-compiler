@@ -200,6 +200,8 @@ fn main() {
 
 ### Check Visitor
 
+El check se asegura primero que no existan otros structs declarados. Se asegura que los tipos definidos para cada atributo fueron declarados previamente (en caso de tener)
+
 ### GenCode Visitor
 
 A la hora de evaluar un StructExp, se reserva memoria suficiente para guadar el struct temporalmente, y se guarda en `struct_offset` su posición relativa a %rbp:
@@ -371,7 +373,37 @@ public:
 
 ### Check Visitor
 
+Rust no acepta operaciones entre i32 e i64, por lo que es necesario manejar esa diferencia. Sin embargo podemos efectuar la operación entre una variable con valor númerico y un número. Por ejemplo:
 
+```rust
+fn main() {
+    let mut id : i32 = 2;
+    let mut id2 : i64 = 4;
+    id = id + 4; // aceptado
+    id2 = id2 + 8; // aceptado
+    id += id2 // no aceptado, tipo distinto.
+}
+```
+
+Por lo que cualquier valor que sea operado entre números no puede tener un tipo definido. Es por ello que definimos el tipo _0num_ para asignarle a los números.
+
+Con ello se tiene la siguiente lógica:
+
+```cpp
+string CheckVisitor::getTypeOp(ImpType a, ImpType b) {
+    if(a.ttype == b.ttype){
+        return a.ttype;
+    }
+    if(b.ttype == "0num"){
+        swap(a, b);
+    }
+    return b.ttype;
+}
+```
+
+Esta función retorna el tipo que debe retornar entre dos ImpType. Además asume que pueden ser operados (este check lo realiza la función ```bool CheckVisitor::checkTypeOp(ImpType a, ImpType b)```). Por lo que devuelve el tipo 0num si ambos son 0num, o en todo caso retorna i32 o i64.
+
+A pesar de ser un cambio simple, esta lógica debía ser realizada para todo el resto del código. (Tarea potente :'c)
 
 ### GenCode Visitor
 
@@ -383,8 +415,7 @@ Estuvo planeado cambiar los registros según el tipo de dato:
 | i32 | %eax |
 | i64 | %rax |
 
-
-## Otras cosas
+Sin embargo, esta era una tarea titánica para mantener el resto de la lógica funcional, por lo que no fue implementado.
 
 ### Assign operations
 
